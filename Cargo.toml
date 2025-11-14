@@ -1,0 +1,24 @@
+[workspace]
+resolver = "3"
+members = ["ttd", "auto_unpack"]
+
+[workspace.package]
+authors = ["Christophe Alladoum"]
+version = "0.1.0"
+edition = "2024"
+description = "Rust bindings for Microsoft TTD"
+readme = "./README.md"
+license = "Apache-2.0"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+lto = true
+
+[profile.release-with-debuginfo]
+inherits = "release"
+debug = true
+
+[workspace.dependencies]

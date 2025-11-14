@@ -1,0 +1,7 @@
+target/
+ttd/ttd_ffi/build
+ttd/ttd_ffi/install
+ttd/src/ttd/bindings.rs
+ttd/constants.rs
+*.dll
+*.exe

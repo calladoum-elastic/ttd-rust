@@ -1,0 +1,41 @@
+namespace TTD_FFI
+{
+
+// clang-format off
+///
+///@brief
+///
+const char* LibraryName    = "@PROJECT_NAME@";
+
+///
+///@brief
+///
+const char* LibraryAuthor  = "@PROJECT_AUTHOR@";
+
+///
+///@brief
+///
+const char* LibraryLicense = "@PROJECT_LICENSE@";
+
+///
+///@brief
+///
+const size_t LibraryVersionMajor = @PROJECT_VERSION_MAJOR@;
+
+///
+///@brief
+///
+const size_t LibraryVersionMinor = @PROJECT_VERSION_MINOR@;
+
+///
+///@brief
+///
+const size_t LibraryVersionPatch = @PROJECT_VERSION_PATCH@;
+
+///
+///@brief
+///
+const char*  LibraryBanner = "@PROJECT_NAME@" " v" "@PROJECT_VERSION_MAJOR@" "."  "@PROJECT_VERSION_MINOR@" "." "@PROJECT_VERSION_PATCH@";
+// clang-format on
+
+} // namespace TTD_FFI
