@@ -50,8 +50,8 @@ pub mod root {
             }
             unsafe extern "C" {
                 #[doc = " Load trace and allocate cursor"]
-                #[link_name = "\u{1}?Load@Replay@TTD_FFI@@YAHPEBE@Z"]
-                pub fn Load(trace: *const root::u8_) -> root::i32_;
+                #[link_name = "\u{1}?Load@Replay@TTD_FFI@@YAHPEBG@Z"]
+                pub fn Load(trace: *const root::u16_) -> root::i32_;
             }
             unsafe extern "C" {
                 #[doc = " Unload the engine"]
@@ -211,19 +211,19 @@ pub mod root {
             unsafe extern "C" {
                 #[link_name = "\u{1}?SetReplayProgressCallback@Replay@TTD_FFI@@YAXP6AX_KAEBUPosition@1TTD@@@Z0@Z"]
                 pub fn SetReplayProgressCallback(
-                    cb: ::std::option::Option<unsafe extern "C" fn(arg1: usize, arg2: *const root::TTD::Replay::Position)>,
+                    cb: ::core::option::Option<unsafe extern "C" fn(arg1: usize, arg2: *const root::TTD::Replay::Position)>,
                     context: root::uptr,
                 );
             }
             unsafe extern "C" {
                 #[link_name = "\u{1}?SetRegisterChangedCallback@Replay@TTD_FFI@@YAXP6AX_KEPEBX10PEBVIThreadView@1TTD@@@Z0@Z"]
                 pub fn SetRegisterChangedCallback(
-                    arg1: ::std::option::Option<
+                    arg1: ::core::option::Option<
                         unsafe extern "C" fn(
                             arg1: usize,
                             arg2: u8,
-                            arg3: *const ::std::os::raw::c_void,
-                            arg4: *const ::std::os::raw::c_void,
+                            arg3: *const ::core::ffi::c_void,
+                            arg4: *const ::core::ffi::c_void,
                             arg5: usize,
                             arg6: *const root::TTD::Replay::IThreadView,
                         ),
@@ -233,15 +233,17 @@ pub mod root {
             }
         }
     }
-    pub type u8_ = ::std::os::raw::c_uchar;
-    pub type i32_ = ::std::os::raw::c_int;
-    pub type u32_ = ::std::os::raw::c_uint;
-    pub type u64_ = ::std::os::raw::c_ulonglong;
+    pub type u8_ = ::core::ffi::c_uchar;
+    pub type u16_ = ::core::ffi::c_ushort;
+    pub type i32_ = ::core::ffi::c_int;
+    pub type u32_ = ::core::ffi::c_uint;
+    pub type u64_ = ::core::ffi::c_ulonglong;
     pub type usize_ = root::u64_;
     pub type uptr = root::usize_;
     pub mod std {
         #[allow(unused_imports)]
         use self::super::super::root;
+        pub type conditional_type<_Ty1> = _Ty1;
         pub mod ranges {
             #[allow(unused_imports)]
             use self::super::super::super::root;
@@ -282,7 +284,7 @@ pub mod root {
         pub const ThreadId_Max: ThreadId = 4294967295;
         pub type ThreadId = u32;
         #[repr(C)]
-        #[derive(Debug, Default, Copy, Clone)]
+        #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
         pub struct TimingInfo {
             pub SystemTime: u64,
             pub ProcessCreateTime: u64,
@@ -292,13 +294,13 @@ pub mod root {
         }
         #[allow(clippy::unnecessary_operation, clippy::identity_op)]
         const _: () = {
-            ["Size of TimingInfo"][::std::mem::size_of::<TimingInfo>() - 40usize];
-            ["Alignment of TimingInfo"][::std::mem::align_of::<TimingInfo>() - 8usize];
-            ["Offset of field: TimingInfo::SystemTime"][::std::mem::offset_of!(TimingInfo, SystemTime) - 0usize];
-            ["Offset of field: TimingInfo::ProcessCreateTime"][::std::mem::offset_of!(TimingInfo, ProcessCreateTime) - 8usize];
-            ["Offset of field: TimingInfo::ProcessUserTime"][::std::mem::offset_of!(TimingInfo, ProcessUserTime) - 16usize];
-            ["Offset of field: TimingInfo::ProcessKernelTime"][::std::mem::offset_of!(TimingInfo, ProcessKernelTime) - 24usize];
-            ["Offset of field: TimingInfo::SystemUpTime"][::std::mem::offset_of!(TimingInfo, SystemUpTime) - 32usize];
+            ["Size of TimingInfo"][::core::mem::size_of::<TimingInfo>() - 40usize];
+            ["Alignment of TimingInfo"][::core::mem::align_of::<TimingInfo>() - 8usize];
+            ["Offset of field: TimingInfo::SystemTime"][::core::mem::offset_of!(TimingInfo, SystemTime) - 0usize];
+            ["Offset of field: TimingInfo::ProcessCreateTime"][::core::mem::offset_of!(TimingInfo, ProcessCreateTime) - 8usize];
+            ["Offset of field: TimingInfo::ProcessUserTime"][::core::mem::offset_of!(TimingInfo, ProcessUserTime) - 16usize];
+            ["Offset of field: TimingInfo::ProcessKernelTime"][::core::mem::offset_of!(TimingInfo, ProcessKernelTime) - 24usize];
+            ["Offset of field: TimingInfo::SystemUpTime"][::core::mem::offset_of!(TimingInfo, SystemUpTime) - 32usize];
         };
         #[repr(C)]
         #[derive(Copy, Clone)]
@@ -336,7 +338,7 @@ pub mod root {
             pub OtherCpuInfo: root::TTD::SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_2,
         }
         #[repr(C)]
-        #[derive(Debug, Default, Copy, Clone)]
+        #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
         pub struct SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1 {
             pub VendorId: [u32; 3usize],
             pub VersionInformation: u32,
@@ -346,96 +348,96 @@ pub mod root {
         #[allow(clippy::unnecessary_operation, clippy::identity_op)]
         const _: () = {
             ["Size of SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1"]
-                [::std::mem::size_of::<SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1>() - 24usize];
+                [::core::mem::size_of::<SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1>() - 24usize];
             ["Alignment of SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1"]
-                [::std::mem::align_of::<SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1>() - 4usize];
+                [::core::mem::align_of::<SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1>() - 4usize];
             ["Offset of field: SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1::VendorId"]
-                [::std::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1, VendorId) - 0usize];
+                [::core::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1, VendorId) - 0usize];
             ["Offset of field: SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1::VersionInformation"]
-                [::std::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1, VersionInformation) - 12usize];
+                [::core::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1, VersionInformation) - 12usize];
             ["Offset of field: SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1::FeatureInformation"]
-                [::std::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1, FeatureInformation) - 16usize];
+                [::core::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1, FeatureInformation) - 16usize];
             ["Offset of field: SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1::AMDExtendedCpuFeatures"]
-                [::std::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1, AMDExtendedCpuFeatures) - 20usize];
+                [::core::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1, AMDExtendedCpuFeatures) - 20usize];
         };
         #[repr(C)]
-        #[derive(Debug, Default, Copy, Clone)]
+        #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
         pub struct SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_2 {
             pub ProcessorFeatures: [u64; 2usize],
         }
         #[allow(clippy::unnecessary_operation, clippy::identity_op)]
         const _: () = {
             ["Size of SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_2"]
-                [::std::mem::size_of::<SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_2>() - 16usize];
+                [::core::mem::size_of::<SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_2>() - 16usize];
             ["Alignment of SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_2"]
-                [::std::mem::align_of::<SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_2>() - 8usize];
+                [::core::mem::align_of::<SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_2>() - 8usize];
             ["Offset of field: SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_2::ProcessorFeatures"]
-                [::std::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_2, ProcessorFeatures) - 0usize];
+                [::core::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1__bindgen_ty_2, ProcessorFeatures) - 0usize];
         };
         #[allow(clippy::unnecessary_operation, clippy::identity_op)]
         const _: () = {
-            ["Size of SystemInfo__bindgen_ty_1__bindgen_ty_1"][::std::mem::size_of::<SystemInfo__bindgen_ty_1__bindgen_ty_1>() - 24usize];
-            ["Alignment of SystemInfo__bindgen_ty_1__bindgen_ty_1"][::std::mem::align_of::<SystemInfo__bindgen_ty_1__bindgen_ty_1>() - 8usize];
+            ["Size of SystemInfo__bindgen_ty_1__bindgen_ty_1"][::core::mem::size_of::<SystemInfo__bindgen_ty_1__bindgen_ty_1>() - 24usize];
+            ["Alignment of SystemInfo__bindgen_ty_1__bindgen_ty_1"][::core::mem::align_of::<SystemInfo__bindgen_ty_1__bindgen_ty_1>() - 8usize];
             ["Offset of field: SystemInfo__bindgen_ty_1__bindgen_ty_1::X86CpuInfo"]
-                [::std::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1, X86CpuInfo) - 0usize];
+                [::core::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1, X86CpuInfo) - 0usize];
             ["Offset of field: SystemInfo__bindgen_ty_1__bindgen_ty_1::OtherCpuInfo"]
-                [::std::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1, OtherCpuInfo) - 0usize];
+                [::core::mem::offset_of!(SystemInfo__bindgen_ty_1__bindgen_ty_1, OtherCpuInfo) - 0usize];
         };
         impl Default for SystemInfo__bindgen_ty_1__bindgen_ty_1 {
             fn default() -> Self {
-                let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                 unsafe {
-                    ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                    ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                     s.assume_init()
                 }
             }
         }
         #[allow(clippy::unnecessary_operation, clippy::identity_op)]
         const _: () = {
-            ["Size of SystemInfo__bindgen_ty_1"][::std::mem::size_of::<SystemInfo__bindgen_ty_1>() - 56usize];
-            ["Alignment of SystemInfo__bindgen_ty_1"][::std::mem::align_of::<SystemInfo__bindgen_ty_1>() - 8usize];
+            ["Size of SystemInfo__bindgen_ty_1"][::core::mem::size_of::<SystemInfo__bindgen_ty_1>() - 56usize];
+            ["Alignment of SystemInfo__bindgen_ty_1"][::core::mem::align_of::<SystemInfo__bindgen_ty_1>() - 8usize];
             ["Offset of field: SystemInfo__bindgen_ty_1::ProcessorArchitecture"]
-                [::std::mem::offset_of!(SystemInfo__bindgen_ty_1, ProcessorArchitecture) - 0usize];
-            ["Offset of field: SystemInfo__bindgen_ty_1::ProcessorLevel"][::std::mem::offset_of!(SystemInfo__bindgen_ty_1, ProcessorLevel) - 2usize];
-            ["Offset of field: SystemInfo__bindgen_ty_1::ProcessorRevision"][::std::mem::offset_of!(SystemInfo__bindgen_ty_1, ProcessorRevision) - 4usize];
-            ["Offset of field: SystemInfo__bindgen_ty_1::NumberOfProcessors"][::std::mem::offset_of!(SystemInfo__bindgen_ty_1, NumberOfProcessors) - 6usize];
-            ["Offset of field: SystemInfo__bindgen_ty_1::ProductType"][::std::mem::offset_of!(SystemInfo__bindgen_ty_1, ProductType) - 7usize];
-            ["Offset of field: SystemInfo__bindgen_ty_1::MajorVersion"][::std::mem::offset_of!(SystemInfo__bindgen_ty_1, MajorVersion) - 8usize];
-            ["Offset of field: SystemInfo__bindgen_ty_1::MinorVersion"][::std::mem::offset_of!(SystemInfo__bindgen_ty_1, MinorVersion) - 12usize];
-            ["Offset of field: SystemInfo__bindgen_ty_1::BuildNumber"][::std::mem::offset_of!(SystemInfo__bindgen_ty_1, BuildNumber) - 16usize];
-            ["Offset of field: SystemInfo__bindgen_ty_1::PlatformId"][::std::mem::offset_of!(SystemInfo__bindgen_ty_1, PlatformId) - 20usize];
-            ["Offset of field: SystemInfo__bindgen_ty_1::CSDVersionRva"][::std::mem::offset_of!(SystemInfo__bindgen_ty_1, CSDVersionRva) - 24usize];
-            ["Offset of field: SystemInfo__bindgen_ty_1::SuiteMask"][::std::mem::offset_of!(SystemInfo__bindgen_ty_1, SuiteMask) - 28usize];
-            ["Offset of field: SystemInfo__bindgen_ty_1::Reserved2"][::std::mem::offset_of!(SystemInfo__bindgen_ty_1, Reserved2) - 30usize];
-            ["Offset of field: SystemInfo__bindgen_ty_1::Cpu"][::std::mem::offset_of!(SystemInfo__bindgen_ty_1, Cpu) - 32usize];
+                [::core::mem::offset_of!(SystemInfo__bindgen_ty_1, ProcessorArchitecture) - 0usize];
+            ["Offset of field: SystemInfo__bindgen_ty_1::ProcessorLevel"][::core::mem::offset_of!(SystemInfo__bindgen_ty_1, ProcessorLevel) - 2usize];
+            ["Offset of field: SystemInfo__bindgen_ty_1::ProcessorRevision"][::core::mem::offset_of!(SystemInfo__bindgen_ty_1, ProcessorRevision) - 4usize];
+            ["Offset of field: SystemInfo__bindgen_ty_1::NumberOfProcessors"][::core::mem::offset_of!(SystemInfo__bindgen_ty_1, NumberOfProcessors) - 6usize];
+            ["Offset of field: SystemInfo__bindgen_ty_1::ProductType"][::core::mem::offset_of!(SystemInfo__bindgen_ty_1, ProductType) - 7usize];
+            ["Offset of field: SystemInfo__bindgen_ty_1::MajorVersion"][::core::mem::offset_of!(SystemInfo__bindgen_ty_1, MajorVersion) - 8usize];
+            ["Offset of field: SystemInfo__bindgen_ty_1::MinorVersion"][::core::mem::offset_of!(SystemInfo__bindgen_ty_1, MinorVersion) - 12usize];
+            ["Offset of field: SystemInfo__bindgen_ty_1::BuildNumber"][::core::mem::offset_of!(SystemInfo__bindgen_ty_1, BuildNumber) - 16usize];
+            ["Offset of field: SystemInfo__bindgen_ty_1::PlatformId"][::core::mem::offset_of!(SystemInfo__bindgen_ty_1, PlatformId) - 20usize];
+            ["Offset of field: SystemInfo__bindgen_ty_1::CSDVersionRva"][::core::mem::offset_of!(SystemInfo__bindgen_ty_1, CSDVersionRva) - 24usize];
+            ["Offset of field: SystemInfo__bindgen_ty_1::SuiteMask"][::core::mem::offset_of!(SystemInfo__bindgen_ty_1, SuiteMask) - 28usize];
+            ["Offset of field: SystemInfo__bindgen_ty_1::Reserved2"][::core::mem::offset_of!(SystemInfo__bindgen_ty_1, Reserved2) - 30usize];
+            ["Offset of field: SystemInfo__bindgen_ty_1::Cpu"][::core::mem::offset_of!(SystemInfo__bindgen_ty_1, Cpu) - 32usize];
         };
         impl Default for SystemInfo__bindgen_ty_1 {
             fn default() -> Self {
-                let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                 unsafe {
-                    ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                    ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                     s.assume_init()
                 }
             }
         }
         #[allow(clippy::unnecessary_operation, clippy::identity_op)]
         const _: () = {
-            ["Size of SystemInfo"][::std::mem::size_of::<SystemInfo>() - 368usize];
-            ["Alignment of SystemInfo"][::std::mem::align_of::<SystemInfo>() - 8usize];
-            ["Offset of field: SystemInfo::MajorVersion"][::std::mem::offset_of!(SystemInfo, MajorVersion) - 0usize];
-            ["Offset of field: SystemInfo::MinorVersion"][::std::mem::offset_of!(SystemInfo, MinorVersion) - 4usize];
-            ["Offset of field: SystemInfo::BuildNumber"][::std::mem::offset_of!(SystemInfo, BuildNumber) - 8usize];
-            ["Offset of field: SystemInfo::ProcessId"][::std::mem::offset_of!(SystemInfo, ProcessId) - 12usize];
-            ["Offset of field: SystemInfo::Time"][::std::mem::offset_of!(SystemInfo, Time) - 16usize];
-            ["Offset of field: SystemInfo::System"][::std::mem::offset_of!(SystemInfo, System) - 56usize];
-            ["Offset of field: SystemInfo::UserName"][::std::mem::offset_of!(SystemInfo, UserName) - 112usize];
-            ["Offset of field: SystemInfo::SystemName"][::std::mem::offset_of!(SystemInfo, SystemName) - 240usize];
+            ["Size of SystemInfo"][::core::mem::size_of::<SystemInfo>() - 368usize];
+            ["Alignment of SystemInfo"][::core::mem::align_of::<SystemInfo>() - 8usize];
+            ["Offset of field: SystemInfo::MajorVersion"][::core::mem::offset_of!(SystemInfo, MajorVersion) - 0usize];
+            ["Offset of field: SystemInfo::MinorVersion"][::core::mem::offset_of!(SystemInfo, MinorVersion) - 4usize];
+            ["Offset of field: SystemInfo::BuildNumber"][::core::mem::offset_of!(SystemInfo, BuildNumber) - 8usize];
+            ["Offset of field: SystemInfo::ProcessId"][::core::mem::offset_of!(SystemInfo, ProcessId) - 12usize];
+            ["Offset of field: SystemInfo::Time"][::core::mem::offset_of!(SystemInfo, Time) - 16usize];
+            ["Offset of field: SystemInfo::System"][::core::mem::offset_of!(SystemInfo, System) - 56usize];
+            ["Offset of field: SystemInfo::UserName"][::core::mem::offset_of!(SystemInfo, UserName) - 112usize];
+            ["Offset of field: SystemInfo::SystemName"][::core::mem::offset_of!(SystemInfo, SystemName) - 240usize];
         };
         impl Default for SystemInfo {
             fn default() -> Self {
-                let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                 unsafe {
-                    ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                    ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                     s.assume_init()
                 }
             }
@@ -453,60 +455,60 @@ pub mod root {
                 pub Data: [u64; 334usize],
             }
             #[repr(C)]
-            #[derive(Debug, Default, Copy, Clone)]
+            #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct RegisterContext__bindgen_ty_1 {
                 pub _address: u8,
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of RegisterContext__bindgen_ty_1"][::std::mem::size_of::<RegisterContext__bindgen_ty_1>() - 1usize];
-                ["Alignment of RegisterContext__bindgen_ty_1"][::std::mem::align_of::<RegisterContext__bindgen_ty_1>() - 1usize];
+                ["Size of RegisterContext__bindgen_ty_1"][::core::mem::size_of::<RegisterContext__bindgen_ty_1>() - 1usize];
+                ["Alignment of RegisterContext__bindgen_ty_1"][::core::mem::align_of::<RegisterContext__bindgen_ty_1>() - 1usize];
             };
             #[repr(C)]
-            #[derive(Debug, Default, Copy, Clone)]
+            #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct RegisterContext__bindgen_ty_2 {
                 pub _address: u8,
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of RegisterContext__bindgen_ty_2"][::std::mem::size_of::<RegisterContext__bindgen_ty_2>() - 1usize];
-                ["Alignment of RegisterContext__bindgen_ty_2"][::std::mem::align_of::<RegisterContext__bindgen_ty_2>() - 1usize];
+                ["Size of RegisterContext__bindgen_ty_2"][::core::mem::size_of::<RegisterContext__bindgen_ty_2>() - 1usize];
+                ["Alignment of RegisterContext__bindgen_ty_2"][::core::mem::align_of::<RegisterContext__bindgen_ty_2>() - 1usize];
             };
             #[repr(C)]
-            #[derive(Debug, Default, Copy, Clone)]
+            #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct RegisterContext__bindgen_ty_3 {
                 pub _address: u8,
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of RegisterContext__bindgen_ty_3"][::std::mem::size_of::<RegisterContext__bindgen_ty_3>() - 1usize];
-                ["Alignment of RegisterContext__bindgen_ty_3"][::std::mem::align_of::<RegisterContext__bindgen_ty_3>() - 1usize];
+                ["Size of RegisterContext__bindgen_ty_3"][::core::mem::size_of::<RegisterContext__bindgen_ty_3>() - 1usize];
+                ["Alignment of RegisterContext__bindgen_ty_3"][::core::mem::align_of::<RegisterContext__bindgen_ty_3>() - 1usize];
             };
             #[repr(C)]
-            #[derive(Debug, Default, Copy, Clone)]
+            #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct RegisterContext__bindgen_ty_4 {
                 pub _address: u8,
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of RegisterContext__bindgen_ty_4"][::std::mem::size_of::<RegisterContext__bindgen_ty_4>() - 1usize];
-                ["Alignment of RegisterContext__bindgen_ty_4"][::std::mem::align_of::<RegisterContext__bindgen_ty_4>() - 1usize];
+                ["Size of RegisterContext__bindgen_ty_4"][::core::mem::size_of::<RegisterContext__bindgen_ty_4>() - 1usize];
+                ["Alignment of RegisterContext__bindgen_ty_4"][::core::mem::align_of::<RegisterContext__bindgen_ty_4>() - 1usize];
             };
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of RegisterContext"][::std::mem::size_of::<RegisterContext>() - 2672usize];
-                ["Alignment of RegisterContext"][::std::mem::align_of::<RegisterContext>() - 8usize];
-                ["Offset of field: RegisterContext::X86"][::std::mem::offset_of!(RegisterContext, X86) - 0usize];
-                ["Offset of field: RegisterContext::X64"][::std::mem::offset_of!(RegisterContext, X64) - 0usize];
-                ["Offset of field: RegisterContext::Arm"][::std::mem::offset_of!(RegisterContext, Arm) - 0usize];
-                ["Offset of field: RegisterContext::Arm64"][::std::mem::offset_of!(RegisterContext, Arm64) - 0usize];
-                ["Offset of field: RegisterContext::Data"][::std::mem::offset_of!(RegisterContext, Data) - 0usize];
+                ["Size of RegisterContext"][::core::mem::size_of::<RegisterContext>() - 2672usize];
+                ["Alignment of RegisterContext"][::core::mem::align_of::<RegisterContext>() - 8usize];
+                ["Offset of field: RegisterContext::X86"][::core::mem::offset_of!(RegisterContext, X86) - 0usize];
+                ["Offset of field: RegisterContext::X64"][::core::mem::offset_of!(RegisterContext, X64) - 0usize];
+                ["Offset of field: RegisterContext::Arm"][::core::mem::offset_of!(RegisterContext, Arm) - 0usize];
+                ["Offset of field: RegisterContext::Arm64"][::core::mem::offset_of!(RegisterContext, Arm64) - 0usize];
+                ["Offset of field: RegisterContext::Data"][::core::mem::offset_of!(RegisterContext, Data) - 0usize];
             };
             impl Default for RegisterContext {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
@@ -521,66 +523,66 @@ pub mod root {
                 pub Data: [u64; 1104usize],
             }
             #[repr(C)]
-            #[derive(Debug, Default, Copy, Clone)]
+            #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct ExtendedRegisterContext__bindgen_ty_1 {
                 pub _address: u8,
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of ExtendedRegisterContext__bindgen_ty_1"][::std::mem::size_of::<ExtendedRegisterContext__bindgen_ty_1>() - 1usize];
-                ["Alignment of ExtendedRegisterContext__bindgen_ty_1"][::std::mem::align_of::<ExtendedRegisterContext__bindgen_ty_1>() - 1usize];
+                ["Size of ExtendedRegisterContext__bindgen_ty_1"][::core::mem::size_of::<ExtendedRegisterContext__bindgen_ty_1>() - 1usize];
+                ["Alignment of ExtendedRegisterContext__bindgen_ty_1"][::core::mem::align_of::<ExtendedRegisterContext__bindgen_ty_1>() - 1usize];
             };
             #[repr(C)]
-            #[derive(Debug, Default, Copy, Clone)]
+            #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct ExtendedRegisterContext__bindgen_ty_2 {
                 pub _address: u8,
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of ExtendedRegisterContext__bindgen_ty_2"][::std::mem::size_of::<ExtendedRegisterContext__bindgen_ty_2>() - 1usize];
-                ["Alignment of ExtendedRegisterContext__bindgen_ty_2"][::std::mem::align_of::<ExtendedRegisterContext__bindgen_ty_2>() - 1usize];
+                ["Size of ExtendedRegisterContext__bindgen_ty_2"][::core::mem::size_of::<ExtendedRegisterContext__bindgen_ty_2>() - 1usize];
+                ["Alignment of ExtendedRegisterContext__bindgen_ty_2"][::core::mem::align_of::<ExtendedRegisterContext__bindgen_ty_2>() - 1usize];
             };
             #[repr(C)]
-            #[derive(Debug, Default, Copy, Clone)]
+            #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct ExtendedRegisterContext__bindgen_ty_3 {
                 pub _address: u8,
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of ExtendedRegisterContext__bindgen_ty_3"][::std::mem::size_of::<ExtendedRegisterContext__bindgen_ty_3>() - 1usize];
-                ["Alignment of ExtendedRegisterContext__bindgen_ty_3"][::std::mem::align_of::<ExtendedRegisterContext__bindgen_ty_3>() - 1usize];
+                ["Size of ExtendedRegisterContext__bindgen_ty_3"][::core::mem::size_of::<ExtendedRegisterContext__bindgen_ty_3>() - 1usize];
+                ["Alignment of ExtendedRegisterContext__bindgen_ty_3"][::core::mem::align_of::<ExtendedRegisterContext__bindgen_ty_3>() - 1usize];
             };
             #[repr(C)]
-            #[derive(Debug, Default, Copy, Clone)]
+            #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct ExtendedRegisterContext__bindgen_ty_4 {
                 pub _address: u8,
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of ExtendedRegisterContext__bindgen_ty_4"][::std::mem::size_of::<ExtendedRegisterContext__bindgen_ty_4>() - 1usize];
-                ["Alignment of ExtendedRegisterContext__bindgen_ty_4"][::std::mem::align_of::<ExtendedRegisterContext__bindgen_ty_4>() - 1usize];
+                ["Size of ExtendedRegisterContext__bindgen_ty_4"][::core::mem::size_of::<ExtendedRegisterContext__bindgen_ty_4>() - 1usize];
+                ["Alignment of ExtendedRegisterContext__bindgen_ty_4"][::core::mem::align_of::<ExtendedRegisterContext__bindgen_ty_4>() - 1usize];
             };
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of ExtendedRegisterContext"][::std::mem::size_of::<ExtendedRegisterContext>() - 8832usize];
-                ["Alignment of ExtendedRegisterContext"][::std::mem::align_of::<ExtendedRegisterContext>() - 8usize];
-                ["Offset of field: ExtendedRegisterContext::X86"][::std::mem::offset_of!(ExtendedRegisterContext, X86) - 0usize];
-                ["Offset of field: ExtendedRegisterContext::X64"][::std::mem::offset_of!(ExtendedRegisterContext, X64) - 0usize];
-                ["Offset of field: ExtendedRegisterContext::Arm"][::std::mem::offset_of!(ExtendedRegisterContext, Arm) - 0usize];
-                ["Offset of field: ExtendedRegisterContext::Arm64"][::std::mem::offset_of!(ExtendedRegisterContext, Arm64) - 0usize];
-                ["Offset of field: ExtendedRegisterContext::Data"][::std::mem::offset_of!(ExtendedRegisterContext, Data) - 0usize];
+                ["Size of ExtendedRegisterContext"][::core::mem::size_of::<ExtendedRegisterContext>() - 8832usize];
+                ["Alignment of ExtendedRegisterContext"][::core::mem::align_of::<ExtendedRegisterContext>() - 8usize];
+                ["Offset of field: ExtendedRegisterContext::X86"][::core::mem::offset_of!(ExtendedRegisterContext, X86) - 0usize];
+                ["Offset of field: ExtendedRegisterContext::X64"][::core::mem::offset_of!(ExtendedRegisterContext, X64) - 0usize];
+                ["Offset of field: ExtendedRegisterContext::Arm"][::core::mem::offset_of!(ExtendedRegisterContext, Arm) - 0usize];
+                ["Offset of field: ExtendedRegisterContext::Arm64"][::core::mem::offset_of!(ExtendedRegisterContext, Arm64) - 0usize];
+                ["Offset of field: ExtendedRegisterContext::Data"][::core::mem::offset_of!(ExtendedRegisterContext, Data) - 0usize];
             };
             impl Default for ExtendedRegisterContext {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
             }
             #[repr(C)]
-            #[derive(Debug, Copy, Clone)]
+            #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct Module {
                 pub pName: *const u16,
                 pub NameLength: usize,
@@ -591,26 +593,26 @@ pub mod root {
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of Module"][::std::mem::size_of::<Module>() - 40usize];
-                ["Alignment of Module"][::std::mem::align_of::<Module>() - 8usize];
-                ["Offset of field: Module::pName"][::std::mem::offset_of!(Module, pName) - 0usize];
-                ["Offset of field: Module::NameLength"][::std::mem::offset_of!(Module, NameLength) - 8usize];
-                ["Offset of field: Module::Address"][::std::mem::offset_of!(Module, Address) - 16usize];
-                ["Offset of field: Module::Size"][::std::mem::offset_of!(Module, Size) - 24usize];
-                ["Offset of field: Module::Checksum"][::std::mem::offset_of!(Module, Checksum) - 32usize];
-                ["Offset of field: Module::Timestamp"][::std::mem::offset_of!(Module, Timestamp) - 36usize];
+                ["Size of Module"][::core::mem::size_of::<Module>() - 40usize];
+                ["Alignment of Module"][::core::mem::align_of::<Module>() - 8usize];
+                ["Offset of field: Module::pName"][::core::mem::offset_of!(Module, pName) - 0usize];
+                ["Offset of field: Module::NameLength"][::core::mem::offset_of!(Module, NameLength) - 8usize];
+                ["Offset of field: Module::Address"][::core::mem::offset_of!(Module, Address) - 16usize];
+                ["Offset of field: Module::Size"][::core::mem::offset_of!(Module, Size) - 24usize];
+                ["Offset of field: Module::Checksum"][::core::mem::offset_of!(Module, Checksum) - 32usize];
+                ["Offset of field: Module::Timestamp"][::core::mem::offset_of!(Module, Timestamp) - 36usize];
             };
             impl Default for Module {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
             }
             #[repr(C)]
-            #[derive(Debug, Copy, Clone)]
+            #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct ModuleInstance {
                 pub pModule: *const root::TTD::Replay::Module,
                 pub LoadTime: root::TTD::SequenceId,
@@ -618,17 +620,17 @@ pub mod root {
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of ModuleInstance"][::std::mem::size_of::<ModuleInstance>() - 24usize];
-                ["Alignment of ModuleInstance"][::std::mem::align_of::<ModuleInstance>() - 8usize];
-                ["Offset of field: ModuleInstance::pModule"][::std::mem::offset_of!(ModuleInstance, pModule) - 0usize];
-                ["Offset of field: ModuleInstance::LoadTime"][::std::mem::offset_of!(ModuleInstance, LoadTime) - 8usize];
-                ["Offset of field: ModuleInstance::UnloadTime"][::std::mem::offset_of!(ModuleInstance, UnloadTime) - 16usize];
+                ["Size of ModuleInstance"][::core::mem::size_of::<ModuleInstance>() - 24usize];
+                ["Alignment of ModuleInstance"][::core::mem::align_of::<ModuleInstance>() - 8usize];
+                ["Offset of field: ModuleInstance::pModule"][::core::mem::offset_of!(ModuleInstance, pModule) - 0usize];
+                ["Offset of field: ModuleInstance::LoadTime"][::core::mem::offset_of!(ModuleInstance, LoadTime) - 8usize];
+                ["Offset of field: ModuleInstance::UnloadTime"][::core::mem::offset_of!(ModuleInstance, UnloadTime) - 16usize];
             };
             impl Default for ModuleInstance {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
@@ -643,7 +645,7 @@ pub mod root {
             pub const StepCount_Invalid: StepCount = 18446744073709551615;
             pub type StepCount = u64;
             #[repr(C)]
-            #[derive(Debug, Copy, Clone)]
+            #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct Position {
                 pub Sequence: root::TTD::SequenceId,
                 pub Steps: root::TTD::Replay::StepCount,
@@ -662,10 +664,10 @@ pub mod root {
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of Position"][::std::mem::size_of::<Position>() - 16usize];
-                ["Alignment of Position"][::std::mem::align_of::<Position>() - 8usize];
-                ["Offset of field: Position::Sequence"][::std::mem::offset_of!(Position, Sequence) - 0usize];
-                ["Offset of field: Position::Steps"][::std::mem::offset_of!(Position, Steps) - 8usize];
+                ["Size of Position"][::core::mem::size_of::<Position>() - 16usize];
+                ["Alignment of Position"][::core::mem::align_of::<Position>() - 8usize];
+                ["Offset of field: Position::Sequence"][::core::mem::offset_of!(Position, Sequence) - 0usize];
+                ["Offset of field: Position::Steps"][::core::mem::offset_of!(Position, Steps) - 8usize];
             };
             unsafe extern "C" {
                 #[link_name = "\u{1}?IsValid@Position@Replay@TTD@@QEBA_NXZ"]
@@ -685,9 +687,9 @@ pub mod root {
             }
             impl Default for Position {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
@@ -699,25 +701,25 @@ pub mod root {
                 }
                 #[inline]
                 pub unsafe fn new() -> Self {
-                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
+                    let mut __bindgen_tmp = ::core::mem::MaybeUninit::uninit();
                     Position_Position(__bindgen_tmp.as_mut_ptr());
                     __bindgen_tmp.assume_init()
                 }
                 #[inline]
                 pub unsafe fn new1(sequence: root::TTD::SequenceId) -> Self {
-                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
+                    let mut __bindgen_tmp = ::core::mem::MaybeUninit::uninit();
                     Position_Position1(__bindgen_tmp.as_mut_ptr(), sequence);
                     __bindgen_tmp.assume_init()
                 }
                 #[inline]
                 pub unsafe fn new2(sequence: root::TTD::SequenceId, steps: root::TTD::Replay::StepCount) -> Self {
-                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
+                    let mut __bindgen_tmp = ::core::mem::MaybeUninit::uninit();
                     Position_Position2(__bindgen_tmp.as_mut_ptr(), sequence, steps);
                     __bindgen_tmp.assume_init()
                 }
             }
             #[repr(C)]
-            #[derive(Debug, Copy, Clone)]
+            #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct PositionRange {
                 pub Min: root::TTD::Replay::Position,
                 pub Max: root::TTD::Replay::Position,
@@ -728,10 +730,10 @@ pub mod root {
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of PositionRange"][::std::mem::size_of::<PositionRange>() - 32usize];
-                ["Alignment of PositionRange"][::std::mem::align_of::<PositionRange>() - 8usize];
-                ["Offset of field: PositionRange::Min"][::std::mem::offset_of!(PositionRange, Min) - 0usize];
-                ["Offset of field: PositionRange::Max"][::std::mem::offset_of!(PositionRange, Max) - 16usize];
+                ["Size of PositionRange"][::core::mem::size_of::<PositionRange>() - 32usize];
+                ["Alignment of PositionRange"][::core::mem::align_of::<PositionRange>() - 8usize];
+                ["Offset of field: PositionRange::Min"][::core::mem::offset_of!(PositionRange, Min) - 0usize];
+                ["Offset of field: PositionRange::Max"][::core::mem::offset_of!(PositionRange, Max) - 16usize];
             };
             unsafe extern "C" {
                 #[link_name = "\u{1}?IsValid@PositionRange@Replay@TTD@@QEBA_NXZ"]
@@ -751,9 +753,9 @@ pub mod root {
             }
             impl Default for PositionRange {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
@@ -765,13 +767,13 @@ pub mod root {
                 }
                 #[inline]
                 pub unsafe fn new() -> Self {
-                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
+                    let mut __bindgen_tmp = ::core::mem::MaybeUninit::uninit();
                     PositionRange_PositionRange(__bindgen_tmp.as_mut_ptr());
                     __bindgen_tmp.assume_init()
                 }
                 #[inline]
                 pub unsafe fn new1(minimum: root::TTD::Replay::Position, maximum: root::TTD::Replay::Position) -> Self {
-                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
+                    let mut __bindgen_tmp = ::core::mem::MaybeUninit::uninit();
                     PositionRange_PositionRange1(__bindgen_tmp.as_mut_ptr(), minimum, maximum);
                     __bindgen_tmp.assume_init()
                 }
@@ -800,23 +802,23 @@ pub mod root {
             pub const GapEventType_Throttled: GapEventType = 16;
             pub type GapEventType = u8;
             #[repr(C)]
-            #[derive(Debug, Copy, Clone)]
+            #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct GapData {
                 pub Kind: root::TTD::Replay::GapKind,
                 pub Event: root::TTD::Replay::GapEventType,
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of GapData"][::std::mem::size_of::<GapData>() - 2usize];
-                ["Alignment of GapData"][::std::mem::align_of::<GapData>() - 1usize];
-                ["Offset of field: GapData::Kind"][::std::mem::offset_of!(GapData, Kind) - 0usize];
-                ["Offset of field: GapData::Event"][::std::mem::offset_of!(GapData, Event) - 1usize];
+                ["Size of GapData"][::core::mem::size_of::<GapData>() - 2usize];
+                ["Alignment of GapData"][::core::mem::align_of::<GapData>() - 1usize];
+                ["Offset of field: GapData::Kind"][::core::mem::offset_of!(GapData, Kind) - 0usize];
+                ["Offset of field: GapData::Event"][::core::mem::offset_of!(GapData, Event) - 1usize];
             };
             impl Default for GapData {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
@@ -860,7 +862,7 @@ pub mod root {
             pub const DataAccessMask_All: DataAccessMask = 255;
             pub type DataAccessMask = u8;
             #[repr(C)]
-            #[derive(Debug, Copy, Clone)]
+            #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct MemoryWatchpointData {
                 pub Address: root::TTD::GuestAddress,
                 pub Size: u64,
@@ -869,40 +871,40 @@ pub mod root {
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of MemoryWatchpointData"][::std::mem::size_of::<MemoryWatchpointData>() - 24usize];
-                ["Alignment of MemoryWatchpointData"][::std::mem::align_of::<MemoryWatchpointData>() - 8usize];
-                ["Offset of field: MemoryWatchpointData::Address"][::std::mem::offset_of!(MemoryWatchpointData, Address) - 0usize];
-                ["Offset of field: MemoryWatchpointData::Size"][::std::mem::offset_of!(MemoryWatchpointData, Size) - 8usize];
-                ["Offset of field: MemoryWatchpointData::AccessMask"][::std::mem::offset_of!(MemoryWatchpointData, AccessMask) - 16usize];
-                ["Offset of field: MemoryWatchpointData::ThreadId"][::std::mem::offset_of!(MemoryWatchpointData, ThreadId) - 20usize];
+                ["Size of MemoryWatchpointData"][::core::mem::size_of::<MemoryWatchpointData>() - 24usize];
+                ["Alignment of MemoryWatchpointData"][::core::mem::align_of::<MemoryWatchpointData>() - 8usize];
+                ["Offset of field: MemoryWatchpointData::Address"][::core::mem::offset_of!(MemoryWatchpointData, Address) - 0usize];
+                ["Offset of field: MemoryWatchpointData::Size"][::core::mem::offset_of!(MemoryWatchpointData, Size) - 8usize];
+                ["Offset of field: MemoryWatchpointData::AccessMask"][::core::mem::offset_of!(MemoryWatchpointData, AccessMask) - 16usize];
+                ["Offset of field: MemoryWatchpointData::ThreadId"][::core::mem::offset_of!(MemoryWatchpointData, ThreadId) - 20usize];
             };
             impl Default for MemoryWatchpointData {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
             }
             #[repr(C)]
-            #[derive(Debug, Copy, Clone)]
+            #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct PositionWatchpointData {
                 pub Positions: root::TTD::Replay::PositionRange,
                 pub ThreadId: root::TTD::Replay::UniqueThreadId,
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of PositionWatchpointData"][::std::mem::size_of::<PositionWatchpointData>() - 40usize];
-                ["Alignment of PositionWatchpointData"][::std::mem::align_of::<PositionWatchpointData>() - 8usize];
-                ["Offset of field: PositionWatchpointData::Positions"][::std::mem::offset_of!(PositionWatchpointData, Positions) - 0usize];
-                ["Offset of field: PositionWatchpointData::ThreadId"][::std::mem::offset_of!(PositionWatchpointData, ThreadId) - 32usize];
+                ["Size of PositionWatchpointData"][::core::mem::size_of::<PositionWatchpointData>() - 40usize];
+                ["Alignment of PositionWatchpointData"][::core::mem::align_of::<PositionWatchpointData>() - 8usize];
+                ["Offset of field: PositionWatchpointData::Positions"][::core::mem::offset_of!(PositionWatchpointData, Positions) - 0usize];
+                ["Offset of field: PositionWatchpointData::ThreadId"][::core::mem::offset_of!(PositionWatchpointData, ThreadId) - 32usize];
             };
             impl Default for PositionWatchpointData {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
@@ -920,7 +922,7 @@ pub mod root {
             pub const ReplayFlags_All: ReplayFlags = 7;
             pub type ReplayFlags = u32;
             #[repr(C)]
-            #[derive(Debug, Copy, Clone)]
+            #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct ThreadInfo {
                 pub UniqueId: root::TTD::Replay::UniqueThreadId,
                 pub Id: root::TTD::ThreadId,
@@ -929,24 +931,24 @@ pub mod root {
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of ThreadInfo"][::std::mem::size_of::<ThreadInfo>() - 72usize];
-                ["Alignment of ThreadInfo"][::std::mem::align_of::<ThreadInfo>() - 8usize];
-                ["Offset of field: ThreadInfo::UniqueId"][::std::mem::offset_of!(ThreadInfo, UniqueId) - 0usize];
-                ["Offset of field: ThreadInfo::Id"][::std::mem::offset_of!(ThreadInfo, Id) - 4usize];
-                ["Offset of field: ThreadInfo::Lifetime"][::std::mem::offset_of!(ThreadInfo, Lifetime) - 8usize];
-                ["Offset of field: ThreadInfo::ActiveTime"][::std::mem::offset_of!(ThreadInfo, ActiveTime) - 40usize];
+                ["Size of ThreadInfo"][::core::mem::size_of::<ThreadInfo>() - 72usize];
+                ["Alignment of ThreadInfo"][::core::mem::align_of::<ThreadInfo>() - 8usize];
+                ["Offset of field: ThreadInfo::UniqueId"][::core::mem::offset_of!(ThreadInfo, UniqueId) - 0usize];
+                ["Offset of field: ThreadInfo::Id"][::core::mem::offset_of!(ThreadInfo, Id) - 4usize];
+                ["Offset of field: ThreadInfo::Lifetime"][::core::mem::offset_of!(ThreadInfo, Lifetime) - 8usize];
+                ["Offset of field: ThreadInfo::ActiveTime"][::core::mem::offset_of!(ThreadInfo, ActiveTime) - 40usize];
             };
             impl Default for ThreadInfo {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
             }
             #[repr(C)]
-            #[derive(Debug, Copy, Clone)]
+            #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct ExceptionEvent {
                 pub Position: root::TTD::Replay::Position,
                 pub pThreadInfo: *const root::TTD::Replay::ThreadInfo,
@@ -960,67 +962,67 @@ pub mod root {
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of ExceptionEvent"][::std::mem::size_of::<ExceptionEvent>() - 184usize];
-                ["Alignment of ExceptionEvent"][::std::mem::align_of::<ExceptionEvent>() - 8usize];
-                ["Offset of field: ExceptionEvent::Position"][::std::mem::offset_of!(ExceptionEvent, Position) - 0usize];
-                ["Offset of field: ExceptionEvent::pThreadInfo"][::std::mem::offset_of!(ExceptionEvent, pThreadInfo) - 16usize];
-                ["Offset of field: ExceptionEvent::Type"][::std::mem::offset_of!(ExceptionEvent, Type) - 24usize];
-                ["Offset of field: ExceptionEvent::Code"][::std::mem::offset_of!(ExceptionEvent, Code) - 28usize];
-                ["Offset of field: ExceptionEvent::Flags"][::std::mem::offset_of!(ExceptionEvent, Flags) - 32usize];
-                ["Offset of field: ExceptionEvent::RecordAddress"][::std::mem::offset_of!(ExceptionEvent, RecordAddress) - 40usize];
-                ["Offset of field: ExceptionEvent::ProgramCounter"][::std::mem::offset_of!(ExceptionEvent, ProgramCounter) - 48usize];
-                ["Offset of field: ExceptionEvent::ParameterCount"][::std::mem::offset_of!(ExceptionEvent, ParameterCount) - 56usize];
-                ["Offset of field: ExceptionEvent::Parameters"][::std::mem::offset_of!(ExceptionEvent, Parameters) - 64usize];
+                ["Size of ExceptionEvent"][::core::mem::size_of::<ExceptionEvent>() - 184usize];
+                ["Alignment of ExceptionEvent"][::core::mem::align_of::<ExceptionEvent>() - 8usize];
+                ["Offset of field: ExceptionEvent::Position"][::core::mem::offset_of!(ExceptionEvent, Position) - 0usize];
+                ["Offset of field: ExceptionEvent::pThreadInfo"][::core::mem::offset_of!(ExceptionEvent, pThreadInfo) - 16usize];
+                ["Offset of field: ExceptionEvent::Type"][::core::mem::offset_of!(ExceptionEvent, Type) - 24usize];
+                ["Offset of field: ExceptionEvent::Code"][::core::mem::offset_of!(ExceptionEvent, Code) - 28usize];
+                ["Offset of field: ExceptionEvent::Flags"][::core::mem::offset_of!(ExceptionEvent, Flags) - 32usize];
+                ["Offset of field: ExceptionEvent::RecordAddress"][::core::mem::offset_of!(ExceptionEvent, RecordAddress) - 40usize];
+                ["Offset of field: ExceptionEvent::ProgramCounter"][::core::mem::offset_of!(ExceptionEvent, ProgramCounter) - 48usize];
+                ["Offset of field: ExceptionEvent::ParameterCount"][::core::mem::offset_of!(ExceptionEvent, ParameterCount) - 56usize];
+                ["Offset of field: ExceptionEvent::Parameters"][::core::mem::offset_of!(ExceptionEvent, Parameters) - 64usize];
             };
             impl Default for ExceptionEvent {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
             }
             #[repr(C)]
-            #[derive(Debug, Copy, Clone)]
+            #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct ModuleLoadedEvent {
                 pub Position: root::TTD::Replay::Position,
                 pub pModule: *const root::TTD::Replay::Module,
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of ModuleLoadedEvent"][::std::mem::size_of::<ModuleLoadedEvent>() - 24usize];
-                ["Alignment of ModuleLoadedEvent"][::std::mem::align_of::<ModuleLoadedEvent>() - 8usize];
-                ["Offset of field: ModuleLoadedEvent::Position"][::std::mem::offset_of!(ModuleLoadedEvent, Position) - 0usize];
-                ["Offset of field: ModuleLoadedEvent::pModule"][::std::mem::offset_of!(ModuleLoadedEvent, pModule) - 16usize];
+                ["Size of ModuleLoadedEvent"][::core::mem::size_of::<ModuleLoadedEvent>() - 24usize];
+                ["Alignment of ModuleLoadedEvent"][::core::mem::align_of::<ModuleLoadedEvent>() - 8usize];
+                ["Offset of field: ModuleLoadedEvent::Position"][::core::mem::offset_of!(ModuleLoadedEvent, Position) - 0usize];
+                ["Offset of field: ModuleLoadedEvent::pModule"][::core::mem::offset_of!(ModuleLoadedEvent, pModule) - 16usize];
             };
             impl Default for ModuleLoadedEvent {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
             }
             #[repr(C)]
-            #[derive(Debug, Copy, Clone)]
+            #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct ModuleUnloadedEvent {
                 pub Position: root::TTD::Replay::Position,
                 pub pModule: *const root::TTD::Replay::Module,
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of ModuleUnloadedEvent"][::std::mem::size_of::<ModuleUnloadedEvent>() - 24usize];
-                ["Alignment of ModuleUnloadedEvent"][::std::mem::align_of::<ModuleUnloadedEvent>() - 8usize];
-                ["Offset of field: ModuleUnloadedEvent::Position"][::std::mem::offset_of!(ModuleUnloadedEvent, Position) - 0usize];
-                ["Offset of field: ModuleUnloadedEvent::pModule"][::std::mem::offset_of!(ModuleUnloadedEvent, pModule) - 16usize];
+                ["Size of ModuleUnloadedEvent"][::core::mem::size_of::<ModuleUnloadedEvent>() - 24usize];
+                ["Alignment of ModuleUnloadedEvent"][::core::mem::align_of::<ModuleUnloadedEvent>() - 8usize];
+                ["Offset of field: ModuleUnloadedEvent::Position"][::core::mem::offset_of!(ModuleUnloadedEvent, Position) - 0usize];
+                ["Offset of field: ModuleUnloadedEvent::pModule"][::core::mem::offset_of!(ModuleUnloadedEvent, pModule) - 16usize];
             };
             impl Default for ModuleUnloadedEvent {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
@@ -1033,17 +1035,17 @@ pub mod root {
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of MemoryRange"][::std::mem::size_of::<MemoryRange>() - 32usize];
-                ["Alignment of MemoryRange"][::std::mem::align_of::<MemoryRange>() - 8usize];
-                ["Offset of field: MemoryRange::Address"][::std::mem::offset_of!(MemoryRange, Address) - 0usize];
-                ["Offset of field: MemoryRange::Memory"][::std::mem::offset_of!(MemoryRange, Memory) - 8usize];
-                ["Offset of field: MemoryRange::Sequence"][::std::mem::offset_of!(MemoryRange, Sequence) - 24usize];
+                ["Size of MemoryRange"][::core::mem::size_of::<MemoryRange>() - 32usize];
+                ["Alignment of MemoryRange"][::core::mem::align_of::<MemoryRange>() - 8usize];
+                ["Offset of field: MemoryRange::Address"][::core::mem::offset_of!(MemoryRange, Address) - 0usize];
+                ["Offset of field: MemoryRange::Memory"][::core::mem::offset_of!(MemoryRange, Memory) - 8usize];
+                ["Offset of field: MemoryRange::Sequence"][::core::mem::offset_of!(MemoryRange, Sequence) - 24usize];
             };
             impl Default for MemoryRange {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
@@ -1055,16 +1057,16 @@ pub mod root {
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of MemoryBuffer"][::std::mem::size_of::<MemoryBuffer>() - 24usize];
-                ["Alignment of MemoryBuffer"][::std::mem::align_of::<MemoryBuffer>() - 8usize];
-                ["Offset of field: MemoryBuffer::Address"][::std::mem::offset_of!(MemoryBuffer, Address) - 0usize];
-                ["Offset of field: MemoryBuffer::Memory"][::std::mem::offset_of!(MemoryBuffer, Memory) - 8usize];
+                ["Size of MemoryBuffer"][::core::mem::size_of::<MemoryBuffer>() - 24usize];
+                ["Alignment of MemoryBuffer"][::core::mem::align_of::<MemoryBuffer>() - 8usize];
+                ["Offset of field: MemoryBuffer::Address"][::core::mem::offset_of!(MemoryBuffer, Address) - 0usize];
+                ["Offset of field: MemoryBuffer::Memory"][::core::mem::offset_of!(MemoryBuffer, Memory) - 8usize];
             };
             impl Default for MemoryBuffer {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
@@ -1077,38 +1079,38 @@ pub mod root {
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of MemoryBufferWithRanges"][::std::mem::size_of::<MemoryBufferWithRanges>() - 32usize];
-                ["Alignment of MemoryBufferWithRanges"][::std::mem::align_of::<MemoryBufferWithRanges>() - 8usize];
-                ["Offset of field: MemoryBufferWithRanges::Address"][::std::mem::offset_of!(MemoryBufferWithRanges, Address) - 0usize];
-                ["Offset of field: MemoryBufferWithRanges::Memory"][::std::mem::offset_of!(MemoryBufferWithRanges, Memory) - 8usize];
-                ["Offset of field: MemoryBufferWithRanges::RangeCount"][::std::mem::offset_of!(MemoryBufferWithRanges, RangeCount) - 24usize];
+                ["Size of MemoryBufferWithRanges"][::core::mem::size_of::<MemoryBufferWithRanges>() - 32usize];
+                ["Alignment of MemoryBufferWithRanges"][::core::mem::align_of::<MemoryBufferWithRanges>() - 8usize];
+                ["Offset of field: MemoryBufferWithRanges::Address"][::core::mem::offset_of!(MemoryBufferWithRanges, Address) - 0usize];
+                ["Offset of field: MemoryBufferWithRanges::Memory"][::core::mem::offset_of!(MemoryBufferWithRanges, Memory) - 8usize];
+                ["Offset of field: MemoryBufferWithRanges::RangeCount"][::core::mem::offset_of!(MemoryBufferWithRanges, RangeCount) - 24usize];
             };
             impl Default for MemoryBufferWithRanges {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
             }
             #[repr(C)]
-            pub struct IThreadView__bindgen_vtable(::std::os::raw::c_void);
+            pub struct IThreadView__bindgen_vtable(::core::ffi::c_void);
             #[repr(C)]
-            #[derive(Debug)]
+            #[derive(Debug, Hash, PartialOrd, PartialEq)]
             pub struct IThreadView {
                 pub vtable_: *const IThreadView__bindgen_vtable,
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of IThreadView"][::std::mem::size_of::<IThreadView>() - 8usize];
-                ["Alignment of IThreadView"][::std::mem::align_of::<IThreadView>() - 8usize];
+                ["Size of IThreadView"][::core::mem::size_of::<IThreadView>() - 8usize];
+                ["Alignment of IThreadView"][::core::mem::align_of::<IThreadView>() - 8usize];
             };
             impl Default for IThreadView {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
@@ -1118,7 +1120,7 @@ pub mod root {
                 pub fn IThreadView_IThreadView_destructor(this: *mut root::TTD::Replay::IThreadView);
             }
             #[repr(C)]
-            #[derive(Debug, Copy, Clone)]
+            #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
             pub struct ICursorView_MemoryWatchpointResult {
                 pub Address: root::TTD::GuestAddress,
                 pub Size: u64,
@@ -1126,18 +1128,18 @@ pub mod root {
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of ICursorView_MemoryWatchpointResult"][::std::mem::size_of::<ICursorView_MemoryWatchpointResult>() - 24usize];
-                ["Alignment of ICursorView_MemoryWatchpointResult"][::std::mem::align_of::<ICursorView_MemoryWatchpointResult>() - 8usize];
-                ["Offset of field: ICursorView_MemoryWatchpointResult::Address"][::std::mem::offset_of!(ICursorView_MemoryWatchpointResult, Address) - 0usize];
-                ["Offset of field: ICursorView_MemoryWatchpointResult::Size"][::std::mem::offset_of!(ICursorView_MemoryWatchpointResult, Size) - 8usize];
+                ["Size of ICursorView_MemoryWatchpointResult"][::core::mem::size_of::<ICursorView_MemoryWatchpointResult>() - 24usize];
+                ["Alignment of ICursorView_MemoryWatchpointResult"][::core::mem::align_of::<ICursorView_MemoryWatchpointResult>() - 8usize];
+                ["Offset of field: ICursorView_MemoryWatchpointResult::Address"][::core::mem::offset_of!(ICursorView_MemoryWatchpointResult, Address) - 0usize];
+                ["Offset of field: ICursorView_MemoryWatchpointResult::Size"][::core::mem::offset_of!(ICursorView_MemoryWatchpointResult, Size) - 8usize];
                 ["Offset of field: ICursorView_MemoryWatchpointResult::AccessType"]
-                    [::std::mem::offset_of!(ICursorView_MemoryWatchpointResult, AccessType) - 16usize];
+                    [::core::mem::offset_of!(ICursorView_MemoryWatchpointResult, AccessType) - 16usize];
             };
             impl Default for ICursorView_MemoryWatchpointResult {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
@@ -1161,36 +1163,36 @@ pub mod root {
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of ICursorView_ReplayResult__bindgen_ty_1"][::std::mem::size_of::<ICursorView_ReplayResult__bindgen_ty_1>() - 24usize];
-                ["Alignment of ICursorView_ReplayResult__bindgen_ty_1"][::std::mem::align_of::<ICursorView_ReplayResult__bindgen_ty_1>() - 8usize];
+                ["Size of ICursorView_ReplayResult__bindgen_ty_1"][::core::mem::size_of::<ICursorView_ReplayResult__bindgen_ty_1>() - 24usize];
+                ["Alignment of ICursorView_ReplayResult__bindgen_ty_1"][::core::mem::align_of::<ICursorView_ReplayResult__bindgen_ty_1>() - 8usize];
                 ["Offset of field: ICursorView_ReplayResult__bindgen_ty_1::MemoryWatchpoint"]
-                    [::std::mem::offset_of!(ICursorView_ReplayResult__bindgen_ty_1, MemoryWatchpoint) - 0usize];
+                    [::core::mem::offset_of!(ICursorView_ReplayResult__bindgen_ty_1, MemoryWatchpoint) - 0usize];
                 ["Offset of field: ICursorView_ReplayResult__bindgen_ty_1::PositionWatchpoint"]
-                    [::std::mem::offset_of!(ICursorView_ReplayResult__bindgen_ty_1, PositionWatchpoint) - 0usize];
+                    [::core::mem::offset_of!(ICursorView_ReplayResult__bindgen_ty_1, PositionWatchpoint) - 0usize];
                 ["Offset of field: ICursorView_ReplayResult__bindgen_ty_1::GapEvent"]
-                    [::std::mem::offset_of!(ICursorView_ReplayResult__bindgen_ty_1, GapEvent) - 0usize];
+                    [::core::mem::offset_of!(ICursorView_ReplayResult__bindgen_ty_1, GapEvent) - 0usize];
                 ["Offset of field: ICursorView_ReplayResult__bindgen_ty_1::pException"]
-                    [::std::mem::offset_of!(ICursorView_ReplayResult__bindgen_ty_1, pException) - 0usize];
+                    [::core::mem::offset_of!(ICursorView_ReplayResult__bindgen_ty_1, pException) - 0usize];
                 ["Offset of field: ICursorView_ReplayResult__bindgen_ty_1::Watchpoint"]
-                    [::std::mem::offset_of!(ICursorView_ReplayResult__bindgen_ty_1, Watchpoint) - 0usize];
+                    [::core::mem::offset_of!(ICursorView_ReplayResult__bindgen_ty_1, Watchpoint) - 0usize];
             };
             impl Default for ICursorView_ReplayResult__bindgen_ty_1 {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
             }
             #[allow(clippy::unnecessary_operation, clippy::identity_op)]
             const _: () = {
-                ["Size of ICursorView_ReplayResult"][::std::mem::size_of::<ICursorView_ReplayResult>() - 48usize];
-                ["Alignment of ICursorView_ReplayResult"][::std::mem::align_of::<ICursorView_ReplayResult>() - 8usize];
-                ["Offset of field: ICursorView_ReplayResult::StopReason"][::std::mem::offset_of!(ICursorView_ReplayResult, StopReason) - 0usize];
-                ["Offset of field: ICursorView_ReplayResult::StepsExecuted"][::std::mem::offset_of!(ICursorView_ReplayResult, StepsExecuted) - 8usize];
+                ["Size of ICursorView_ReplayResult"][::core::mem::size_of::<ICursorView_ReplayResult>() - 48usize];
+                ["Alignment of ICursorView_ReplayResult"][::core::mem::align_of::<ICursorView_ReplayResult>() - 8usize];
+                ["Offset of field: ICursorView_ReplayResult::StopReason"][::core::mem::offset_of!(ICursorView_ReplayResult, StopReason) - 0usize];
+                ["Offset of field: ICursorView_ReplayResult::StepsExecuted"][::core::mem::offset_of!(ICursorView_ReplayResult, StepsExecuted) - 8usize];
                 ["Offset of field: ICursorView_ReplayResult::InstructionsExecuted"]
-                    [::std::mem::offset_of!(ICursorView_ReplayResult, InstructionsExecuted) - 16usize];
+                    [::core::mem::offset_of!(ICursorView_ReplayResult, InstructionsExecuted) - 16usize];
             };
             unsafe extern "C" {
                 #[link_name = "\u{1}??0ReplayResult@ICursorView@Replay@TTD@@QEAA@XZ"]
@@ -1198,9 +1200,9 @@ pub mod root {
             }
             impl Default for ICursorView_ReplayResult {
                 fn default() -> Self {
-                    let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+                    let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
                     unsafe {
-                        ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                        ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
                 }
@@ -1208,7 +1210,7 @@ pub mod root {
             impl ICursorView_ReplayResult {
                 #[inline]
                 pub unsafe fn new() -> Self {
-                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
+                    let mut __bindgen_tmp = ::core::mem::MaybeUninit::uninit();
                     ICursorView_ReplayResult_ReplayResult(__bindgen_tmp.as_mut_ptr());
                     __bindgen_tmp.assume_init()
                 }
@@ -1217,46 +1219,46 @@ pub mod root {
     }
     pub type AVX_EXTENDED_CONTEXT = root::_AVX_EXTENDED_CONTEXT;
     #[repr(C)]
-    #[derive(Debug, Default, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct M128BIT {
         pub Low: u64,
         pub High: i64,
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of M128BIT"][::std::mem::size_of::<M128BIT>() - 16usize];
-        ["Alignment of M128BIT"][::std::mem::align_of::<M128BIT>() - 8usize];
-        ["Offset of field: M128BIT::Low"][::std::mem::offset_of!(M128BIT, Low) - 0usize];
-        ["Offset of field: M128BIT::High"][::std::mem::offset_of!(M128BIT, High) - 8usize];
+        ["Size of M128BIT"][::core::mem::size_of::<M128BIT>() - 16usize];
+        ["Alignment of M128BIT"][::core::mem::align_of::<M128BIT>() - 8usize];
+        ["Offset of field: M128BIT::Low"][::core::mem::offset_of!(M128BIT, Low) - 0usize];
+        ["Offset of field: M128BIT::High"][::core::mem::offset_of!(M128BIT, High) - 8usize];
     };
     #[repr(C)]
-    #[derive(Debug, Default, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct M256BIT {
         pub Low: root::M128BIT,
         pub High: root::M128BIT,
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of M256BIT"][::std::mem::size_of::<M256BIT>() - 32usize];
-        ["Alignment of M256BIT"][::std::mem::align_of::<M256BIT>() - 8usize];
-        ["Offset of field: M256BIT::Low"][::std::mem::offset_of!(M256BIT, Low) - 0usize];
-        ["Offset of field: M256BIT::High"][::std::mem::offset_of!(M256BIT, High) - 16usize];
+        ["Size of M256BIT"][::core::mem::size_of::<M256BIT>() - 32usize];
+        ["Alignment of M256BIT"][::core::mem::align_of::<M256BIT>() - 8usize];
+        ["Offset of field: M256BIT::Low"][::core::mem::offset_of!(M256BIT, Low) - 0usize];
+        ["Offset of field: M256BIT::High"][::core::mem::offset_of!(M256BIT, High) - 16usize];
     };
     #[repr(C)]
-    #[derive(Debug, Default, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct M512BIT {
         pub Low: root::M256BIT,
         pub High: root::M256BIT,
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of M512BIT"][::std::mem::size_of::<M512BIT>() - 64usize];
-        ["Alignment of M512BIT"][::std::mem::align_of::<M512BIT>() - 8usize];
-        ["Offset of field: M512BIT::Low"][::std::mem::offset_of!(M512BIT, Low) - 0usize];
-        ["Offset of field: M512BIT::High"][::std::mem::offset_of!(M512BIT, High) - 32usize];
+        ["Size of M512BIT"][::core::mem::size_of::<M512BIT>() - 64usize];
+        ["Alignment of M512BIT"][::core::mem::align_of::<M512BIT>() - 8usize];
+        ["Offset of field: M512BIT::Low"][::core::mem::offset_of!(M512BIT, Low) - 0usize];
+        ["Offset of field: M512BIT::High"][::core::mem::offset_of!(M512BIT, High) - 32usize];
     };
     #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct X86_FXSAVE_FORMAT {
         pub ControlWord: u16,
         pub StatusWord: u16,
@@ -1274,33 +1276,33 @@ pub mod root {
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of X86_FXSAVE_FORMAT"][::std::mem::size_of::<X86_FXSAVE_FORMAT>() - 512usize];
-        ["Alignment of X86_FXSAVE_FORMAT"][::std::mem::align_of::<X86_FXSAVE_FORMAT>() - 4usize];
-        ["Offset of field: X86_FXSAVE_FORMAT::ControlWord"][::std::mem::offset_of!(X86_FXSAVE_FORMAT, ControlWord) - 0usize];
-        ["Offset of field: X86_FXSAVE_FORMAT::StatusWord"][::std::mem::offset_of!(X86_FXSAVE_FORMAT, StatusWord) - 2usize];
-        ["Offset of field: X86_FXSAVE_FORMAT::TagWord"][::std::mem::offset_of!(X86_FXSAVE_FORMAT, TagWord) - 4usize];
-        ["Offset of field: X86_FXSAVE_FORMAT::ErrorOpcode"][::std::mem::offset_of!(X86_FXSAVE_FORMAT, ErrorOpcode) - 6usize];
-        ["Offset of field: X86_FXSAVE_FORMAT::ErrorOffset"][::std::mem::offset_of!(X86_FXSAVE_FORMAT, ErrorOffset) - 8usize];
-        ["Offset of field: X86_FXSAVE_FORMAT::ErrorSelector"][::std::mem::offset_of!(X86_FXSAVE_FORMAT, ErrorSelector) - 12usize];
-        ["Offset of field: X86_FXSAVE_FORMAT::DataOffset"][::std::mem::offset_of!(X86_FXSAVE_FORMAT, DataOffset) - 16usize];
-        ["Offset of field: X86_FXSAVE_FORMAT::DataSelector"][::std::mem::offset_of!(X86_FXSAVE_FORMAT, DataSelector) - 20usize];
-        ["Offset of field: X86_FXSAVE_FORMAT::MXCsr"][::std::mem::offset_of!(X86_FXSAVE_FORMAT, MXCsr) - 24usize];
-        ["Offset of field: X86_FXSAVE_FORMAT::Reserved2"][::std::mem::offset_of!(X86_FXSAVE_FORMAT, Reserved2) - 28usize];
-        ["Offset of field: X86_FXSAVE_FORMAT::RegisterArea"][::std::mem::offset_of!(X86_FXSAVE_FORMAT, RegisterArea) - 32usize];
-        ["Offset of field: X86_FXSAVE_FORMAT::Reserved3"][::std::mem::offset_of!(X86_FXSAVE_FORMAT, Reserved3) - 160usize];
-        ["Offset of field: X86_FXSAVE_FORMAT::Reserved4"][::std::mem::offset_of!(X86_FXSAVE_FORMAT, Reserved4) - 288usize];
+        ["Size of X86_FXSAVE_FORMAT"][::core::mem::size_of::<X86_FXSAVE_FORMAT>() - 512usize];
+        ["Alignment of X86_FXSAVE_FORMAT"][::core::mem::align_of::<X86_FXSAVE_FORMAT>() - 4usize];
+        ["Offset of field: X86_FXSAVE_FORMAT::ControlWord"][::core::mem::offset_of!(X86_FXSAVE_FORMAT, ControlWord) - 0usize];
+        ["Offset of field: X86_FXSAVE_FORMAT::StatusWord"][::core::mem::offset_of!(X86_FXSAVE_FORMAT, StatusWord) - 2usize];
+        ["Offset of field: X86_FXSAVE_FORMAT::TagWord"][::core::mem::offset_of!(X86_FXSAVE_FORMAT, TagWord) - 4usize];
+        ["Offset of field: X86_FXSAVE_FORMAT::ErrorOpcode"][::core::mem::offset_of!(X86_FXSAVE_FORMAT, ErrorOpcode) - 6usize];
+        ["Offset of field: X86_FXSAVE_FORMAT::ErrorOffset"][::core::mem::offset_of!(X86_FXSAVE_FORMAT, ErrorOffset) - 8usize];
+        ["Offset of field: X86_FXSAVE_FORMAT::ErrorSelector"][::core::mem::offset_of!(X86_FXSAVE_FORMAT, ErrorSelector) - 12usize];
+        ["Offset of field: X86_FXSAVE_FORMAT::DataOffset"][::core::mem::offset_of!(X86_FXSAVE_FORMAT, DataOffset) - 16usize];
+        ["Offset of field: X86_FXSAVE_FORMAT::DataSelector"][::core::mem::offset_of!(X86_FXSAVE_FORMAT, DataSelector) - 20usize];
+        ["Offset of field: X86_FXSAVE_FORMAT::MXCsr"][::core::mem::offset_of!(X86_FXSAVE_FORMAT, MXCsr) - 24usize];
+        ["Offset of field: X86_FXSAVE_FORMAT::Reserved2"][::core::mem::offset_of!(X86_FXSAVE_FORMAT, Reserved2) - 28usize];
+        ["Offset of field: X86_FXSAVE_FORMAT::RegisterArea"][::core::mem::offset_of!(X86_FXSAVE_FORMAT, RegisterArea) - 32usize];
+        ["Offset of field: X86_FXSAVE_FORMAT::Reserved3"][::core::mem::offset_of!(X86_FXSAVE_FORMAT, Reserved3) - 160usize];
+        ["Offset of field: X86_FXSAVE_FORMAT::Reserved4"][::core::mem::offset_of!(X86_FXSAVE_FORMAT, Reserved4) - 288usize];
     };
     impl Default for X86_FXSAVE_FORMAT {
         fn default() -> Self {
-            let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+            let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
             unsafe {
-                ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                 s.assume_init()
             }
         }
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct X86_FLOATING_SAVE_AREA {
         pub ControlWord: u32,
         pub StatusWord: u32,
@@ -1314,23 +1316,23 @@ pub mod root {
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of X86_FLOATING_SAVE_AREA"][::std::mem::size_of::<X86_FLOATING_SAVE_AREA>() - 112usize];
-        ["Alignment of X86_FLOATING_SAVE_AREA"][::std::mem::align_of::<X86_FLOATING_SAVE_AREA>() - 4usize];
-        ["Offset of field: X86_FLOATING_SAVE_AREA::ControlWord"][::std::mem::offset_of!(X86_FLOATING_SAVE_AREA, ControlWord) - 0usize];
-        ["Offset of field: X86_FLOATING_SAVE_AREA::StatusWord"][::std::mem::offset_of!(X86_FLOATING_SAVE_AREA, StatusWord) - 4usize];
-        ["Offset of field: X86_FLOATING_SAVE_AREA::TagWord"][::std::mem::offset_of!(X86_FLOATING_SAVE_AREA, TagWord) - 8usize];
-        ["Offset of field: X86_FLOATING_SAVE_AREA::ErrorOffset"][::std::mem::offset_of!(X86_FLOATING_SAVE_AREA, ErrorOffset) - 12usize];
-        ["Offset of field: X86_FLOATING_SAVE_AREA::ErrorSelector"][::std::mem::offset_of!(X86_FLOATING_SAVE_AREA, ErrorSelector) - 16usize];
-        ["Offset of field: X86_FLOATING_SAVE_AREA::DataOffset"][::std::mem::offset_of!(X86_FLOATING_SAVE_AREA, DataOffset) - 20usize];
-        ["Offset of field: X86_FLOATING_SAVE_AREA::DataSelector"][::std::mem::offset_of!(X86_FLOATING_SAVE_AREA, DataSelector) - 24usize];
-        ["Offset of field: X86_FLOATING_SAVE_AREA::RegisterArea"][::std::mem::offset_of!(X86_FLOATING_SAVE_AREA, RegisterArea) - 28usize];
-        ["Offset of field: X86_FLOATING_SAVE_AREA::Cr0NpxState"][::std::mem::offset_of!(X86_FLOATING_SAVE_AREA, Cr0NpxState) - 108usize];
+        ["Size of X86_FLOATING_SAVE_AREA"][::core::mem::size_of::<X86_FLOATING_SAVE_AREA>() - 112usize];
+        ["Alignment of X86_FLOATING_SAVE_AREA"][::core::mem::align_of::<X86_FLOATING_SAVE_AREA>() - 4usize];
+        ["Offset of field: X86_FLOATING_SAVE_AREA::ControlWord"][::core::mem::offset_of!(X86_FLOATING_SAVE_AREA, ControlWord) - 0usize];
+        ["Offset of field: X86_FLOATING_SAVE_AREA::StatusWord"][::core::mem::offset_of!(X86_FLOATING_SAVE_AREA, StatusWord) - 4usize];
+        ["Offset of field: X86_FLOATING_SAVE_AREA::TagWord"][::core::mem::offset_of!(X86_FLOATING_SAVE_AREA, TagWord) - 8usize];
+        ["Offset of field: X86_FLOATING_SAVE_AREA::ErrorOffset"][::core::mem::offset_of!(X86_FLOATING_SAVE_AREA, ErrorOffset) - 12usize];
+        ["Offset of field: X86_FLOATING_SAVE_AREA::ErrorSelector"][::core::mem::offset_of!(X86_FLOATING_SAVE_AREA, ErrorSelector) - 16usize];
+        ["Offset of field: X86_FLOATING_SAVE_AREA::DataOffset"][::core::mem::offset_of!(X86_FLOATING_SAVE_AREA, DataOffset) - 20usize];
+        ["Offset of field: X86_FLOATING_SAVE_AREA::DataSelector"][::core::mem::offset_of!(X86_FLOATING_SAVE_AREA, DataSelector) - 24usize];
+        ["Offset of field: X86_FLOATING_SAVE_AREA::RegisterArea"][::core::mem::offset_of!(X86_FLOATING_SAVE_AREA, RegisterArea) - 28usize];
+        ["Offset of field: X86_FLOATING_SAVE_AREA::Cr0NpxState"][::core::mem::offset_of!(X86_FLOATING_SAVE_AREA, Cr0NpxState) - 108usize];
     };
     impl Default for X86_FLOATING_SAVE_AREA {
         fn default() -> Self {
-            let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+            let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
             unsafe {
-                ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                 s.assume_init()
             }
         }
@@ -1372,61 +1374,61 @@ pub mod root {
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of X86_NT5_CONTEXT__bindgen_ty_1"][::std::mem::size_of::<X86_NT5_CONTEXT__bindgen_ty_1>() - 512usize];
-        ["Alignment of X86_NT5_CONTEXT__bindgen_ty_1"][::std::mem::align_of::<X86_NT5_CONTEXT__bindgen_ty_1>() - 4usize];
+        ["Size of X86_NT5_CONTEXT__bindgen_ty_1"][::core::mem::size_of::<X86_NT5_CONTEXT__bindgen_ty_1>() - 512usize];
+        ["Alignment of X86_NT5_CONTEXT__bindgen_ty_1"][::core::mem::align_of::<X86_NT5_CONTEXT__bindgen_ty_1>() - 4usize];
         ["Offset of field: X86_NT5_CONTEXT__bindgen_ty_1::ExtendedRegisters"]
-            [::std::mem::offset_of!(X86_NT5_CONTEXT__bindgen_ty_1, ExtendedRegisters) - 0usize];
-        ["Offset of field: X86_NT5_CONTEXT__bindgen_ty_1::FxSave"][::std::mem::offset_of!(X86_NT5_CONTEXT__bindgen_ty_1, FxSave) - 0usize];
+            [::core::mem::offset_of!(X86_NT5_CONTEXT__bindgen_ty_1, ExtendedRegisters) - 0usize];
+        ["Offset of field: X86_NT5_CONTEXT__bindgen_ty_1::FxSave"][::core::mem::offset_of!(X86_NT5_CONTEXT__bindgen_ty_1, FxSave) - 0usize];
     };
     impl Default for X86_NT5_CONTEXT__bindgen_ty_1 {
         fn default() -> Self {
-            let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+            let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
             unsafe {
-                ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                 s.assume_init()
             }
         }
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of X86_NT5_CONTEXT"][::std::mem::size_of::<X86_NT5_CONTEXT>() - 716usize];
-        ["Alignment of X86_NT5_CONTEXT"][::std::mem::align_of::<X86_NT5_CONTEXT>() - 4usize];
-        ["Offset of field: X86_NT5_CONTEXT::ContextFlags"][::std::mem::offset_of!(X86_NT5_CONTEXT, ContextFlags) - 0usize];
-        ["Offset of field: X86_NT5_CONTEXT::Dr0"][::std::mem::offset_of!(X86_NT5_CONTEXT, Dr0) - 4usize];
-        ["Offset of field: X86_NT5_CONTEXT::Dr1"][::std::mem::offset_of!(X86_NT5_CONTEXT, Dr1) - 8usize];
-        ["Offset of field: X86_NT5_CONTEXT::Dr2"][::std::mem::offset_of!(X86_NT5_CONTEXT, Dr2) - 12usize];
-        ["Offset of field: X86_NT5_CONTEXT::Dr3"][::std::mem::offset_of!(X86_NT5_CONTEXT, Dr3) - 16usize];
-        ["Offset of field: X86_NT5_CONTEXT::Dr6"][::std::mem::offset_of!(X86_NT5_CONTEXT, Dr6) - 20usize];
-        ["Offset of field: X86_NT5_CONTEXT::Dr7"][::std::mem::offset_of!(X86_NT5_CONTEXT, Dr7) - 24usize];
-        ["Offset of field: X86_NT5_CONTEXT::FloatSave"][::std::mem::offset_of!(X86_NT5_CONTEXT, FloatSave) - 28usize];
-        ["Offset of field: X86_NT5_CONTEXT::SegGs"][::std::mem::offset_of!(X86_NT5_CONTEXT, SegGs) - 140usize];
-        ["Offset of field: X86_NT5_CONTEXT::SegFs"][::std::mem::offset_of!(X86_NT5_CONTEXT, SegFs) - 144usize];
-        ["Offset of field: X86_NT5_CONTEXT::SegEs"][::std::mem::offset_of!(X86_NT5_CONTEXT, SegEs) - 148usize];
-        ["Offset of field: X86_NT5_CONTEXT::SegDs"][::std::mem::offset_of!(X86_NT5_CONTEXT, SegDs) - 152usize];
-        ["Offset of field: X86_NT5_CONTEXT::Edi"][::std::mem::offset_of!(X86_NT5_CONTEXT, Edi) - 156usize];
-        ["Offset of field: X86_NT5_CONTEXT::Esi"][::std::mem::offset_of!(X86_NT5_CONTEXT, Esi) - 160usize];
-        ["Offset of field: X86_NT5_CONTEXT::Ebx"][::std::mem::offset_of!(X86_NT5_CONTEXT, Ebx) - 164usize];
-        ["Offset of field: X86_NT5_CONTEXT::Edx"][::std::mem::offset_of!(X86_NT5_CONTEXT, Edx) - 168usize];
-        ["Offset of field: X86_NT5_CONTEXT::Ecx"][::std::mem::offset_of!(X86_NT5_CONTEXT, Ecx) - 172usize];
-        ["Offset of field: X86_NT5_CONTEXT::Eax"][::std::mem::offset_of!(X86_NT5_CONTEXT, Eax) - 176usize];
-        ["Offset of field: X86_NT5_CONTEXT::Ebp"][::std::mem::offset_of!(X86_NT5_CONTEXT, Ebp) - 180usize];
-        ["Offset of field: X86_NT5_CONTEXT::Eip"][::std::mem::offset_of!(X86_NT5_CONTEXT, Eip) - 184usize];
-        ["Offset of field: X86_NT5_CONTEXT::SegCs"][::std::mem::offset_of!(X86_NT5_CONTEXT, SegCs) - 188usize];
-        ["Offset of field: X86_NT5_CONTEXT::EFlags"][::std::mem::offset_of!(X86_NT5_CONTEXT, EFlags) - 192usize];
-        ["Offset of field: X86_NT5_CONTEXT::Esp"][::std::mem::offset_of!(X86_NT5_CONTEXT, Esp) - 196usize];
-        ["Offset of field: X86_NT5_CONTEXT::SegSs"][::std::mem::offset_of!(X86_NT5_CONTEXT, SegSs) - 200usize];
+        ["Size of X86_NT5_CONTEXT"][::core::mem::size_of::<X86_NT5_CONTEXT>() - 716usize];
+        ["Alignment of X86_NT5_CONTEXT"][::core::mem::align_of::<X86_NT5_CONTEXT>() - 4usize];
+        ["Offset of field: X86_NT5_CONTEXT::ContextFlags"][::core::mem::offset_of!(X86_NT5_CONTEXT, ContextFlags) - 0usize];
+        ["Offset of field: X86_NT5_CONTEXT::Dr0"][::core::mem::offset_of!(X86_NT5_CONTEXT, Dr0) - 4usize];
+        ["Offset of field: X86_NT5_CONTEXT::Dr1"][::core::mem::offset_of!(X86_NT5_CONTEXT, Dr1) - 8usize];
+        ["Offset of field: X86_NT5_CONTEXT::Dr2"][::core::mem::offset_of!(X86_NT5_CONTEXT, Dr2) - 12usize];
+        ["Offset of field: X86_NT5_CONTEXT::Dr3"][::core::mem::offset_of!(X86_NT5_CONTEXT, Dr3) - 16usize];
+        ["Offset of field: X86_NT5_CONTEXT::Dr6"][::core::mem::offset_of!(X86_NT5_CONTEXT, Dr6) - 20usize];
+        ["Offset of field: X86_NT5_CONTEXT::Dr7"][::core::mem::offset_of!(X86_NT5_CONTEXT, Dr7) - 24usize];
+        ["Offset of field: X86_NT5_CONTEXT::FloatSave"][::core::mem::offset_of!(X86_NT5_CONTEXT, FloatSave) - 28usize];
+        ["Offset of field: X86_NT5_CONTEXT::SegGs"][::core::mem::offset_of!(X86_NT5_CONTEXT, SegGs) - 140usize];
+        ["Offset of field: X86_NT5_CONTEXT::SegFs"][::core::mem::offset_of!(X86_NT5_CONTEXT, SegFs) - 144usize];
+        ["Offset of field: X86_NT5_CONTEXT::SegEs"][::core::mem::offset_of!(X86_NT5_CONTEXT, SegEs) - 148usize];
+        ["Offset of field: X86_NT5_CONTEXT::SegDs"][::core::mem::offset_of!(X86_NT5_CONTEXT, SegDs) - 152usize];
+        ["Offset of field: X86_NT5_CONTEXT::Edi"][::core::mem::offset_of!(X86_NT5_CONTEXT, Edi) - 156usize];
+        ["Offset of field: X86_NT5_CONTEXT::Esi"][::core::mem::offset_of!(X86_NT5_CONTEXT, Esi) - 160usize];
+        ["Offset of field: X86_NT5_CONTEXT::Ebx"][::core::mem::offset_of!(X86_NT5_CONTEXT, Ebx) - 164usize];
+        ["Offset of field: X86_NT5_CONTEXT::Edx"][::core::mem::offset_of!(X86_NT5_CONTEXT, Edx) - 168usize];
+        ["Offset of field: X86_NT5_CONTEXT::Ecx"][::core::mem::offset_of!(X86_NT5_CONTEXT, Ecx) - 172usize];
+        ["Offset of field: X86_NT5_CONTEXT::Eax"][::core::mem::offset_of!(X86_NT5_CONTEXT, Eax) - 176usize];
+        ["Offset of field: X86_NT5_CONTEXT::Ebp"][::core::mem::offset_of!(X86_NT5_CONTEXT, Ebp) - 180usize];
+        ["Offset of field: X86_NT5_CONTEXT::Eip"][::core::mem::offset_of!(X86_NT5_CONTEXT, Eip) - 184usize];
+        ["Offset of field: X86_NT5_CONTEXT::SegCs"][::core::mem::offset_of!(X86_NT5_CONTEXT, SegCs) - 188usize];
+        ["Offset of field: X86_NT5_CONTEXT::EFlags"][::core::mem::offset_of!(X86_NT5_CONTEXT, EFlags) - 192usize];
+        ["Offset of field: X86_NT5_CONTEXT::Esp"][::core::mem::offset_of!(X86_NT5_CONTEXT, Esp) - 196usize];
+        ["Offset of field: X86_NT5_CONTEXT::SegSs"][::core::mem::offset_of!(X86_NT5_CONTEXT, SegSs) - 200usize];
     };
     impl Default for X86_NT5_CONTEXT {
         fn default() -> Self {
-            let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+            let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
             unsafe {
-                ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                 s.assume_init()
             }
         }
     }
     #[repr(C)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct AMD64_XMM_SAVE_AREA32 {
         pub ControlWord: u16,
         pub StatusWord: u16,
@@ -1447,30 +1449,30 @@ pub mod root {
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of AMD64_XMM_SAVE_AREA32"][::std::mem::size_of::<AMD64_XMM_SAVE_AREA32>() - 512usize];
-        ["Alignment of AMD64_XMM_SAVE_AREA32"][::std::mem::align_of::<AMD64_XMM_SAVE_AREA32>() - 8usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::ControlWord"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, ControlWord) - 0usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::StatusWord"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, StatusWord) - 2usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::TagWord"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, TagWord) - 4usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::Reserved1"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, Reserved1) - 5usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::ErrorOpcode"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, ErrorOpcode) - 6usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::ErrorOffset"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, ErrorOffset) - 8usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::ErrorSelector"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, ErrorSelector) - 12usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::Reserved2"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, Reserved2) - 14usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::DataOffset"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, DataOffset) - 16usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::DataSelector"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, DataSelector) - 20usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::Reserved3"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, Reserved3) - 22usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::MxCsr"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, MxCsr) - 24usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::MxCsr_Mask"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, MxCsr_Mask) - 28usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::FloatRegisters"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, FloatRegisters) - 32usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::XmmRegisters"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, XmmRegisters) - 160usize];
-        ["Offset of field: AMD64_XMM_SAVE_AREA32::Reserved4"][::std::mem::offset_of!(AMD64_XMM_SAVE_AREA32, Reserved4) - 416usize];
+        ["Size of AMD64_XMM_SAVE_AREA32"][::core::mem::size_of::<AMD64_XMM_SAVE_AREA32>() - 512usize];
+        ["Alignment of AMD64_XMM_SAVE_AREA32"][::core::mem::align_of::<AMD64_XMM_SAVE_AREA32>() - 8usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::ControlWord"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, ControlWord) - 0usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::StatusWord"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, StatusWord) - 2usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::TagWord"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, TagWord) - 4usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::Reserved1"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, Reserved1) - 5usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::ErrorOpcode"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, ErrorOpcode) - 6usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::ErrorOffset"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, ErrorOffset) - 8usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::ErrorSelector"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, ErrorSelector) - 12usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::Reserved2"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, Reserved2) - 14usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::DataOffset"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, DataOffset) - 16usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::DataSelector"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, DataSelector) - 20usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::Reserved3"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, Reserved3) - 22usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::MxCsr"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, MxCsr) - 24usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::MxCsr_Mask"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, MxCsr_Mask) - 28usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::FloatRegisters"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, FloatRegisters) - 32usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::XmmRegisters"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, XmmRegisters) - 160usize];
+        ["Offset of field: AMD64_XMM_SAVE_AREA32::Reserved4"][::core::mem::offset_of!(AMD64_XMM_SAVE_AREA32, Reserved4) - 416usize];
     };
     impl Default for AMD64_XMM_SAVE_AREA32 {
         fn default() -> Self {
-            let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+            let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
             unsafe {
-                ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                 s.assume_init()
             }
         }
@@ -1532,7 +1534,7 @@ pub mod root {
         pub __bindgen_anon_1: root::AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1,
     }
     #[repr(C)]
-    #[derive(Debug, Default, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1 {
         pub Header: [root::M128BIT; 2usize],
         pub Legacy: [root::M128BIT; 8usize],
@@ -1555,121 +1557,121 @@ pub mod root {
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1"][::std::mem::size_of::<AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1>() - 416usize];
-        ["Alignment of AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1"][::std::mem::align_of::<AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1>() - 8usize];
+        ["Size of AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1"][::core::mem::size_of::<AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1>() - 416usize];
+        ["Alignment of AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1"][::core::mem::align_of::<AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1>() - 8usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Header"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Header) - 0usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Header) - 0usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Legacy"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Legacy) - 32usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Legacy) - 32usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm0"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm0) - 160usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm0) - 160usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm1"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm1) - 176usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm1) - 176usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm2"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm2) - 192usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm2) - 192usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm3"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm3) - 208usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm3) - 208usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm4"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm4) - 224usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm4) - 224usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm5"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm5) - 240usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm5) - 240usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm6"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm6) - 256usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm6) - 256usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm7"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm7) - 272usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm7) - 272usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm8"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm8) - 288usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm8) - 288usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm9"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm9) - 304usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm9) - 304usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm10"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm10) - 320usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm10) - 320usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm11"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm11) - 336usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm11) - 336usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm12"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm12) - 352usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm12) - 352usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm13"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm13) - 368usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm13) - 368usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm14"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm14) - 384usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm14) - 384usize];
         ["Offset of field: AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1::Xmm15"]
-            [::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm15) - 400usize];
+            [::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1__bindgen_ty_1, Xmm15) - 400usize];
     };
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of AMD64_CONTEXT__bindgen_ty_1"][::std::mem::size_of::<AMD64_CONTEXT__bindgen_ty_1>() - 512usize];
-        ["Alignment of AMD64_CONTEXT__bindgen_ty_1"][::std::mem::align_of::<AMD64_CONTEXT__bindgen_ty_1>() - 8usize];
-        ["Offset of field: AMD64_CONTEXT__bindgen_ty_1::FltSave"][::std::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1, FltSave) - 0usize];
+        ["Size of AMD64_CONTEXT__bindgen_ty_1"][::core::mem::size_of::<AMD64_CONTEXT__bindgen_ty_1>() - 512usize];
+        ["Alignment of AMD64_CONTEXT__bindgen_ty_1"][::core::mem::align_of::<AMD64_CONTEXT__bindgen_ty_1>() - 8usize];
+        ["Offset of field: AMD64_CONTEXT__bindgen_ty_1::FltSave"][::core::mem::offset_of!(AMD64_CONTEXT__bindgen_ty_1, FltSave) - 0usize];
     };
     impl Default for AMD64_CONTEXT__bindgen_ty_1 {
         fn default() -> Self {
-            let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+            let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
             unsafe {
-                ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                 s.assume_init()
             }
         }
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of AMD64_CONTEXT"][::std::mem::size_of::<AMD64_CONTEXT>() - 1232usize];
-        ["Alignment of AMD64_CONTEXT"][::std::mem::align_of::<AMD64_CONTEXT>() - 8usize];
-        ["Offset of field: AMD64_CONTEXT::P1Home"][::std::mem::offset_of!(AMD64_CONTEXT, P1Home) - 0usize];
-        ["Offset of field: AMD64_CONTEXT::P2Home"][::std::mem::offset_of!(AMD64_CONTEXT, P2Home) - 8usize];
-        ["Offset of field: AMD64_CONTEXT::P3Home"][::std::mem::offset_of!(AMD64_CONTEXT, P3Home) - 16usize];
-        ["Offset of field: AMD64_CONTEXT::P4Home"][::std::mem::offset_of!(AMD64_CONTEXT, P4Home) - 24usize];
-        ["Offset of field: AMD64_CONTEXT::P5Home"][::std::mem::offset_of!(AMD64_CONTEXT, P5Home) - 32usize];
-        ["Offset of field: AMD64_CONTEXT::P6Home"][::std::mem::offset_of!(AMD64_CONTEXT, P6Home) - 40usize];
-        ["Offset of field: AMD64_CONTEXT::ContextFlags"][::std::mem::offset_of!(AMD64_CONTEXT, ContextFlags) - 48usize];
-        ["Offset of field: AMD64_CONTEXT::MxCsr"][::std::mem::offset_of!(AMD64_CONTEXT, MxCsr) - 52usize];
-        ["Offset of field: AMD64_CONTEXT::SegCs"][::std::mem::offset_of!(AMD64_CONTEXT, SegCs) - 56usize];
-        ["Offset of field: AMD64_CONTEXT::SegDs"][::std::mem::offset_of!(AMD64_CONTEXT, SegDs) - 58usize];
-        ["Offset of field: AMD64_CONTEXT::SegEs"][::std::mem::offset_of!(AMD64_CONTEXT, SegEs) - 60usize];
-        ["Offset of field: AMD64_CONTEXT::SegFs"][::std::mem::offset_of!(AMD64_CONTEXT, SegFs) - 62usize];
-        ["Offset of field: AMD64_CONTEXT::SegGs"][::std::mem::offset_of!(AMD64_CONTEXT, SegGs) - 64usize];
-        ["Offset of field: AMD64_CONTEXT::SegSs"][::std::mem::offset_of!(AMD64_CONTEXT, SegSs) - 66usize];
-        ["Offset of field: AMD64_CONTEXT::EFlags"][::std::mem::offset_of!(AMD64_CONTEXT, EFlags) - 68usize];
-        ["Offset of field: AMD64_CONTEXT::Dr0"][::std::mem::offset_of!(AMD64_CONTEXT, Dr0) - 72usize];
-        ["Offset of field: AMD64_CONTEXT::Dr1"][::std::mem::offset_of!(AMD64_CONTEXT, Dr1) - 80usize];
-        ["Offset of field: AMD64_CONTEXT::Dr2"][::std::mem::offset_of!(AMD64_CONTEXT, Dr2) - 88usize];
-        ["Offset of field: AMD64_CONTEXT::Dr3"][::std::mem::offset_of!(AMD64_CONTEXT, Dr3) - 96usize];
-        ["Offset of field: AMD64_CONTEXT::Dr6"][::std::mem::offset_of!(AMD64_CONTEXT, Dr6) - 104usize];
-        ["Offset of field: AMD64_CONTEXT::Dr7"][::std::mem::offset_of!(AMD64_CONTEXT, Dr7) - 112usize];
-        ["Offset of field: AMD64_CONTEXT::Rax"][::std::mem::offset_of!(AMD64_CONTEXT, Rax) - 120usize];
-        ["Offset of field: AMD64_CONTEXT::Rcx"][::std::mem::offset_of!(AMD64_CONTEXT, Rcx) - 128usize];
-        ["Offset of field: AMD64_CONTEXT::Rdx"][::std::mem::offset_of!(AMD64_CONTEXT, Rdx) - 136usize];
-        ["Offset of field: AMD64_CONTEXT::Rbx"][::std::mem::offset_of!(AMD64_CONTEXT, Rbx) - 144usize];
-        ["Offset of field: AMD64_CONTEXT::Rsp"][::std::mem::offset_of!(AMD64_CONTEXT, Rsp) - 152usize];
-        ["Offset of field: AMD64_CONTEXT::Rbp"][::std::mem::offset_of!(AMD64_CONTEXT, Rbp) - 160usize];
-        ["Offset of field: AMD64_CONTEXT::Rsi"][::std::mem::offset_of!(AMD64_CONTEXT, Rsi) - 168usize];
-        ["Offset of field: AMD64_CONTEXT::Rdi"][::std::mem::offset_of!(AMD64_CONTEXT, Rdi) - 176usize];
-        ["Offset of field: AMD64_CONTEXT::R8"][::std::mem::offset_of!(AMD64_CONTEXT, R8) - 184usize];
-        ["Offset of field: AMD64_CONTEXT::R9"][::std::mem::offset_of!(AMD64_CONTEXT, R9) - 192usize];
-        ["Offset of field: AMD64_CONTEXT::R10"][::std::mem::offset_of!(AMD64_CONTEXT, R10) - 200usize];
-        ["Offset of field: AMD64_CONTEXT::R11"][::std::mem::offset_of!(AMD64_CONTEXT, R11) - 208usize];
-        ["Offset of field: AMD64_CONTEXT::R12"][::std::mem::offset_of!(AMD64_CONTEXT, R12) - 216usize];
-        ["Offset of field: AMD64_CONTEXT::R13"][::std::mem::offset_of!(AMD64_CONTEXT, R13) - 224usize];
-        ["Offset of field: AMD64_CONTEXT::R14"][::std::mem::offset_of!(AMD64_CONTEXT, R14) - 232usize];
-        ["Offset of field: AMD64_CONTEXT::R15"][::std::mem::offset_of!(AMD64_CONTEXT, R15) - 240usize];
-        ["Offset of field: AMD64_CONTEXT::Rip"][::std::mem::offset_of!(AMD64_CONTEXT, Rip) - 248usize];
-        ["Offset of field: AMD64_CONTEXT::VectorRegister"][::std::mem::offset_of!(AMD64_CONTEXT, VectorRegister) - 768usize];
-        ["Offset of field: AMD64_CONTEXT::VectorControl"][::std::mem::offset_of!(AMD64_CONTEXT, VectorControl) - 1184usize];
-        ["Offset of field: AMD64_CONTEXT::DebugControl"][::std::mem::offset_of!(AMD64_CONTEXT, DebugControl) - 1192usize];
-        ["Offset of field: AMD64_CONTEXT::LastBranchToRip"][::std::mem::offset_of!(AMD64_CONTEXT, LastBranchToRip) - 1200usize];
-        ["Offset of field: AMD64_CONTEXT::LastBranchFromRip"][::std::mem::offset_of!(AMD64_CONTEXT, LastBranchFromRip) - 1208usize];
-        ["Offset of field: AMD64_CONTEXT::LastExceptionToRip"][::std::mem::offset_of!(AMD64_CONTEXT, LastExceptionToRip) - 1216usize];
-        ["Offset of field: AMD64_CONTEXT::LastExceptionFromRip"][::std::mem::offset_of!(AMD64_CONTEXT, LastExceptionFromRip) - 1224usize];
+        ["Size of AMD64_CONTEXT"][::core::mem::size_of::<AMD64_CONTEXT>() - 1232usize];
+        ["Alignment of AMD64_CONTEXT"][::core::mem::align_of::<AMD64_CONTEXT>() - 8usize];
+        ["Offset of field: AMD64_CONTEXT::P1Home"][::core::mem::offset_of!(AMD64_CONTEXT, P1Home) - 0usize];
+        ["Offset of field: AMD64_CONTEXT::P2Home"][::core::mem::offset_of!(AMD64_CONTEXT, P2Home) - 8usize];
+        ["Offset of field: AMD64_CONTEXT::P3Home"][::core::mem::offset_of!(AMD64_CONTEXT, P3Home) - 16usize];
+        ["Offset of field: AMD64_CONTEXT::P4Home"][::core::mem::offset_of!(AMD64_CONTEXT, P4Home) - 24usize];
+        ["Offset of field: AMD64_CONTEXT::P5Home"][::core::mem::offset_of!(AMD64_CONTEXT, P5Home) - 32usize];
+        ["Offset of field: AMD64_CONTEXT::P6Home"][::core::mem::offset_of!(AMD64_CONTEXT, P6Home) - 40usize];
+        ["Offset of field: AMD64_CONTEXT::ContextFlags"][::core::mem::offset_of!(AMD64_CONTEXT, ContextFlags) - 48usize];
+        ["Offset of field: AMD64_CONTEXT::MxCsr"][::core::mem::offset_of!(AMD64_CONTEXT, MxCsr) - 52usize];
+        ["Offset of field: AMD64_CONTEXT::SegCs"][::core::mem::offset_of!(AMD64_CONTEXT, SegCs) - 56usize];
+        ["Offset of field: AMD64_CONTEXT::SegDs"][::core::mem::offset_of!(AMD64_CONTEXT, SegDs) - 58usize];
+        ["Offset of field: AMD64_CONTEXT::SegEs"][::core::mem::offset_of!(AMD64_CONTEXT, SegEs) - 60usize];
+        ["Offset of field: AMD64_CONTEXT::SegFs"][::core::mem::offset_of!(AMD64_CONTEXT, SegFs) - 62usize];
+        ["Offset of field: AMD64_CONTEXT::SegGs"][::core::mem::offset_of!(AMD64_CONTEXT, SegGs) - 64usize];
+        ["Offset of field: AMD64_CONTEXT::SegSs"][::core::mem::offset_of!(AMD64_CONTEXT, SegSs) - 66usize];
+        ["Offset of field: AMD64_CONTEXT::EFlags"][::core::mem::offset_of!(AMD64_CONTEXT, EFlags) - 68usize];
+        ["Offset of field: AMD64_CONTEXT::Dr0"][::core::mem::offset_of!(AMD64_CONTEXT, Dr0) - 72usize];
+        ["Offset of field: AMD64_CONTEXT::Dr1"][::core::mem::offset_of!(AMD64_CONTEXT, Dr1) - 80usize];
+        ["Offset of field: AMD64_CONTEXT::Dr2"][::core::mem::offset_of!(AMD64_CONTEXT, Dr2) - 88usize];
+        ["Offset of field: AMD64_CONTEXT::Dr3"][::core::mem::offset_of!(AMD64_CONTEXT, Dr3) - 96usize];
+        ["Offset of field: AMD64_CONTEXT::Dr6"][::core::mem::offset_of!(AMD64_CONTEXT, Dr6) - 104usize];
+        ["Offset of field: AMD64_CONTEXT::Dr7"][::core::mem::offset_of!(AMD64_CONTEXT, Dr7) - 112usize];
+        ["Offset of field: AMD64_CONTEXT::Rax"][::core::mem::offset_of!(AMD64_CONTEXT, Rax) - 120usize];
+        ["Offset of field: AMD64_CONTEXT::Rcx"][::core::mem::offset_of!(AMD64_CONTEXT, Rcx) - 128usize];
+        ["Offset of field: AMD64_CONTEXT::Rdx"][::core::mem::offset_of!(AMD64_CONTEXT, Rdx) - 136usize];
+        ["Offset of field: AMD64_CONTEXT::Rbx"][::core::mem::offset_of!(AMD64_CONTEXT, Rbx) - 144usize];
+        ["Offset of field: AMD64_CONTEXT::Rsp"][::core::mem::offset_of!(AMD64_CONTEXT, Rsp) - 152usize];
+        ["Offset of field: AMD64_CONTEXT::Rbp"][::core::mem::offset_of!(AMD64_CONTEXT, Rbp) - 160usize];
+        ["Offset of field: AMD64_CONTEXT::Rsi"][::core::mem::offset_of!(AMD64_CONTEXT, Rsi) - 168usize];
+        ["Offset of field: AMD64_CONTEXT::Rdi"][::core::mem::offset_of!(AMD64_CONTEXT, Rdi) - 176usize];
+        ["Offset of field: AMD64_CONTEXT::R8"][::core::mem::offset_of!(AMD64_CONTEXT, R8) - 184usize];
+        ["Offset of field: AMD64_CONTEXT::R9"][::core::mem::offset_of!(AMD64_CONTEXT, R9) - 192usize];
+        ["Offset of field: AMD64_CONTEXT::R10"][::core::mem::offset_of!(AMD64_CONTEXT, R10) - 200usize];
+        ["Offset of field: AMD64_CONTEXT::R11"][::core::mem::offset_of!(AMD64_CONTEXT, R11) - 208usize];
+        ["Offset of field: AMD64_CONTEXT::R12"][::core::mem::offset_of!(AMD64_CONTEXT, R12) - 216usize];
+        ["Offset of field: AMD64_CONTEXT::R13"][::core::mem::offset_of!(AMD64_CONTEXT, R13) - 224usize];
+        ["Offset of field: AMD64_CONTEXT::R14"][::core::mem::offset_of!(AMD64_CONTEXT, R14) - 232usize];
+        ["Offset of field: AMD64_CONTEXT::R15"][::core::mem::offset_of!(AMD64_CONTEXT, R15) - 240usize];
+        ["Offset of field: AMD64_CONTEXT::Rip"][::core::mem::offset_of!(AMD64_CONTEXT, Rip) - 248usize];
+        ["Offset of field: AMD64_CONTEXT::VectorRegister"][::core::mem::offset_of!(AMD64_CONTEXT, VectorRegister) - 768usize];
+        ["Offset of field: AMD64_CONTEXT::VectorControl"][::core::mem::offset_of!(AMD64_CONTEXT, VectorControl) - 1184usize];
+        ["Offset of field: AMD64_CONTEXT::DebugControl"][::core::mem::offset_of!(AMD64_CONTEXT, DebugControl) - 1192usize];
+        ["Offset of field: AMD64_CONTEXT::LastBranchToRip"][::core::mem::offset_of!(AMD64_CONTEXT, LastBranchToRip) - 1200usize];
+        ["Offset of field: AMD64_CONTEXT::LastBranchFromRip"][::core::mem::offset_of!(AMD64_CONTEXT, LastBranchFromRip) - 1208usize];
+        ["Offset of field: AMD64_CONTEXT::LastExceptionToRip"][::core::mem::offset_of!(AMD64_CONTEXT, LastExceptionToRip) - 1216usize];
+        ["Offset of field: AMD64_CONTEXT::LastExceptionFromRip"][::core::mem::offset_of!(AMD64_CONTEXT, LastExceptionFromRip) - 1224usize];
     };
     impl Default for AMD64_CONTEXT {
         fn default() -> Self {
-            let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+            let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
             unsafe {
-                ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                 s.assume_init()
             }
         }
     }
     #[repr(C)]
-    #[derive(Debug, Default, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct VECTOR_128BIT_REGISTERS {
         pub Ymm0: root::M128BIT,
         pub Ymm1: root::M128BIT,
@@ -1690,27 +1692,27 @@ pub mod root {
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of VECTOR_128BIT_REGISTERS"][::std::mem::size_of::<VECTOR_128BIT_REGISTERS>() - 256usize];
-        ["Alignment of VECTOR_128BIT_REGISTERS"][::std::mem::align_of::<VECTOR_128BIT_REGISTERS>() - 8usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm0"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm0) - 0usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm1"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm1) - 16usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm2"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm2) - 32usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm3"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm3) - 48usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm4"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm4) - 64usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm5"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm5) - 80usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm6"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm6) - 96usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm7"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm7) - 112usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm8"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm8) - 128usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm9"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm9) - 144usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm10"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm10) - 160usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm11"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm11) - 176usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm12"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm12) - 192usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm13"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm13) - 208usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm14"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm14) - 224usize];
-        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm15"][::std::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm15) - 240usize];
+        ["Size of VECTOR_128BIT_REGISTERS"][::core::mem::size_of::<VECTOR_128BIT_REGISTERS>() - 256usize];
+        ["Alignment of VECTOR_128BIT_REGISTERS"][::core::mem::align_of::<VECTOR_128BIT_REGISTERS>() - 8usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm0"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm0) - 0usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm1"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm1) - 16usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm2"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm2) - 32usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm3"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm3) - 48usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm4"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm4) - 64usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm5"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm5) - 80usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm6"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm6) - 96usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm7"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm7) - 112usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm8"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm8) - 128usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm9"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm9) - 144usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm10"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm10) - 160usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm11"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm11) - 176usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm12"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm12) - 192usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm13"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm13) - 208usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm14"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm14) - 224usize];
+        ["Offset of field: VECTOR_128BIT_REGISTERS::Ymm15"][::core::mem::offset_of!(VECTOR_128BIT_REGISTERS, Ymm15) - 240usize];
     };
     #[repr(C)]
-    #[derive(Debug, Default, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct _VECTOR_256BIT_REGISTERS {
         pub Zmm0: root::M256BIT,
         pub Zmm1: root::M256BIT,
@@ -1731,28 +1733,28 @@ pub mod root {
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of _VECTOR_256BIT_REGISTERS"][::std::mem::size_of::<_VECTOR_256BIT_REGISTERS>() - 512usize];
-        ["Alignment of _VECTOR_256BIT_REGISTERS"][::std::mem::align_of::<_VECTOR_256BIT_REGISTERS>() - 8usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm0"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm0) - 0usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm1"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm1) - 32usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm2"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm2) - 64usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm3"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm3) - 96usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm4"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm4) - 128usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm5"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm5) - 160usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm6"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm6) - 192usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm7"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm7) - 224usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm8"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm8) - 256usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm9"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm9) - 288usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm10"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm10) - 320usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm11"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm11) - 352usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm12"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm12) - 384usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm13"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm13) - 416usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm14"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm14) - 448usize];
-        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm15"][::std::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm15) - 480usize];
+        ["Size of _VECTOR_256BIT_REGISTERS"][::core::mem::size_of::<_VECTOR_256BIT_REGISTERS>() - 512usize];
+        ["Alignment of _VECTOR_256BIT_REGISTERS"][::core::mem::align_of::<_VECTOR_256BIT_REGISTERS>() - 8usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm0"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm0) - 0usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm1"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm1) - 32usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm2"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm2) - 64usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm3"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm3) - 96usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm4"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm4) - 128usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm5"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm5) - 160usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm6"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm6) - 192usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm7"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm7) - 224usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm8"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm8) - 256usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm9"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm9) - 288usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm10"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm10) - 320usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm11"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm11) - 352usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm12"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm12) - 384usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm13"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm13) - 416usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm14"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm14) - 448usize];
+        ["Offset of field: _VECTOR_256BIT_REGISTERS::Zmm15"][::core::mem::offset_of!(_VECTOR_256BIT_REGISTERS, Zmm15) - 480usize];
     };
     pub type VECTOR_256BIT_REGISTERS = root::_VECTOR_256BIT_REGISTERS;
     #[repr(C)]
-    #[derive(Debug, Default, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct _VECTOR_512BIT_REGISTERS {
         pub Zmm16: root::M512BIT,
         pub Zmm17: root::M512BIT,
@@ -1773,69 +1775,69 @@ pub mod root {
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of _VECTOR_512BIT_REGISTERS"][::std::mem::size_of::<_VECTOR_512BIT_REGISTERS>() - 1024usize];
-        ["Alignment of _VECTOR_512BIT_REGISTERS"][::std::mem::align_of::<_VECTOR_512BIT_REGISTERS>() - 8usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm16"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm16) - 0usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm17"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm17) - 64usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm18"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm18) - 128usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm19"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm19) - 192usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm20"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm20) - 256usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm21"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm21) - 320usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm22"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm22) - 384usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm23"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm23) - 448usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm24"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm24) - 512usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm25"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm25) - 576usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm26"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm26) - 640usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm27"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm27) - 704usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm28"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm28) - 768usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm29"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm29) - 832usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm30"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm30) - 896usize];
-        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm31"][::std::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm31) - 960usize];
+        ["Size of _VECTOR_512BIT_REGISTERS"][::core::mem::size_of::<_VECTOR_512BIT_REGISTERS>() - 1024usize];
+        ["Alignment of _VECTOR_512BIT_REGISTERS"][::core::mem::align_of::<_VECTOR_512BIT_REGISTERS>() - 8usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm16"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm16) - 0usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm17"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm17) - 64usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm18"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm18) - 128usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm19"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm19) - 192usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm20"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm20) - 256usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm21"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm21) - 320usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm22"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm22) - 384usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm23"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm23) - 448usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm24"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm24) - 512usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm25"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm25) - 576usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm26"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm26) - 640usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm27"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm27) - 704usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm28"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm28) - 768usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm29"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm29) - 832usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm30"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm30) - 896usize];
+        ["Offset of field: _VECTOR_512BIT_REGISTERS::Zmm31"][::core::mem::offset_of!(_VECTOR_512BIT_REGISTERS, Zmm31) - 960usize];
     };
     pub type VECTOR_512BIT_REGISTERS = root::_VECTOR_512BIT_REGISTERS;
     #[repr(C)]
-    #[derive(Debug, Default, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct AVX_YMM_REGISTERS {
         pub LowPart: root::VECTOR_128BIT_REGISTERS,
         pub HighPart: root::VECTOR_128BIT_REGISTERS,
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of AVX_YMM_REGISTERS"][::std::mem::size_of::<AVX_YMM_REGISTERS>() - 512usize];
-        ["Alignment of AVX_YMM_REGISTERS"][::std::mem::align_of::<AVX_YMM_REGISTERS>() - 8usize];
-        ["Offset of field: AVX_YMM_REGISTERS::LowPart"][::std::mem::offset_of!(AVX_YMM_REGISTERS, LowPart) - 0usize];
-        ["Offset of field: AVX_YMM_REGISTERS::HighPart"][::std::mem::offset_of!(AVX_YMM_REGISTERS, HighPart) - 256usize];
+        ["Size of AVX_YMM_REGISTERS"][::core::mem::size_of::<AVX_YMM_REGISTERS>() - 512usize];
+        ["Alignment of AVX_YMM_REGISTERS"][::core::mem::align_of::<AVX_YMM_REGISTERS>() - 8usize];
+        ["Offset of field: AVX_YMM_REGISTERS::LowPart"][::core::mem::offset_of!(AVX_YMM_REGISTERS, LowPart) - 0usize];
+        ["Offset of field: AVX_YMM_REGISTERS::HighPart"][::core::mem::offset_of!(AVX_YMM_REGISTERS, HighPart) - 256usize];
     };
     #[repr(C)]
-    #[derive(Debug, Default, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct _AVX_ZMM_256_REGISTERS {
         pub LowPart: root::AVX_YMM_REGISTERS,
         pub HighPart: root::VECTOR_256BIT_REGISTERS,
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of _AVX_ZMM_256_REGISTERS"][::std::mem::size_of::<_AVX_ZMM_256_REGISTERS>() - 1024usize];
-        ["Alignment of _AVX_ZMM_256_REGISTERS"][::std::mem::align_of::<_AVX_ZMM_256_REGISTERS>() - 8usize];
-        ["Offset of field: _AVX_ZMM_256_REGISTERS::LowPart"][::std::mem::offset_of!(_AVX_ZMM_256_REGISTERS, LowPart) - 0usize];
-        ["Offset of field: _AVX_ZMM_256_REGISTERS::HighPart"][::std::mem::offset_of!(_AVX_ZMM_256_REGISTERS, HighPart) - 512usize];
+        ["Size of _AVX_ZMM_256_REGISTERS"][::core::mem::size_of::<_AVX_ZMM_256_REGISTERS>() - 1024usize];
+        ["Alignment of _AVX_ZMM_256_REGISTERS"][::core::mem::align_of::<_AVX_ZMM_256_REGISTERS>() - 8usize];
+        ["Offset of field: _AVX_ZMM_256_REGISTERS::LowPart"][::core::mem::offset_of!(_AVX_ZMM_256_REGISTERS, LowPart) - 0usize];
+        ["Offset of field: _AVX_ZMM_256_REGISTERS::HighPart"][::core::mem::offset_of!(_AVX_ZMM_256_REGISTERS, HighPart) - 512usize];
     };
     pub type AVX_ZMM_256_REGISTERS = root::_AVX_ZMM_256_REGISTERS;
     #[repr(C)]
-    #[derive(Debug, Default, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct _AVX_ZMM_REGISTERS {
         pub LowPart: root::AVX_ZMM_256_REGISTERS,
         pub HighPart: root::VECTOR_512BIT_REGISTERS,
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of _AVX_ZMM_REGISTERS"][::std::mem::size_of::<_AVX_ZMM_REGISTERS>() - 2048usize];
-        ["Alignment of _AVX_ZMM_REGISTERS"][::std::mem::align_of::<_AVX_ZMM_REGISTERS>() - 8usize];
-        ["Offset of field: _AVX_ZMM_REGISTERS::LowPart"][::std::mem::offset_of!(_AVX_ZMM_REGISTERS, LowPart) - 0usize];
-        ["Offset of field: _AVX_ZMM_REGISTERS::HighPart"][::std::mem::offset_of!(_AVX_ZMM_REGISTERS, HighPart) - 1024usize];
+        ["Size of _AVX_ZMM_REGISTERS"][::core::mem::size_of::<_AVX_ZMM_REGISTERS>() - 2048usize];
+        ["Alignment of _AVX_ZMM_REGISTERS"][::core::mem::align_of::<_AVX_ZMM_REGISTERS>() - 8usize];
+        ["Offset of field: _AVX_ZMM_REGISTERS::LowPart"][::core::mem::offset_of!(_AVX_ZMM_REGISTERS, LowPart) - 0usize];
+        ["Offset of field: _AVX_ZMM_REGISTERS::HighPart"][::core::mem::offset_of!(_AVX_ZMM_REGISTERS, HighPart) - 1024usize];
     };
     pub type AVX_ZMM_REGISTERS = root::_AVX_ZMM_REGISTERS;
     #[repr(C)]
-    #[derive(Debug, Default, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct _OPMASK_REGISTERS {
         pub k0: u64,
         pub k1: u64,
@@ -1848,28 +1850,28 @@ pub mod root {
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of _OPMASK_REGISTERS"][::std::mem::size_of::<_OPMASK_REGISTERS>() - 64usize];
-        ["Alignment of _OPMASK_REGISTERS"][::std::mem::align_of::<_OPMASK_REGISTERS>() - 8usize];
-        ["Offset of field: _OPMASK_REGISTERS::k0"][::std::mem::offset_of!(_OPMASK_REGISTERS, k0) - 0usize];
-        ["Offset of field: _OPMASK_REGISTERS::k1"][::std::mem::offset_of!(_OPMASK_REGISTERS, k1) - 8usize];
-        ["Offset of field: _OPMASK_REGISTERS::k2"][::std::mem::offset_of!(_OPMASK_REGISTERS, k2) - 16usize];
-        ["Offset of field: _OPMASK_REGISTERS::k3"][::std::mem::offset_of!(_OPMASK_REGISTERS, k3) - 24usize];
-        ["Offset of field: _OPMASK_REGISTERS::k4"][::std::mem::offset_of!(_OPMASK_REGISTERS, k4) - 32usize];
-        ["Offset of field: _OPMASK_REGISTERS::k5"][::std::mem::offset_of!(_OPMASK_REGISTERS, k5) - 40usize];
-        ["Offset of field: _OPMASK_REGISTERS::k6"][::std::mem::offset_of!(_OPMASK_REGISTERS, k6) - 48usize];
-        ["Offset of field: _OPMASK_REGISTERS::k7"][::std::mem::offset_of!(_OPMASK_REGISTERS, k7) - 56usize];
+        ["Size of _OPMASK_REGISTERS"][::core::mem::size_of::<_OPMASK_REGISTERS>() - 64usize];
+        ["Alignment of _OPMASK_REGISTERS"][::core::mem::align_of::<_OPMASK_REGISTERS>() - 8usize];
+        ["Offset of field: _OPMASK_REGISTERS::k0"][::core::mem::offset_of!(_OPMASK_REGISTERS, k0) - 0usize];
+        ["Offset of field: _OPMASK_REGISTERS::k1"][::core::mem::offset_of!(_OPMASK_REGISTERS, k1) - 8usize];
+        ["Offset of field: _OPMASK_REGISTERS::k2"][::core::mem::offset_of!(_OPMASK_REGISTERS, k2) - 16usize];
+        ["Offset of field: _OPMASK_REGISTERS::k3"][::core::mem::offset_of!(_OPMASK_REGISTERS, k3) - 24usize];
+        ["Offset of field: _OPMASK_REGISTERS::k4"][::core::mem::offset_of!(_OPMASK_REGISTERS, k4) - 32usize];
+        ["Offset of field: _OPMASK_REGISTERS::k5"][::core::mem::offset_of!(_OPMASK_REGISTERS, k5) - 40usize];
+        ["Offset of field: _OPMASK_REGISTERS::k6"][::core::mem::offset_of!(_OPMASK_REGISTERS, k6) - 48usize];
+        ["Offset of field: _OPMASK_REGISTERS::k7"][::core::mem::offset_of!(_OPMASK_REGISTERS, k7) - 56usize];
     };
     pub type OPMASK_REGISTERS = root::_OPMASK_REGISTERS;
     #[repr(C)]
-    #[derive(Debug, Default, Copy, Clone)]
+    #[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, PartialEq)]
     pub struct _AVX_512_K_REGISTERS {
         pub OpMask: root::OPMASK_REGISTERS,
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of _AVX_512_K_REGISTERS"][::std::mem::size_of::<_AVX_512_K_REGISTERS>() - 64usize];
-        ["Alignment of _AVX_512_K_REGISTERS"][::std::mem::align_of::<_AVX_512_K_REGISTERS>() - 8usize];
-        ["Offset of field: _AVX_512_K_REGISTERS::OpMask"][::std::mem::offset_of!(_AVX_512_K_REGISTERS, OpMask) - 0usize];
+        ["Size of _AVX_512_K_REGISTERS"][::core::mem::size_of::<_AVX_512_K_REGISTERS>() - 64usize];
+        ["Alignment of _AVX_512_K_REGISTERS"][::core::mem::align_of::<_AVX_512_K_REGISTERS>() - 8usize];
+        ["Offset of field: _AVX_512_K_REGISTERS::OpMask"][::core::mem::offset_of!(_AVX_512_K_REGISTERS, OpMask) - 0usize];
     };
     pub type AVX_512_K_REGISTERS = root::_AVX_512_K_REGISTERS;
     #[repr(C)]
@@ -1887,34 +1889,34 @@ pub mod root {
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of _AVX_EXTENDED_CONTEXT__bindgen_ty_1"][::std::mem::size_of::<_AVX_EXTENDED_CONTEXT__bindgen_ty_1>() - 2048usize];
-        ["Alignment of _AVX_EXTENDED_CONTEXT__bindgen_ty_1"][::std::mem::align_of::<_AVX_EXTENDED_CONTEXT__bindgen_ty_1>() - 8usize];
+        ["Size of _AVX_EXTENDED_CONTEXT__bindgen_ty_1"][::core::mem::size_of::<_AVX_EXTENDED_CONTEXT__bindgen_ty_1>() - 2048usize];
+        ["Alignment of _AVX_EXTENDED_CONTEXT__bindgen_ty_1"][::core::mem::align_of::<_AVX_EXTENDED_CONTEXT__bindgen_ty_1>() - 8usize];
         ["Offset of field: _AVX_EXTENDED_CONTEXT__bindgen_ty_1::YmmRegisters"]
-            [::std::mem::offset_of!(_AVX_EXTENDED_CONTEXT__bindgen_ty_1, YmmRegisters) - 0usize];
+            [::core::mem::offset_of!(_AVX_EXTENDED_CONTEXT__bindgen_ty_1, YmmRegisters) - 0usize];
         ["Offset of field: _AVX_EXTENDED_CONTEXT__bindgen_ty_1::ZmmRegisters"]
-            [::std::mem::offset_of!(_AVX_EXTENDED_CONTEXT__bindgen_ty_1, ZmmRegisters) - 0usize];
+            [::core::mem::offset_of!(_AVX_EXTENDED_CONTEXT__bindgen_ty_1, ZmmRegisters) - 0usize];
     };
     impl Default for _AVX_EXTENDED_CONTEXT__bindgen_ty_1 {
         fn default() -> Self {
-            let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+            let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
             unsafe {
-                ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                 s.assume_init()
             }
         }
     }
     #[allow(clippy::unnecessary_operation, clippy::identity_op)]
     const _: () = {
-        ["Size of _AVX_EXTENDED_CONTEXT"][::std::mem::size_of::<_AVX_EXTENDED_CONTEXT>() - 8832usize];
-        ["Alignment of _AVX_EXTENDED_CONTEXT"][::std::mem::align_of::<_AVX_EXTENDED_CONTEXT>() - 8usize];
-        ["Offset of field: _AVX_EXTENDED_CONTEXT::Avx512Registers"][::std::mem::offset_of!(_AVX_EXTENDED_CONTEXT, Avx512Registers) - 2048usize];
-        ["Offset of field: _AVX_EXTENDED_CONTEXT::ReservedAVXEx"][::std::mem::offset_of!(_AVX_EXTENDED_CONTEXT, ReservedAVXEx) - 2112usize];
+        ["Size of _AVX_EXTENDED_CONTEXT"][::core::mem::size_of::<_AVX_EXTENDED_CONTEXT>() - 8832usize];
+        ["Alignment of _AVX_EXTENDED_CONTEXT"][::core::mem::align_of::<_AVX_EXTENDED_CONTEXT>() - 8usize];
+        ["Offset of field: _AVX_EXTENDED_CONTEXT::Avx512Registers"][::core::mem::offset_of!(_AVX_EXTENDED_CONTEXT, Avx512Registers) - 2048usize];
+        ["Offset of field: _AVX_EXTENDED_CONTEXT::ReservedAVXEx"][::core::mem::offset_of!(_AVX_EXTENDED_CONTEXT, ReservedAVXEx) - 2112usize];
     };
     impl Default for _AVX_EXTENDED_CONTEXT {
         fn default() -> Self {
-            let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+            let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
             unsafe {
-                ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+                ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                 s.assume_init()
             }
         }

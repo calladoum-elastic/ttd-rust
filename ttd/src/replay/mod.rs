@@ -10,6 +10,7 @@ pub(crate) mod sys;
 use std::{
     ffi::CString,
     ops::{Add, Sub},
+    os::windows::ffi::OsStringExt,
     str::FromStr,
 };
 
@@ -283,7 +284,9 @@ impl ReplayEngine {
         }
 
         let c_str = CString::from_str(trace_path.to_str().ok_or(Error::ConversionError)?)?;
-        match sys::load(c_str.to_str()?) {
+        let w_str: Vec<u16> = c_str.to_string_lossy().encode_utf16().chain(std::iter::once(0)).collect();
+
+        match sys::load(&w_str) {
             0 => Ok(()),
             _ => Err(Error::InitializationError),
         }

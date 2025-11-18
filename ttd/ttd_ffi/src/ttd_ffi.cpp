@@ -19,15 +19,15 @@
 // clang-format on
 
 
-// #ifdef _DEBUG
-// #define dbg(fmt, ...) ::wprintf("[*] " fmt L"\n", __VA_ARGS__)
-// #define ok(fmt, ...) ::wprintf("[+] " fmt L"\n", __VA_ARGS__)
-// #define err(fmt, ...) ::wprintf("[-] " fmt L"\n", __VA_ARGS__)
-// #else
+#ifdef _DEBUG
+#define dbg(fmt, ...) ::wprintf("[*] " fmt L"\n", __VA_ARGS__)
+#define ok(fmt, ...) ::wprintf("[+] " fmt L"\n", __VA_ARGS__)
+#define err(fmt, ...) ::wprintf("[-] " fmt L"\n", __VA_ARGS__)
+#else
 #define dbg(fmt, ...)
 #define ok(fmt, ...)
 #define err(fmt, ...)
-// #endif // _DEBUG
+#endif // _DEBUG
 
 
 static TTD::Replay::UniqueReplayEngine g_Engine {nullptr};
@@ -60,23 +60,25 @@ TTD_FFI::Replay::Initialize()
 
 
 i32
-TTD_FFI::Replay::Load(const u8* trace)
+TTD_FFI::Replay::Load(const u16* trace)
 {
-    const std::filesystem::path tracePath {(const i8*)trace};
-    if ( !std::filesystem::exists(tracePath) )
+    // const std::filesystem::path tracePath {(const i16*)trace};
+    // if ( !std::filesystem::exists(tracePath) )
+    // {
+    //     err(L"File %S doesn't exist", tracePath.c_str());
+    //     return -1;
+    // }
+
+    // dbg(L"Loading trace %s", tracePath.wstring().c_str());
+    // const std::wstring ws = tracePath.wstring();
+    // LPWSTR ptr            = (LPWSTR)tracePath.wstring().c_str();
+    if ( !g_Engine->Initialize((PCWSTR)trace) )
     {
-        err(L"File %S doesn't exist", tracePath.c_str());
+        err(L"Initialize('%s') failed", trace);
         return -1;
     }
 
-    dbg(L"Loading trace %s", tracePath.wstring().c_str());
-    if ( !g_Engine->Initialize(tracePath.wstring().c_str()) )
-    {
-        err(L"Initialize('%S') failed", tracePath.c_str());
-        return -1;
-    }
-
-    ok(L"Loaded %s...", tracePath.wstring().c_str());
+    ok(L"Loaded %s...", trace);
 
     dbg(L"creating cursor");
     TTD::Replay::UniqueCursor cursor(g_Engine->NewCursor());

@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __HAS_TTD_FFI
 #define __HAS_TTD_FFI
 
@@ -28,7 +30,7 @@ Initialize();
 
 /// Load trace and allocate cursor
 i32
-Load(const u8* trace);
+Load(const u16* trace);
 
 /// Unload the engine
 i32

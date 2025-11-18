@@ -29,7 +29,9 @@ message(STATUS "CMAKE_MODULE_PATH:                 ${CMAKE_MODULE_PATH}")
 message(STATUS "CMAKE_SYSTEM_PROCESSOR:            ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "CMAKE_SYSTEM_NAME:                 ${CMAKE_SYSTEM_NAME}")
 
-add_library(${PROJECT_NAME} STATIC ttd_ffi.cpp)
+add_library(${PROJECT_NAME} STATIC
+    "${PROJECT_LIB_SRC_DIR}/ttd_ffi.cpp"
+)
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
