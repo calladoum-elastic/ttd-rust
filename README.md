@@ -1,6 +1,6 @@
 # `ttd-rust`
 
-Rust bindings for the **Microsoft Time Travel Debugging (TTD) SDK**.
+Rust bindings for the [**Microsoft Time Travel Debugging (TTD) SDK**](https://github.com/microsoft/WinDbg-Samples/blob/master/TTD/README.md).
 
 This crate provides a safe and ergonomic Rust interface to the TTD SDK, enabling developers to record, replay, and analyze program execution using Microsoft's time-travel debugging technology.
 
@@ -11,12 +11,16 @@ This crate provides a safe and ergonomic Rust interface to the TTD SDK, enabling
 `ttd-rust` wraps the native TTD SDK, making it accessible from Rust without requiring manual FFI boilerplate.
 
 ## Features
+
 - Safe Rust wrappers around TTD SDK functions.
+- Multi replay engine/multi-cursor support
+- Thread-safe
 - Replay program execution from created traces. Trace recording bindings will be added soon.
 - Query events, memory state, and call stacks at any point in time.
 - Integration with existing Rust debugging workflows.
 
 ## Requirements
+
 - **Microsoft TTD SDK** installed on your system.
 - `winget install --exact Microsoft.TimeTravelDebugging --source winget`
 - Rust 1.90+
@@ -57,6 +61,11 @@ ctest -C Debug -T test --test-dir .\ttd\ttd_ffi\build\tests
 ```pwsh
 cargo test
 ```
+
+## Examples
+
+Several examples were provided to illustrate how to use the Rust API:
+ - `auto_unpack` - an automatic unpack that will extract encoded/encrypted payload injected using `VirtualAlloc(RWX)`/`VirtualProtect(RWX)`
 
 ## License
 
