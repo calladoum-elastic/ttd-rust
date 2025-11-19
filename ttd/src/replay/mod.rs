@@ -501,13 +501,12 @@ mod test {
         let replay = ReplayEngine::new().expect("failed to create a new replay");
         assert!(replay.process_id().is_ok());
 
-        let trace_path = std::path::Path::new("c:\\users\\chris\\documents\\notepad03.run");
-        assert!(replay.load(trace_path).is_ok());
+        let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
+        trace_path.push("test.run");
+        assert!(replay.load(trace_path.as_path()).is_ok());
 
         let info = replay.system_info().expect("system_info() failed");
-
-        assert_ne!(info.SystemName.len(), 0);
-        assert_ne!(info.UserName.len(), 0);
-        assert_ne!(info.UserName.len(), 0);
+        assert_eq!(info.SystemName.len(), 64);
+        assert_eq!(info.UserName.len(), 64);
     }
 }

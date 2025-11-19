@@ -43,16 +43,24 @@ jobs:
           cargo build --all-targets --release
           cargo clippy --release
 
+      - name: Run Tests
+        run: |
+          ttd -acceptEula -out $env:TEMP\test -launch c:\windows\system32\cmd.exe "/c whoami"
+          ./ttd/ttd_ffi/install/ttd_ffi_tests/Tests/ttd_ffi_tests.exe
+
+          cp .\ttd*.dll .\target\debug\deps\
+          cargo test
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v5
         with:
           name: ttd_${{ matrix.build }}_${{ matrix.os }}_${{ github.sha }}
           if-no-files-found: warn
           path: |
+            ./ttd/ttd_ffi/install
             ./TTD*.dll
+            ./target/**/ttd.rlib
             ./target/**/ttd.dll
             ./target/**/ttd.pdb
-            ./target/**/windbg_ext_rs.dll
-            ./target/**/windbg_ext_rs.pdb
             ./target/**/auto_unpack.exe
             ./target/**/auto_unpack.pdb
