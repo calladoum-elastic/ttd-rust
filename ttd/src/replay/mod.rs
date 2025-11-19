@@ -10,6 +10,7 @@ pub(crate) mod sys;
 use std::{
     ffi::CString,
     ops::{Add, Sub},
+    os::windows::ffi::OsStringExt,
     str::FromStr,
 };
 
@@ -403,7 +404,8 @@ impl ReplayEngine {
         }
 
         let c_str = CString::from_str(trace_path.to_str().ok_or(Error::ConversionError)?)?;
-        match self.inner.load(c_str.to_str()?) {
+        let w_str: Vec<u16> = c_str.to_string_lossy().encode_utf16().chain(std::iter::once(0)).collect();
+        match self.inner.load(&w_str) {
             0 => Ok(()),
             _ => Err(Error::InitializationError),
         }
@@ -502,6 +504,12 @@ impl ReplayEngine {
 mod test {
     use crate::replay::{EngineInfo, ReplayCursor, ReplayEngine};
 
+    fn get_test_trace() -> std::path::PathBuf {
+        let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
+        trace_path.push("test.run");
+        trace_path
+    }
+
     #[test]
     fn test_ffi_version() {
         let info = EngineInfo::new();
@@ -517,8 +525,9 @@ mod test {
         let replay = ReplayEngine::new().expect("failed to create a new replayer");
         assert!(replay.inner.index() >= 0);
 
-        let trace_path = std::path::Path::new("c:\\users\\chris\\documents\\notepad03.run");
-        assert!(replay.load(trace_path).is_ok());
+        let mut trace_path = get_test_trace();
+        trace_path.push("test.run");
+        assert!(replay.load(trace_path.as_path()).is_ok());
 
         for i in 1..10 {
             let mut cursor = replay.cursor().unwrap();
@@ -535,12 +544,11 @@ mod test {
         let engine = ReplayEngine::new().expect("failed to create a new replayer");
         assert_eq!(engine.index(), 0);
 
-        let trace_path = std::path::Path::new("c:\\users\\chris\\documents\\notepad03.run");
-        assert!(engine.load(trace_path).is_ok());
+        let trace_path = get_test_trace();
+        assert!(engine.load(trace_path.as_path()).is_ok());
 
         let info = engine.system_info().unwrap();
-        assert_ne!(info.SystemName.len(), 0);
-        assert_ne!(info.UserName.len(), 0);
-        assert_ne!(info.UserName.len(), 0);
+        assert_eq!(info.SystemName.len(), 64);
+        assert_eq!(info.UserName.len(), 64);
     }
 }

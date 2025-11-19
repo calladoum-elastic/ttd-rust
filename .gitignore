@@ -5,3 +5,4 @@ ttd/src/ttd/bindings.rs
 ttd/constants.rs
 *.dll
 *.exe
+ttd/src/bindings.rs

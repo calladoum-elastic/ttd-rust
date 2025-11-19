@@ -11,7 +11,7 @@ jobs:
     permissions:
       contents: read
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os:
           # - windows-2022 # missing `winget`
@@ -29,6 +29,21 @@ jobs:
           rustup component add rustfmt
           rustup show
 
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        id: cache-deps
+        env:
+          cache-name: cache-deps
+        with:
+          key: cargo-${{ matrix.os }}-${{ matrix.build }}-${{ hashFiles('**/Cargo.lock') }}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git/db
+            ./target/debug/deps
+            ./target/release/deps
+          restore-keys:
+            cargo-${{ matrix.os }}-${{ matrix.build }}-
+
       - name: Build (debug)
         if: matrix.build == 'debug'
         run: |
@@ -43,16 +58,38 @@ jobs:
           cargo build --all-targets --release
           cargo clippy --release
 
+      - name: Create Test Traces
+        run: |
+          ttd -acceptEula -out $env:TEMP\test -launch c:\windows\system32\cmd.exe "/c whoami"
+
+      - name: Run Rust Tests (debug)
+        if: matrix.build == 'debug'
+        run: |
+          cp .\ttd*.dll .\target\debug\deps\
+          cp .\ttd*.dll .\ttd\ttd_ffi\build\tests\
+          ctest --build-config Debug -T test --test-dir .\ttd\ttd_ffi\build\tests
+          cargo test
+
+      - name: Run Rust Tests (release)
+        if: matrix.build == 'release'
+        run: |
+          cp .\ttd*.dll .\target\release\deps\
+          cp .\ttd*.dll .\ttd\ttd_ffi\build\tests\
+          ctest --build-config Release -T test --test-dir .\ttd\ttd_ffi\build\tests
+          cargo test --release
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v5
         with:
           name: ttd_${{ matrix.build }}_${{ matrix.os }}_${{ github.sha }}
           if-no-files-found: warn
           path: |
+            ./ttd/ttd_ffi_tests/tests/*.exe
+            ./ttd/ttd_ffi_tests/tests/*.pdb
+            ./ttd/ttd_ffi/install/*.exe
+            ./ttd/ttd_ffi/install/*.pdb
             ./TTD*.dll
-            ./target/**/ttd.dll
-            ./target/**/ttd.pdb
-            ./target/**/windbg_ext_rs.dll
-            ./target/**/windbg_ext_rs.pdb
-            ./target/**/auto_unpack.exe
-            ./target/**/auto_unpack.pdb
+            ./target/**/*.rlib
+            ./target/**/*.exe
+            ./target/**/*.pdb
+            ./target/**/*.dll

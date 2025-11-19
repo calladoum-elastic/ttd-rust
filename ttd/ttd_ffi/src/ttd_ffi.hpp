@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __HAS_TTD_FFI
 #define __HAS_TTD_FFI
 
@@ -126,9 +128,9 @@ struct ReplayEngine
     i32
     Initialize();
 
-    /// Load trace and allocate cursor
+    /// Load trace from the `.run` filepath passed as argument
     i32
-    Load(const u8* trace) const;
+    Load(const u16* trace) const;
 
     /// Unload the engine
     i32

@@ -39,7 +39,7 @@ impl ReplayEngine {
         self.inner.m_Index
     }
 
-    pub(crate) fn load(&self, trace: &str) -> i32 {
+    pub(crate) fn load(&self, trace: &[u16]) -> i32 {
         unsafe { self.inner.Load(trace.as_ptr()) }
     }
 
@@ -384,11 +384,19 @@ mod test {
         replay::sys::ReplayEngine,
     };
 
+    fn get_test_trace() -> Vec<u16> {
+        let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
+        trace_path.push("test.run");
+        trace_path.to_string_lossy().encode_utf16().collect()
+    }
+
     #[test]
     fn test_ffi_load_simple() {
         let replay = ReplayEngine::new().expect("failed to create a new replayer");
         assert!(replay.inner.m_Index >= 0);
-        assert_eq!(replay.load("c:\\users\\chris\\documents\\notepad03.run"), 0);
+
+        let trace_path = get_test_trace();
+        assert_eq!(replay.load(trace_path.as_ref()), 0);
 
         for i in 1..10 {
             let mut cursor = replay.cursor().unwrap();
@@ -416,8 +424,8 @@ mod test {
         assert_eq!(engine.index(), 0);
 
         // Note: a trace is needed to have TTD::Replay::SystemInfo populated
-        let trace_path = "c:\\users\\chris\\documents\\notepad03.run";
-        assert_eq!(engine.load(trace_path), 0);
+        let trace_path = get_test_trace();
+        assert_eq!(engine.load(trace_path.as_ref()), 0);
 
         let info = engine.system_info();
         assert_eq!(info.MajorVersion, 1);

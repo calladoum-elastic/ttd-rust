@@ -93,11 +93,11 @@ TTD_FFI::Replay::ReplayEngine::Initialize()
 }
 
 i32
-TTD_FFI::Replay::ReplayEngine::Load(const u8* trace) const
+TTD_FFI::Replay::ReplayEngine::Load(const u16* trace) const
 {
     GetEngineSafe();
 
-    const std::filesystem::path tracePath {(const i8*)trace};
+    const std::filesystem::path tracePath {(const wchar_t*)trace};
     if ( !std::filesystem::exists(tracePath) )
     {
         err(L"File %S doesn't exist", tracePath.string().c_str());
@@ -355,7 +355,7 @@ TTD_FFI::Replay::ReplayCursor::QueryMemoryBuffer(u64 address, u8* buf, usize buf
 {
     GetCursorSafe();
 
-    dbg(L"QueryMemoryBuffer(addr=%llx ,buf=%p, bufsz=%d)", address, buf, bufsz);
+    dbg(L"QueryMemoryBuffer(addr=%llx ,buf=%p, bufsz=%lu)", address, buf, bufsz);
     const TTD::Replay::MemoryBuffer res = cursor->QueryMemoryBuffer(
         TTD::GuestAddress {address},
         TTD::BufferView {buf, bufsz},
@@ -372,7 +372,7 @@ TTD_FFI::Replay::ReplayCursor::QueryMemoryBuffer(u64 address, u8* buf, usize buf
 void
 TTD_FFI::Replay::ReplayCursor::SetPosition(TTD::Replay::Position const& pos)
 {
-    dbg(L"Setting position %x:%x", pos.Sequence, pos.Steps);
+    dbg(L"Setting position %lx:%lx", (uint64_t)pos.Sequence, (uint64_t)pos.Steps);
     GetCursorSafe();
     return cursor->SetPosition(pos);
 }
