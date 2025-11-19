@@ -58,23 +58,24 @@ jobs:
           cargo build --all-targets --release
           cargo clippy --release
 
-      - name: Run C++ Tests
-        if: matrix.build == 'debug'
+      - name: Create Test Traces
         run: |
           ttd -acceptEula -out $env:TEMP\test -launch c:\windows\system32\cmd.exe "/c whoami"
-          cp .\ttd*.dll .\ttd\ttd_ffi\build\tests\
-          ctest --build-config Debug -T test --test-dir .\ttd\ttd_ffi\build\tests
 
       - name: Run Rust Tests (debug)
         if: matrix.build == 'debug'
         run: |
           cp .\ttd*.dll .\target\debug\deps\
+          cp .\ttd*.dll .\ttd\ttd_ffi\build\tests\
+          ctest --build-config Debug -T test --test-dir .\ttd\ttd_ffi\build\tests
           cargo test
 
       - name: Run Rust Tests (release)
         if: matrix.build == 'release'
         run: |
           cp .\ttd*.dll .\target\release\deps\
+          cp .\ttd*.dll .\ttd\ttd_ffi\build\tests\
+          ctest --build-config Release -T test --test-dir .\ttd\ttd_ffi\build\tests
           cargo test --release
 
       - name: Upload Artifact
