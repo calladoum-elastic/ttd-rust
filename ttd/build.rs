@@ -6,6 +6,9 @@ const _: () = assert!(false, "TTD bindings only work on Windows");
 #[cfg(target_arch = "x86_64")]
 const ARCH: &str = "x64";
 
+#[cfg(target_arch = "aarch64")]
+const ARCH: &str = "arm64";
+
 const TTD_SDK_PACKAGE_NAME: &str = "microsoft.timetraveldebugging.apis";
 const TTD_SDK_PACKAGE_VERSION: &str = "0.9.5";
 const NUGET_DOWNLOAD_LINK: &str = const_format::formatcp!(
@@ -166,7 +169,8 @@ fn generate_ttd_bindings() {
             .clang_arg("c++")
             .clang_arg("-std=c++23")
             .clang_arg(format!("-I{}", TTD_FFI_INSTALL_INCLUDE_DIR))
-            .blocklist_type("std::.*")
+            // .blocklist_type("std::.*")
+            .use_core()
             .blocklist_type("TTD::TBufferView.*")
             .blocklist_function("TTD::.*GetEndAddress.*") // FIXME (calladoum) leave this for now
             .allowlist_function("TTD_FFI::.*")
@@ -179,6 +183,10 @@ fn generate_ttd_bindings() {
             .generate_inline_functions(true)
             .derive_default(true)
             .derive_debug(true)
+            .derive_copy(true)
+            .derive_hash(true)
+            .derive_partialeq(true)
+            .derive_partialord(true)
             .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
             .generate()
             .expect("bindgen failed");

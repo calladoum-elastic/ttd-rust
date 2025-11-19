@@ -16,7 +16,7 @@ pub(crate) fn reset() -> i32 {
     unsafe { ffi::TTD_FFI::Replay::Reset() }
 }
 
-pub(crate) fn load(trace: &str) -> i32 {
+pub(crate) fn load(trace: &[u16]) -> i32 {
     unsafe { ffi::TTD_FFI::Replay::Load(trace.as_ptr()) }
 }
 

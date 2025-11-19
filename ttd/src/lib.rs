@@ -2,6 +2,7 @@ pub(crate) mod bindings;
 pub mod constants;
 pub mod error;
 pub mod prelude;
+pub mod types;
 
 #[allow(unused)]
 pub use crate::prelude::*;
