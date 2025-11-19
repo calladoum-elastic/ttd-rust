@@ -59,6 +59,7 @@ jobs:
           cargo clippy --release
 
       - name: Run C++ Tests
+        if: matrix.build == 'debug'
         run: |
           ttd -acceptEula -out $env:TEMP\test -launch c:\windows\system32\cmd.exe "/c whoami"
           cp .\ttd*.dll .\ttd\ttd_ffi\build\tests\
