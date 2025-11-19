@@ -56,6 +56,21 @@ get_target_property( TTDSdkHeaderDirs Microsoft.TimeTravelDebugging.Apis::Includ
 get_target_property( TTDReplayLibs Microsoft.TimeTravelDebugging.Apis::TTDReplay IMPORTED_LOCATION)
 get_target_property( TTDLiveRecorderLibs Microsoft.TimeTravelDebugging.Apis::TTDLiveRecorder IMPORTED_LOCATION)
 
+# Compile and Link ASAN for debug
+target_compile_options(${PROJECT_NAME}
+    PUBLIC
+
+    # ASAN only supported for Intel
+    $<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},x64>:$<$<CONFIG:Debug>:/fsanitize=address>>
+    $<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},win32>:$<$<CONFIG:Debug>:/fsanitize=address>>
+)
+
+target_link_options(${PROJECT_NAME}
+    PUBLIC
+
+    $<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},win32>:$<$<CONFIG:Debug>:/InferAsanLibs>>
+    $<$<STREQUAL:${CMAKE_GENERATOR_PLATFORM},x64>:$<$<CONFIG:Debug>:/InferAsanLibs>>
+)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_NAME}/Library )
 install(

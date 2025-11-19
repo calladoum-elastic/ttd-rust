@@ -24,7 +24,7 @@ pub type Amd64Context = crate::bindings::root::AMD64_CONTEXT;
 pub type Amd64ExtendedContext = crate::bindings::root::AVX_EXTENDED_CONTEXT;
 
 pub type ReplayFlags = crate::replay::sys::ReplayFlags;
-pub type RegisterContext = crate::replay::sys::RegisterContext;
+pub type RegisterContext<'a> = crate::replay::sys::RegisterContext<'a>;
 pub type ExtendedRegisterContext = crate::replay::sys::ExtendedRegisterContext;
 
 pub type SequenceId = crate::bindings::root::TTD::SequenceId;
@@ -227,6 +227,7 @@ pub mod events {
     }
 }
 
+// region: EngineInfo
 pub struct EngineInfo {
     pub major: usize,
     pub minor: usize,
@@ -264,17 +265,136 @@ impl EngineInfo {
         }
     }
 }
+// endregion: EngineInfo
 
-#[derive(Default, Debug)]
-pub struct ReplayEngine {}
+pub struct ReplayCursor<'a> {
+    inner: crate::replay::sys::ReplayCursor<'a>,
+}
+
+impl<'a> ReplayCursor<'a> {
+    pub fn index(&self) -> i32 {
+        self.inner.index()
+    }
+
+    pub fn engine_index(&self) -> i32 {
+        self.inner.engine_index()
+    }
+
+    pub fn replay_forward(&mut self, until: Option<ReplayPosition>) -> Result<ReplayResult> {
+        Ok(self.inner.replay_forward(until).into())
+    }
+
+    pub fn replay_backward(&mut self, until: Option<ReplayPosition>) -> Result<ReplayResult> {
+        Ok(self.inner.replay_backward(until).into())
+    }
+
+    pub fn replay_forward_steps(&mut self, steps: u64) -> Result<ReplayResult> {
+        let until = self.inner.get_position() + steps;
+        Ok(self.inner.replay_forward(Some(until)).into())
+    }
+
+    pub fn replay_backward_steps(&mut self, steps: u64) -> Result<ReplayResult> {
+        let until = self.inner.get_position() + steps;
+        Ok(self.inner.replay_backward(Some(until)).into())
+    }
+
+    pub fn set_position(&mut self, pos: &ReplayPosition) {
+        self.inner.set_position(pos)
+    }
+
+    pub fn get_position(&self) -> Result<ReplayPosition> {
+        Ok(self.inner.get_position())
+    }
+
+    pub fn get_previous_position(&mut self) -> Result<ReplayPosition> {
+        Ok(self.inner.get_previous_position())
+    }
+
+    pub fn get_thread_info(&self) -> Result<&ThreadInfo> {
+        Ok(self.inner.get_thread_info())
+    }
+
+    pub fn get_teb_address(&self) -> Result<u64> {
+        Ok(self.inner.get_teb_address())
+    }
+
+    pub fn get_program_counter(&self) -> Result<u64> {
+        Ok(self.inner.get_program_counter())
+    }
+
+    pub fn get_stack_pointer(&self) -> Result<u64> {
+        Ok(self.inner.get_stack_pointer())
+    }
+
+    pub fn get_frame_pointer(&self) -> Result<u64> {
+        Ok(self.inner.get_frame_pointer())
+    }
+
+    pub fn get_thread_context(&self) -> Result<RegisterContext<'_>> {
+        self.inner.get_thread_context()
+    }
+
+    pub fn pointer_size(&self) -> Result<usize> {
+        match self.get_thread_context()? {
+            sys::RegisterContext::X64(_) => Ok(8),
+            sys::RegisterContext::X86(_) => Ok(4),
+        }
+    }
+
+    pub fn get_thread_extended_context(&self) {
+        unimplemented!()
+    }
+
+    pub fn read_current_memory(&self, address: u64, size: usize) -> Result<Vec<u8>> {
+        self.inner.read_current_memory(address, size)
+    }
+
+    pub fn get_replay_flags(&self) -> Result<ReplayFlags> {
+        Ok(self.inner.get_replay_flags())
+    }
+
+    pub fn set_replay_flags(&mut self, flags: ReplayFlags) -> Result<()> {
+        self.inner.set_replay_flags(flags);
+        Ok(())
+    }
+
+    pub fn add_memory_watchpoint(&mut self, watch_point: &MemoryWatchpointData) -> Result<bool> {
+        Ok(self.inner.add_memory_watchpoint(watch_point))
+    }
+
+    pub fn remove_memory_watchpoint(&mut self, watch_point: &MemoryWatchpointData) -> Result<bool> {
+        Ok(self.inner.remove_memory_watchpoint(watch_point))
+    }
+
+    pub fn add_position_watchpoint(&mut self, watch_point: &PositionWatchpointData) -> Result<bool> {
+        Ok(self.inner.add_position_watchpoint(watch_point))
+    }
+
+    pub fn remove_position_watchpoint(&mut self, watch_point: &PositionWatchpointData) -> Result<bool> {
+        Ok(self.inner.remove_position_watchpoint(watch_point))
+    }
+
+    pub fn set_replay_progress_callback(&mut self, cb: ReplayProgressCallback) {
+        let ptr = cb as *mut sys::ReplayProgressCallbackUnsafe;
+        self.inner.set_replay_progress_callback(unsafe { *ptr });
+    }
+
+    pub fn set_register_changed_callback(&mut self, cb: RegisterChangedCallback) {
+        let ptr = cb as *mut sys::RegisterChangedCallbackUnsafe;
+        self.inner.set_register_changed_callback(unsafe { *ptr });
+    }
+}
+
+// #[derive(Default, Debug)]
+pub struct ReplayEngine {
+    inner: crate::replay::sys::ReplayEngine,
+}
 
 impl ReplayEngine {
     pub fn new() -> Result<Self> {
-        if sys::initialize() != 0 {
-            return Err(Error::InitializationError);
-        }
-
-        Ok(Self {})
+        Ok(Self {
+            inner: crate::replay::sys::ReplayEngine::new()?,
+        })
     }
 
     pub fn load(&self, trace_path: &std::path::Path) -> Result<()> {
@@ -283,177 +403,83 @@ impl ReplayEngine {
         }
 
         let c_str = CString::from_str(trace_path.to_str().ok_or(Error::ConversionError)?)?;
-        match sys::load(c_str.to_str()?) {
+        match self.inner.load(c_str.to_str()?) {
             0 => Ok(()),
             _ => Err(Error::InitializationError),
         }
     }
 
-    pub fn build_index(&self) -> Result<u32> {
-        Ok(sys::build_index())
+    pub fn index(&self) -> i32 {
+        self.inner.index()
     }
 
-    pub fn system_info(&self) -> Result<SystemInfo> {
-        Ok(sys::system_info())
+    pub fn cursor(&'_ self) -> Result<ReplayCursor<'_>> {
+        Ok(ReplayCursor { inner: self.inner.cursor()? })
+    }
+
+    pub fn build_index(&self) -> Result<u32> {
+        Ok(self.inner.build_index())
+    }
+
+    pub fn system_info(&self) -> Result<&SystemInfo> {
+        Ok(self.inner.system_info())
     }
 
     pub fn process_id(&self) -> Result<u32> {
-        Ok(sys::system_info().ProcessId)
-    }
-
-    pub fn replay_forward(&self, until: Option<ReplayPosition>) -> Result<ReplayResult> {
-        Ok(sys::replay_forward(until).into())
-    }
-
-    pub fn replay_backward(&self, until: Option<ReplayPosition>) -> Result<ReplayResult> {
-        Ok(sys::replay_backward(until).into())
-    }
-
-    pub fn replay_forward_steps(&self, steps: u64) -> Result<ReplayResult> {
-        let until = self.get_position()? + steps;
-        Ok(sys::replay_forward(Some(until)).into())
-    }
-
-    pub fn replay_backward_steps(&self, steps: u64) -> Result<ReplayResult> {
-        let until = self.get_position()? + steps;
-        Ok(sys::replay_backward(Some(until)).into())
-    }
-
-    pub fn set_replay_progress_callback(&self, cb: ReplayProgressCallback) {
-        let ptr = cb as *mut sys::ReplayProgressCallbackUnsafe;
-        sys::set_replay_progress_callback(unsafe { *ptr });
-    }
-
-    pub fn set_register_changed_callback(&self, cb: RegisterChangedCallback) {
-        let ptr = cb as *mut sys::RegisterChangedCallbackUnsafe;
-        sys::set_register_changed_callback(unsafe { *ptr });
-    }
-
-    pub fn set_position(&self, pos: &ReplayPosition) {
-        sys::set_position(pos);
-    }
-
-    pub fn get_position(&self) -> Result<ReplayPosition> {
-        Ok(sys::get_position())
-    }
-
-    pub fn pointer_size(&self) -> Result<usize> {
-        match sys::get_thread_context()? {
-            sys::RegisterContext::X64(amd64_context) => Ok(8),
-            sys::RegisterContext::X86(x86_nt5_context) => Ok(4),
-        }
-    }
-
-    pub fn get_thread_context(&self) -> Result<RegisterContext> {
-        sys::get_thread_context()
-    }
-
-    pub fn get_thread_extended_context(&self) {}
-
-    pub fn read_current_memory(&self, address: u64, size: usize) -> Result<Vec<u8>> {
-        sys::read_current_memory(address, size)
-    }
-
-    pub fn get_thread_info(&self) -> Result<ThreadInfo> {
-        Ok(sys::get_thread_info())
-    }
-
-    pub fn get_previous_position(&self) -> Result<ReplayPosition> {
-        Ok(sys::get_previous_position())
-    }
-
-    pub fn get_teb_address(&self) -> Result<u64> {
-        Ok(sys::get_teb_address())
-    }
-
-    pub fn get_program_counter(&self) -> Result<u64> {
-        Ok(sys::get_program_counter())
-    }
-
-    pub fn get_stack_pointer(&self) -> Result<u64> {
-        Ok(sys::get_stack_pointer())
-    }
-
-    pub fn get_frame_pointer(&self) -> Result<u64> {
-        Ok(sys::get_frame_pointer())
-    }
-
-    pub fn get_replay_flags(&self) -> Result<ReplayFlags> {
-        Ok(sys::get_replay_flags())
-    }
-
-    pub fn set_replay_flags(&self, flags: ReplayFlags) -> Result<()> {
-        sys::set_replay_flags(flags);
-        Ok(())
-    }
-
-    pub fn add_memory_watchpoint(&self, watch_point: &MemoryWatchpointData) -> Result<bool> {
-        Ok(sys::add_memory_watchpoint(watch_point))
-    }
-
-    pub fn remove_memory_watchpoint(&self, watch_point: &MemoryWatchpointData) -> Result<bool> {
-        Ok(sys::remove_memory_watchpoint(watch_point))
-    }
-
-    pub fn add_position_watchpoint(&self, watch_point: &PositionWatchpointData) -> Result<bool> {
-        Ok(sys::add_position_watchpoint(watch_point))
-    }
-
-    pub fn remove_position_watchpoint(&self, watch_point: &PositionWatchpointData) -> Result<bool> {
-        Ok(sys::remove_position_watchpoint(watch_point))
+        Ok(self.system_info()?.ProcessId)
     }
 
     pub fn get_module_count(&self) -> Result<usize> {
-        Ok(sys::get_module_count())
+        Ok(self.inner.get_module_count())
     }
 
     pub fn get_module_list(&self) -> Result<Vec<ReplayModule>> {
         let mut res = Vec::<ReplayModule>::with_capacity(self.get_module_count()?);
-        for module in sys::get_module_list().iter() {
+        for module in self.inner.get_module_list().iter() {
             res.push(module.try_into()?);
         }
         Ok(res)
     }
 
     pub fn get_thread_count(&self) -> Result<usize> {
-        Ok(sys::get_thread_count())
+        Ok(self.inner.get_thread_count())
     }
 
     pub fn get_thread_list(&self) -> Result<Vec<ThreadInfo>> {
-        Ok(sys::get_thread_list())
+        Ok(self.inner.get_thread_list())
     }
 
     pub fn get_module_loaded_event_count(&self) -> Result<usize> {
-        Ok(sys::get_module_loaded_event_count())
+        Ok(self.inner.get_module_loaded_event_count())
     }
 
     pub fn get_module_loaded_event_list(&self) -> Result<Vec<events::ModuleLoaded>> {
         let mut res = Vec::<events::ModuleLoaded>::with_capacity(self.get_module_loaded_event_count()?);
-        for module in sys::get_module_loaded_event_list().iter() {
+        for module in self.inner.get_module_loaded_event_list().iter() {
             res.push(module.try_into()?);
         }
         Ok(res)
     }
 
     pub fn get_module_unloaded_event_count(&self) -> Result<usize> {
-        Ok(sys::get_module_unloaded_event_count())
+        Ok(self.inner.get_module_unloaded_event_count())
     }
 
     pub fn get_module_unloaded_event_list(&self) -> Result<Vec<events::ModuleUnloaded>> {
         let mut res = Vec::<events::ModuleUnloaded>::with_capacity(self.get_module_unloaded_event_count()?);
-        for module in sys::get_module_unloaded_event_list().iter() {
+        for module in self.inner.get_module_unloaded_event_list().iter() {
             res.push(module.try_into()?);
         }
         Ok(res)
     }
 
     pub fn get_exception_event_count(&self) -> Result<usize> {
-        Ok(sys::get_exception_event_count())
+        Ok(self.inner.get_exception_event_count())
     }
 
     pub fn get_exception_event_list(&self) -> Result<Vec<events::Exception>> {
         let mut res = Vec::<events::Exception>::with_capacity(self.get_exception_event_count()?);
-        for module in sys::get_exception_event_list().iter() {
+        for module in self.inner.get_exception_event_list().iter() {
             res.push(module.try_into()?);
         }
         Ok(res)
@@ -470,18 +496,11 @@ impl ReplayEngine {
         Ok(matches.first().ok_or(Error::NotFound)?.module.address)
     }
 }
-
-impl Drop for ReplayEngine {
-    fn drop(&mut self) {
-        let _ = sys::reset();
-    }
-}
-
 // endregion: TTD Replay
 
 #[cfg(test)]
 mod test {
-    use crate::replay::{EngineInfo, ReplayEngine};
+    use crate::replay::{EngineInfo, ReplayCursor, ReplayEngine};
 
     #[test]
     fn test_ffi_version() {
@@ -494,15 +513,32 @@ mod test {
     }
 
     #[test]
-    fn test_ffi_replay_basic() {
-        let replay = ReplayEngine::new().expect("failed to create a new replay");
-        assert!(replay.process_id().is_ok());
+    fn test_ffi_load_simple() {
+        let replay = ReplayEngine::new().expect("failed to create a new replayer");
+        assert!(replay.inner.index() >= 0);
 
         let trace_path = std::path::Path::new("c:\\users\\chris\\documents\\notepad03.run");
         assert!(replay.load(trace_path).is_ok());
 
-        let info = replay.system_info().expect("system_info() failed");
+        for i in 1..10 {
+            let mut cursor = replay.cursor().unwrap();
+            let cursor_idx = cursor.index();
+            assert_eq!(cursor_idx, 0);
+            cursor.replay_forward(None).unwrap();
+            cursor.replay_backward(None).unwrap();
+            assert_eq!(cursor_idx, cursor.index());
+        }
+    }
 
+    #[test]
+    fn test_ffi_system_info() {
+        let engine = ReplayEngine::new().expect("failed to create a new replayer");
+        assert_eq!(engine.index(), 0);
+
+        let trace_path = std::path::Path::new("c:\\users\\chris\\documents\\notepad03.run");
+        assert!(engine.load(trace_path).is_ok());
+
+        let info = engine.system_info().unwrap();
         assert_ne!(info.SystemName.len(), 0);
         assert_ne!(info.UserName.len(), 0);
         assert_ne!(info.UserName.len(), 0);

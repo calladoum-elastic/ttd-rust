@@ -43,181 +43,148 @@ pub mod root {
         pub mod Replay {
             #[allow(unused_imports)]
             use self::super::super::super::root;
+            #[repr(C)]
+            #[derive(Debug, Default)]
+            pub struct ReplayCursor {
+                pub m_Index: root::i32_,
+                pub m_EngineIndex: root::i32_,
+            }
+            #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+            const _: () = {
+                ["Size of ReplayCursor"][::std::mem::size_of::<ReplayCursor>() - 8usize];
+                ["Alignment of ReplayCursor"][::std::mem::align_of::<ReplayCursor>() - 4usize];
+                ["Offset of field: ReplayCursor::m_Index"][::std::mem::offset_of!(ReplayCursor, m_Index) - 0usize];
+                ["Offset of field: ReplayCursor::m_EngineIndex"][::std::mem::offset_of!(ReplayCursor, m_EngineIndex) - 4usize];
+            };
             unsafe extern "C" {
-                #[doc = " Initialize the engine"]
-                #[link_name = "\u{1}?Initialize@Replay@TTD_FFI@@YAHXZ"]
-                pub fn Initialize() -> root::i32_;
+                #[doc = " Initialize the cursor with a specific engine"]
+                #[link_name = "\u{1}?Initialize@ReplayCursor@Replay@TTD_FFI@@QEAAHH@Z"]
+                pub fn ReplayCursor_Initialize(this: *mut root::TTD_FFI::Replay::ReplayCursor, arg1: root::i32_) -> root::i32_;
             }
             unsafe extern "C" {
-                #[doc = " Load trace and allocate cursor"]
-                #[link_name = "\u{1}?Load@Replay@TTD_FFI@@YAHPEBE@Z"]
-                pub fn Load(trace: *const root::u8_) -> root::i32_;
+                #[doc = " Unload the cursor"]
+                #[link_name = "\u{1}?Reset@ReplayCursor@Replay@TTD_FFI@@QEAAHXZ"]
+                pub fn ReplayCursor_Reset(this: *mut root::TTD_FFI::Replay::ReplayCursor) -> root::i32_;
             }
             unsafe extern "C" {
-                #[doc = " Unload the engine"]
-                #[link_name = "\u{1}?Reset@Replay@TTD_FFI@@YAHXZ"]
-                pub fn Reset() -> root::i32_;
+                #[link_name = "\u{1}?ReplayForward@ReplayCursor@Replay@TTD_FFI@@QEAA?AUReplayResult@ICursorView@2TTD@@AEBUPosition@26@@Z"]
+                pub fn ReplayCursor_ReplayForward(
+                    this: *mut root::TTD_FFI::Replay::ReplayCursor,
+                    limit: *const root::TTD::Replay::Position,
+                ) -> root::TTD::Replay::ICursorView_ReplayResult;
             }
             unsafe extern "C" {
-                #[doc = " Get system info from the replay engine"]
-                #[link_name = "\u{1}?GetSystemInfo@Replay@TTD_FFI@@YA?AUSystemInfo@TTD@@XZ"]
-                pub fn GetSystemInfo() -> root::TTD::SystemInfo;
+                #[link_name = "\u{1}?ReplayBackward@ReplayCursor@Replay@TTD_FFI@@QEAA?AUReplayResult@ICursorView@2TTD@@UPosition@26@@Z"]
+                pub fn ReplayCursor_ReplayBackward(
+                    this: *mut root::TTD_FFI::Replay::ReplayCursor,
+                    limit: root::TTD::Replay::Position,
+                ) -> root::TTD::Replay::ICursorView_ReplayResult;
             }
             unsafe extern "C" {
-                #[doc = " Build a trace index, to boost search speed"]
-                #[link_name = "\u{1}?BuildIndex@Replay@TTD_FFI@@YAIXZ"]
-                pub fn BuildIndex() -> root::u32_;
+                #[link_name = "\u{1}?SetPosition@ReplayCursor@Replay@TTD_FFI@@QEAAXAEBUPosition@2TTD@@@Z"]
+                pub fn ReplayCursor_SetPosition(this: *mut root::TTD_FFI::Replay::ReplayCursor, pos: *const root::TTD::Replay::Position);
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?ReplayForward@Replay@TTD_FFI@@YA?AUReplayResult@ICursorView@1TTD@@XZ"]
-                pub fn ReplayForward() -> root::TTD::Replay::ICursorView_ReplayResult;
+                #[link_name = "\u{1}?GetPosition@ReplayCursor@Replay@TTD_FFI@@QEBA?AUPosition@2TTD@@XZ"]
+                pub fn ReplayCursor_GetPosition(this: *const root::TTD_FFI::Replay::ReplayCursor) -> root::TTD::Replay::Position;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?ReplayForward@Replay@TTD_FFI@@YA?AUReplayResult@ICursorView@1TTD@@UPosition@15@@Z"]
-                pub fn ReplayForward1(limit: root::TTD::Replay::Position) -> root::TTD::Replay::ICursorView_ReplayResult;
+                #[link_name = "\u{1}?GetPreviousPosition@ReplayCursor@Replay@TTD_FFI@@QEBA?AUPosition@2TTD@@XZ"]
+                pub fn ReplayCursor_GetPreviousPosition(this: *const root::TTD_FFI::Replay::ReplayCursor) -> root::TTD::Replay::Position;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?ReplayBackward@Replay@TTD_FFI@@YA?AUReplayResult@ICursorView@1TTD@@XZ"]
-                pub fn ReplayBackward() -> root::TTD::Replay::ICursorView_ReplayResult;
+                #[link_name = "\u{1}?GetThreadInfo@ReplayCursor@Replay@TTD_FFI@@QEBAAEBUThreadInfo@2TTD@@XZ"]
+                pub fn ReplayCursor_GetThreadInfo(this: *const root::TTD_FFI::Replay::ReplayCursor) -> *const root::TTD::Replay::ThreadInfo;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?ReplayBackward@Replay@TTD_FFI@@YA?AUReplayResult@ICursorView@1TTD@@UPosition@15@@Z"]
-                pub fn ReplayBackward1(limit: root::TTD::Replay::Position) -> root::TTD::Replay::ICursorView_ReplayResult;
+                #[link_name = "\u{1}?GetTebAddress@ReplayCursor@Replay@TTD_FFI@@QEBA_KXZ"]
+                pub fn ReplayCursor_GetTebAddress(this: *const root::TTD_FFI::Replay::ReplayCursor) -> root::u64_;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?SetPosition@Replay@TTD_FFI@@YAXAEBUPosition@1TTD@@@Z"]
-                pub fn SetPosition(pos: *const root::TTD::Replay::Position);
+                #[link_name = "\u{1}?GetProgramCounter@ReplayCursor@Replay@TTD_FFI@@QEBA_KXZ"]
+                pub fn ReplayCursor_GetProgramCounter(this: *const root::TTD_FFI::Replay::ReplayCursor) -> root::u64_;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?GetPosition@Replay@TTD_FFI@@YA?AUPosition@1TTD@@XZ"]
-                pub fn GetPosition() -> root::TTD::Replay::Position;
+                #[link_name = "\u{1}?GetStackPointer@ReplayCursor@Replay@TTD_FFI@@QEBA_KXZ"]
+                pub fn ReplayCursor_GetStackPointer(this: *const root::TTD_FFI::Replay::ReplayCursor) -> root::u64_;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?QueryMemoryBuffer@Replay@TTD_FFI@@YAH_KPEAE0@Z"]
-                pub fn QueryMemoryBuffer(address: root::u64_, buf: *mut root::u8_, bufsz: root::usize_) -> root::i32_;
+                #[link_name = "\u{1}?GetFramePointer@ReplayCursor@Replay@TTD_FFI@@QEBA_KXZ"]
+                pub fn ReplayCursor_GetFramePointer(this: *const root::TTD_FFI::Replay::ReplayCursor) -> root::u64_;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?GetThreadInfo@Replay@TTD_FFI@@YAAEBUThreadInfo@1TTD@@XZ"]
-                pub fn GetThreadInfo() -> *const root::TTD::Replay::ThreadInfo;
+                #[link_name = "\u{1}?GetX86RegisterContext@ReplayCursor@Replay@TTD_FFI@@QEBAPEAUX86_NT5_CONTEXT@@XZ"]
+                pub fn ReplayCursor_GetX86RegisterContext(this: *const root::TTD_FFI::Replay::ReplayCursor) -> *mut root::X86_NT5_CONTEXT;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?GetPreviousPosition@Replay@TTD_FFI@@YA?AUPosition@1TTD@@XZ"]
-                pub fn GetPreviousPosition() -> root::TTD::Replay::Position;
+                #[link_name = "\u{1}?GetX86ExtendedRegisterContext@ReplayCursor@Replay@TTD_FFI@@QEBAPEAU_AVX_EXTENDED_CONTEXT@@XZ"]
+                pub fn ReplayCursor_GetX86ExtendedRegisterContext(this: *const root::TTD_FFI::Replay::ReplayCursor) -> *mut root::AVX_EXTENDED_CONTEXT;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?GetTebAddress@Replay@TTD_FFI@@YA_KXZ"]
-                pub fn GetTebAddress() -> root::u64_;
+                #[link_name = "\u{1}?GetX64RegisterContext@ReplayCursor@Replay@TTD_FFI@@QEBAPEAUAMD64_CONTEXT@@XZ"]
+                pub fn ReplayCursor_GetX64RegisterContext(this: *const root::TTD_FFI::Replay::ReplayCursor) -> *mut root::AMD64_CONTEXT;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?GetProgramCounter@Replay@TTD_FFI@@YA_KXZ"]
-                pub fn GetProgramCounter() -> root::u64_;
+                #[link_name = "\u{1}?GetX64ExtendedRegisterContext@ReplayCursor@Replay@TTD_FFI@@QEBAPEAU_AVX_EXTENDED_CONTEXT@@XZ"]
+                pub fn ReplayCursor_GetX64ExtendedRegisterContext(this: *const root::TTD_FFI::Replay::ReplayCursor) -> *mut root::AVX_EXTENDED_CONTEXT;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?GetStackPointer@Replay@TTD_FFI@@YA_KXZ"]
-                pub fn GetStackPointer() -> root::u64_;
+                #[link_name = "\u{1}?SetReplayFlags@ReplayCursor@Replay@TTD_FFI@@QEAAXW4ReplayFlags@2TTD@@@Z"]
+                pub fn ReplayCursor_SetReplayFlags(this: *mut root::TTD_FFI::Replay::ReplayCursor, flags: root::TTD::Replay::ReplayFlags);
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?GetFramePointer@Replay@TTD_FFI@@YA_KXZ"]
-                pub fn GetFramePointer() -> root::u64_;
+                #[link_name = "\u{1}?GetReplayFlags@ReplayCursor@Replay@TTD_FFI@@QEBA?AW4ReplayFlags@2TTD@@XZ"]
+                pub fn ReplayCursor_GetReplayFlags(this: *const root::TTD_FFI::Replay::ReplayCursor) -> root::TTD::Replay::ReplayFlags;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?GetX86RegisterContext@Replay@TTD_FFI@@YA?AUX86_NT5_CONTEXT@@XZ"]
-                pub fn GetX86RegisterContext() -> root::X86_NT5_CONTEXT;
+                #[link_name = "\u{1}?QueryMemoryBuffer@ReplayCursor@Replay@TTD_FFI@@QEBAH_KPEAE0@Z"]
+                pub fn ReplayCursor_QueryMemoryBuffer(
+                    this: *const root::TTD_FFI::Replay::ReplayCursor,
+                    address: root::u64_,
+                    buf: *mut root::u8_,
+                    bufsz: root::usize_,
+                ) -> root::i32_;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?GetX86ExtendedRegisterContext@Replay@TTD_FFI@@YA?AU_AVX_EXTENDED_CONTEXT@@XZ"]
-                pub fn GetX86ExtendedRegisterContext() -> root::AVX_EXTENDED_CONTEXT;
+                #[link_name = "\u{1}?AddMemoryWatchpoint@ReplayCursor@Replay@TTD_FFI@@QEAA_NAEBUMemoryWatchpointData@2TTD@@@Z"]
+                pub fn ReplayCursor_AddMemoryWatchpoint(
+                    this: *mut root::TTD_FFI::Replay::ReplayCursor,
+                    arg1: *const root::TTD::Replay::MemoryWatchpointData,
+                ) -> bool;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?GetX64RegisterContext@Replay@TTD_FFI@@YA?AUAMD64_CONTEXT@@XZ"]
-                pub fn GetX64RegisterContext() -> root::AMD64_CONTEXT;
+                #[link_name = "\u{1}?RemoveMemoryWatchpoint@ReplayCursor@Replay@TTD_FFI@@QEAA_NAEBUMemoryWatchpointData@2TTD@@@Z"]
+                pub fn ReplayCursor_RemoveMemoryWatchpoint(
+                    this: *mut root::TTD_FFI::Replay::ReplayCursor,
+                    arg1: *const root::TTD::Replay::MemoryWatchpointData,
+                ) -> bool;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?GetX64ExtendedRegisterContext@Replay@TTD_FFI@@YA?AU_AVX_EXTENDED_CONTEXT@@XZ"]
-                pub fn GetX64ExtendedRegisterContext() -> root::AVX_EXTENDED_CONTEXT;
+                #[link_name = "\u{1}?AddPositionWatchpoint@ReplayCursor@Replay@TTD_FFI@@QEAA_NAEBUPositionWatchpointData@2TTD@@@Z"]
+                pub fn ReplayCursor_AddPositionWatchpoint(
+                    this: *mut root::TTD_FFI::Replay::ReplayCursor,
+                    arg1: *const root::TTD::Replay::PositionWatchpointData,
+                ) -> bool;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?SetReplayFlags@Replay@TTD_FFI@@YAXW4ReplayFlags@1TTD@@@Z"]
-                pub fn SetReplayFlags(flags: root::TTD::Replay::ReplayFlags);
+                #[link_name = "\u{1}?RemovePositionWatchpoint@ReplayCursor@Replay@TTD_FFI@@QEAA_NAEBUPositionWatchpointData@2TTD@@@Z"]
+                pub fn ReplayCursor_RemovePositionWatchpoint(
+                    this: *mut root::TTD_FFI::Replay::ReplayCursor,
+                    arg1: *const root::TTD::Replay::PositionWatchpointData,
+                ) -> bool;
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?GetReplayFlags@Replay@TTD_FFI@@YA?AW4ReplayFlags@1TTD@@XZ"]
-                pub fn GetReplayFlags() -> root::TTD::Replay::ReplayFlags;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?AddMemoryWatchpoint@Replay@TTD_FFI@@YA_NAEBUMemoryWatchpointData@1TTD@@@Z"]
-                pub fn AddMemoryWatchpoint(arg1: *const root::TTD::Replay::MemoryWatchpointData) -> bool;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?RemoveMemoryWatchpoint@Replay@TTD_FFI@@YA_NAEBUMemoryWatchpointData@1TTD@@@Z"]
-                pub fn RemoveMemoryWatchpoint(arg1: *const root::TTD::Replay::MemoryWatchpointData) -> bool;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?AddPositionWatchpoint@Replay@TTD_FFI@@YA_NAEBUPositionWatchpointData@1TTD@@@Z"]
-                pub fn AddPositionWatchpoint(arg1: *const root::TTD::Replay::PositionWatchpointData) -> bool;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?RemovePositionWatchpoint@Replay@TTD_FFI@@YA_NAEBUPositionWatchpointData@1TTD@@@Z"]
-                pub fn RemovePositionWatchpoint(arg1: *const root::TTD::Replay::PositionWatchpointData) -> bool;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?GetModuleCount@Replay@TTD_FFI@@YA_KXZ"]
-                pub fn GetModuleCount() -> usize;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?GetModuleList@Replay@TTD_FFI@@YAPEBUModule@1TTD@@XZ"]
-                pub fn GetModuleList() -> *const root::TTD::Replay::Module;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?GetModuleInstanceCount@Replay@TTD_FFI@@YA_KXZ"]
-                pub fn GetModuleInstanceCount() -> usize;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?GetModuleInstanceList@Replay@TTD_FFI@@YAPEBUModuleInstance@1TTD@@XZ"]
-                pub fn GetModuleInstanceList() -> *const root::TTD::Replay::ModuleInstance;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?GetThreadCount@Replay@TTD_FFI@@YA_KXZ"]
-                pub fn GetThreadCount() -> usize;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?GetThreadList@Replay@TTD_FFI@@YAPEBUThreadInfo@1TTD@@XZ"]
-                pub fn GetThreadList() -> *const root::TTD::Replay::ThreadInfo;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?GetModuleLoadedEventCount@Replay@TTD_FFI@@YA_KXZ"]
-                pub fn GetModuleLoadedEventCount() -> usize;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?GetModuleLoadedEventList@Replay@TTD_FFI@@YAPEBUModuleLoadedEvent@1TTD@@XZ"]
-                pub fn GetModuleLoadedEventList() -> *const root::TTD::Replay::ModuleLoadedEvent;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?GetModuleUnloadedEventCount@Replay@TTD_FFI@@YA_KXZ"]
-                pub fn GetModuleUnloadedEventCount() -> usize;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?GetModuleUnloadedEventList@Replay@TTD_FFI@@YAPEBUModuleUnloadedEvent@1TTD@@XZ"]
-                pub fn GetModuleUnloadedEventList() -> *const root::TTD::Replay::ModuleUnloadedEvent;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?GetExceptionEventCount@Replay@TTD_FFI@@YA_KXZ"]
-                pub fn GetExceptionEventCount() -> usize;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?GetExceptionEventList@Replay@TTD_FFI@@YAPEBUExceptionEvent@1TTD@@XZ"]
-                pub fn GetExceptionEventList() -> *const root::TTD::Replay::ExceptionEvent;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}?SetReplayProgressCallback@Replay@TTD_FFI@@YAXP6AX_KAEBUPosition@1TTD@@@Z0@Z"]
-                pub fn SetReplayProgressCallback(
+                #[link_name = "\u{1}?SetReplayProgressCallback@ReplayCursor@Replay@TTD_FFI@@QEAAXP6AX_KAEBUPosition@2TTD@@@Z0@Z"]
+                pub fn ReplayCursor_SetReplayProgressCallback(
+                    this: *mut root::TTD_FFI::Replay::ReplayCursor,
                     cb: ::std::option::Option<unsafe extern "C" fn(arg1: usize, arg2: *const root::TTD::Replay::Position)>,
                     context: root::uptr,
                 );
             }
             unsafe extern "C" {
-                #[link_name = "\u{1}?SetRegisterChangedCallback@Replay@TTD_FFI@@YAXP6AX_KEPEBX10PEBVIThreadView@1TTD@@@Z0@Z"]
-                pub fn SetRegisterChangedCallback(
+                #[link_name = "\u{1}?SetRegisterChangedCallback@ReplayCursor@Replay@TTD_FFI@@QEAAXP6AX_KEPEBX10PEBVIThreadView@2TTD@@@Z0@Z"]
+                pub fn ReplayCursor_SetRegisterChangedCallback(
+                    this: *mut root::TTD_FFI::Replay::ReplayCursor,
                     arg1: ::std::option::Option<
                         unsafe extern "C" fn(
                             arg1: usize,
@@ -230,6 +197,317 @@ pub mod root {
                     >,
                     context: root::uptr,
                 );
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}??0ReplayCursor@Replay@TTD_FFI@@QEAA@XZ"]
+                pub fn ReplayCursor_ReplayCursor(this: *mut root::TTD_FFI::Replay::ReplayCursor);
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}??1ReplayCursor@Replay@TTD_FFI@@QEAA@XZ"]
+                pub fn ReplayCursor_ReplayCursor_destructor(this: *mut root::TTD_FFI::Replay::ReplayCursor);
+            }
+            impl ReplayCursor {
+                #[inline]
+                pub unsafe fn Initialize(&mut self, arg1: root::i32_) -> root::i32_ {
+                    ReplayCursor_Initialize(self, arg1)
+                }
+                #[inline]
+                pub unsafe fn Reset(&mut self) -> root::i32_ {
+                    ReplayCursor_Reset(self)
+                }
+                #[inline]
+                pub unsafe fn ReplayForward(&mut self, limit: *const root::TTD::Replay::Position) -> root::TTD::Replay::ICursorView_ReplayResult {
+                    ReplayCursor_ReplayForward(self, limit)
+                }
+                #[inline]
+                pub unsafe fn ReplayBackward(&mut self, limit: root::TTD::Replay::Position) -> root::TTD::Replay::ICursorView_ReplayResult {
+                    ReplayCursor_ReplayBackward(self, limit)
+                }
+                #[inline]
+                pub unsafe fn SetPosition(&mut self, pos: *const root::TTD::Replay::Position) {
+                    ReplayCursor_SetPosition(self, pos)
+                }
+                #[inline]
+                pub unsafe fn GetPosition(&self) -> root::TTD::Replay::Position {
+                    ReplayCursor_GetPosition(self)
+                }
+                #[inline]
+                pub unsafe fn GetPreviousPosition(&self) -> root::TTD::Replay::Position {
+                    ReplayCursor_GetPreviousPosition(self)
+                }
+                #[inline]
+                pub unsafe fn GetThreadInfo(&self) -> *const root::TTD::Replay::ThreadInfo {
+                    ReplayCursor_GetThreadInfo(self)
+                }
+                #[inline]
+                pub unsafe fn GetTebAddress(&self) -> root::u64_ {
+                    ReplayCursor_GetTebAddress(self)
+                }
+                #[inline]
+                pub unsafe fn GetProgramCounter(&self) -> root::u64_ {
+                    ReplayCursor_GetProgramCounter(self)
+                }
+                #[inline]
+                pub unsafe fn GetStackPointer(&self) -> root::u64_ {
+                    ReplayCursor_GetStackPointer(self)
+                }
+                #[inline]
+                pub unsafe fn GetFramePointer(&self) -> root::u64_ {
+                    ReplayCursor_GetFramePointer(self)
+                }
+                #[inline]
+                pub unsafe fn GetX86RegisterContext(&self) -> *mut root::X86_NT5_CONTEXT {
+                    ReplayCursor_GetX86RegisterContext(self)
+                }
+                #[inline]
+                pub unsafe fn GetX86ExtendedRegisterContext(&self) -> *mut root::AVX_EXTENDED_CONTEXT {
+                    ReplayCursor_GetX86ExtendedRegisterContext(self)
+                }
+                #[inline]
+                pub unsafe fn GetX64RegisterContext(&self) -> *mut root::AMD64_CONTEXT {
+                    ReplayCursor_GetX64RegisterContext(self)
+                }
+                #[inline]
+                pub unsafe fn GetX64ExtendedRegisterContext(&self) -> *mut root::AVX_EXTENDED_CONTEXT {
+                    ReplayCursor_GetX64ExtendedRegisterContext(self)
+                }
+                #[inline]
+                pub unsafe fn SetReplayFlags(&mut self, flags: root::TTD::Replay::ReplayFlags) {
+                    ReplayCursor_SetReplayFlags(self, flags)
+                }
+                #[inline]
+                pub unsafe fn GetReplayFlags(&self) -> root::TTD::Replay::ReplayFlags {
+                    ReplayCursor_GetReplayFlags(self)
+                }
+                #[inline]
+                pub unsafe fn QueryMemoryBuffer(&self, address: root::u64_, buf: *mut root::u8_, bufsz: root::usize_) -> root::i32_ {
+                    ReplayCursor_QueryMemoryBuffer(self, address, buf, bufsz)
+                }
+                #[inline]
+                pub unsafe fn AddMemoryWatchpoint(&mut self, arg1: *const root::TTD::Replay::MemoryWatchpointData) -> bool {
+                    ReplayCursor_AddMemoryWatchpoint(self, arg1)
+                }
+                #[inline]
+                pub unsafe fn RemoveMemoryWatchpoint(&mut self, arg1: *const root::TTD::Replay::MemoryWatchpointData) -> bool {
+                    ReplayCursor_RemoveMemoryWatchpoint(self, arg1)
+                }
+                #[inline]
+                pub unsafe fn AddPositionWatchpoint(&mut self, arg1: *const root::TTD::Replay::PositionWatchpointData) -> bool {
+                    ReplayCursor_AddPositionWatchpoint(self, arg1)
+                }
+                #[inline]
+                pub unsafe fn RemovePositionWatchpoint(&mut self, arg1: *const root::TTD::Replay::PositionWatchpointData) -> bool {
+                    ReplayCursor_RemovePositionWatchpoint(self, arg1)
+                }
+                #[inline]
+                pub unsafe fn SetReplayProgressCallback(
+                    &mut self,
+                    cb: ::std::option::Option<unsafe extern "C" fn(arg1: usize, arg2: *const root::TTD::Replay::Position)>,
+                    context: root::uptr,
+                ) {
+                    ReplayCursor_SetReplayProgressCallback(self, cb, context)
+                }
+                #[inline]
+                pub unsafe fn SetRegisterChangedCallback(
+                    &mut self,
+                    arg1: ::std::option::Option<
+                        unsafe extern "C" fn(
+                            arg1: usize,
+                            arg2: u8,
+                            arg3: *const ::std::os::raw::c_void,
+                            arg4: *const ::std::os::raw::c_void,
+                            arg5: usize,
+                            arg6: *const root::TTD::Replay::IThreadView,
+                        ),
+                    >,
+                    context: root::uptr,
+                ) {
+                    ReplayCursor_SetRegisterChangedCallback(self, arg1, context)
+                }
+                #[inline]
+                pub unsafe fn new() -> Self {
+                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
+                    ReplayCursor_ReplayCursor(__bindgen_tmp.as_mut_ptr());
+                    __bindgen_tmp.assume_init()
+                }
+                #[inline]
+                pub unsafe fn destruct(&mut self) {
+                    ReplayCursor_ReplayCursor_destructor(self)
+                }
+            }
+            #[repr(C)]
+            #[derive(Debug, Default)]
+            pub struct ReplayEngine {
+                pub m_Index: root::i32_,
+            }
+            #[allow(clippy::unnecessary_operation, clippy::identity_op)]
+            const _: () = {
+                ["Size of ReplayEngine"][::std::mem::size_of::<ReplayEngine>() - 4usize];
+                ["Alignment of ReplayEngine"][::std::mem::align_of::<ReplayEngine>() - 4usize];
+                ["Offset of field: ReplayEngine::m_Index"][::std::mem::offset_of!(ReplayEngine, m_Index) - 0usize];
+            };
+            unsafe extern "C" {
+                #[doc = " Initialize the engine"]
+                #[link_name = "\u{1}?Initialize@ReplayEngine@Replay@TTD_FFI@@QEAAHXZ"]
+                pub fn ReplayEngine_Initialize(this: *mut root::TTD_FFI::Replay::ReplayEngine) -> root::i32_;
+            }
+            unsafe extern "C" {
+                #[doc = " Load trace and allocate cursor"]
+                #[link_name = "\u{1}?Load@ReplayEngine@Replay@TTD_FFI@@QEBAHPEBE@Z"]
+                pub fn ReplayEngine_Load(this: *const root::TTD_FFI::Replay::ReplayEngine, trace: *const root::u8_) -> root::i32_;
+            }
+            unsafe extern "C" {
+                #[doc = " Unload the engine"]
+                #[link_name = "\u{1}?Reset@ReplayEngine@Replay@TTD_FFI@@QEAAHXZ"]
+                pub fn ReplayEngine_Reset(this: *mut root::TTD_FFI::Replay::ReplayEngine) -> root::i32_;
+            }
+            unsafe extern "C" {
+                #[doc = " Get system info from the replay engine"]
+                #[link_name = "\u{1}?GetSystemInfo@ReplayEngine@Replay@TTD_FFI@@QEBAAEBUSystemInfo@TTD@@XZ"]
+                pub fn ReplayEngine_GetSystemInfo(this: *const root::TTD_FFI::Replay::ReplayEngine) -> *const root::TTD::SystemInfo;
+            }
+            unsafe extern "C" {
+                #[doc = " Build a trace index, to boost search speed"]
+                #[link_name = "\u{1}?BuildIndex@ReplayEngine@Replay@TTD_FFI@@QEBAIXZ"]
+                pub fn ReplayEngine_BuildIndex(this: *const root::TTD_FFI::Replay::ReplayEngine) -> root::u32_;
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}?GetModuleCount@ReplayEngine@Replay@TTD_FFI@@QEBA_KXZ"]
+                pub fn ReplayEngine_GetModuleCount(this: *const root::TTD_FFI::Replay::ReplayEngine) -> usize;
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}?GetModuleList@ReplayEngine@Replay@TTD_FFI@@QEBAPEBUModule@2TTD@@XZ"]
+                pub fn ReplayEngine_GetModuleList(this: *const root::TTD_FFI::Replay::ReplayEngine) -> *const root::TTD::Replay::Module;
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}?GetModuleInstanceCount@ReplayEngine@Replay@TTD_FFI@@QEBA_KXZ"]
+                pub fn ReplayEngine_GetModuleInstanceCount(this: *const root::TTD_FFI::Replay::ReplayEngine) -> usize;
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}?GetModuleInstanceList@ReplayEngine@Replay@TTD_FFI@@QEBAPEBUModuleInstance@2TTD@@XZ"]
+                pub fn ReplayEngine_GetModuleInstanceList(this: *const root::TTD_FFI::Replay::ReplayEngine) -> *const root::TTD::Replay::ModuleInstance;
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}?GetThreadCount@ReplayEngine@Replay@TTD_FFI@@QEBA_KXZ"]
+                pub fn ReplayEngine_GetThreadCount(this: *const root::TTD_FFI::Replay::ReplayEngine) -> usize;
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}?GetThreadList@ReplayEngine@Replay@TTD_FFI@@QEBAPEBUThreadInfo@2TTD@@XZ"]
+                pub fn ReplayEngine_GetThreadList(this: *const root::TTD_FFI::Replay::ReplayEngine) -> *const root::TTD::Replay::ThreadInfo;
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}?GetModuleLoadedEventCount@ReplayEngine@Replay@TTD_FFI@@QEBA_KXZ"]
+                pub fn ReplayEngine_GetModuleLoadedEventCount(this: *const root::TTD_FFI::Replay::ReplayEngine) -> usize;
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}?GetModuleLoadedEventList@ReplayEngine@Replay@TTD_FFI@@QEBAPEBUModuleLoadedEvent@2TTD@@XZ"]
+                pub fn ReplayEngine_GetModuleLoadedEventList(this: *const root::TTD_FFI::Replay::ReplayEngine) -> *const root::TTD::Replay::ModuleLoadedEvent;
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}?GetModuleUnloadedEventCount@ReplayEngine@Replay@TTD_FFI@@QEBA_KXZ"]
+                pub fn ReplayEngine_GetModuleUnloadedEventCount(this: *const root::TTD_FFI::Replay::ReplayEngine) -> usize;
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}?GetModuleUnloadedEventList@ReplayEngine@Replay@TTD_FFI@@QEBAPEBUModuleUnloadedEvent@2TTD@@XZ"]
+                pub fn ReplayEngine_GetModuleUnloadedEventList(
+                    this: *const root::TTD_FFI::Replay::ReplayEngine,
+                ) -> *const root::TTD::Replay::ModuleUnloadedEvent;
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}?GetExceptionEventCount@ReplayEngine@Replay@TTD_FFI@@QEBA_KXZ"]
+                pub fn ReplayEngine_GetExceptionEventCount(this: *const root::TTD_FFI::Replay::ReplayEngine) -> usize;
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}?GetExceptionEventList@ReplayEngine@Replay@TTD_FFI@@QEBAPEBUExceptionEvent@2TTD@@XZ"]
+                pub fn ReplayEngine_GetExceptionEventList(this: *const root::TTD_FFI::Replay::ReplayEngine) -> *const root::TTD::Replay::ExceptionEvent;
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}??0ReplayEngine@Replay@TTD_FFI@@QEAA@XZ"]
+                pub fn ReplayEngine_ReplayEngine(this: *mut root::TTD_FFI::Replay::ReplayEngine);
+            }
+            unsafe extern "C" {
+                #[link_name = "\u{1}??1ReplayEngine@Replay@TTD_FFI@@QEAA@XZ"]
+                pub fn ReplayEngine_ReplayEngine_destructor(this: *mut root::TTD_FFI::Replay::ReplayEngine);
+            }
+            impl ReplayEngine {
+                #[inline]
+                pub unsafe fn Initialize(&mut self) -> root::i32_ {
+                    ReplayEngine_Initialize(self)
+                }
+                #[inline]
+                pub unsafe fn Load(&self, trace: *const root::u8_) -> root::i32_ {
+                    ReplayEngine_Load(self, trace)
+                }
+                #[inline]
+                pub unsafe fn Reset(&mut self) -> root::i32_ {
+                    ReplayEngine_Reset(self)
+                }
+                #[inline]
+                pub unsafe fn GetSystemInfo(&self) -> *const root::TTD::SystemInfo {
+                    ReplayEngine_GetSystemInfo(self)
+                }
+                #[inline]
+                pub unsafe fn BuildIndex(&self) -> root::u32_ {
+                    ReplayEngine_BuildIndex(self)
+                }
+                #[inline]
+                pub unsafe fn GetModuleCount(&self) -> usize {
+                    ReplayEngine_GetModuleCount(self)
+                }
+                #[inline]
+                pub unsafe fn GetModuleList(&self) -> *const root::TTD::Replay::Module {
+                    ReplayEngine_GetModuleList(self)
+                }
+                #[inline]
+                pub unsafe fn GetModuleInstanceCount(&self) -> usize {
+                    ReplayEngine_GetModuleInstanceCount(self)
+                }
+                #[inline]
+                pub unsafe fn GetModuleInstanceList(&self) -> *const root::TTD::Replay::ModuleInstance {
+                    ReplayEngine_GetModuleInstanceList(self)
+                }
+                #[inline]
+                pub unsafe fn GetThreadCount(&self) -> usize {
+                    ReplayEngine_GetThreadCount(self)
+                }
+                #[inline]
+                pub unsafe fn GetThreadList(&self) -> *const root::TTD::Replay::ThreadInfo {
+                    ReplayEngine_GetThreadList(self)
+                }
+                #[inline]
+                pub unsafe fn GetModuleLoadedEventCount(&self) -> usize {
+                    ReplayEngine_GetModuleLoadedEventCount(self)
+                }
+                #[inline]
+                pub unsafe fn GetModuleLoadedEventList(&self) -> *const root::TTD::Replay::ModuleLoadedEvent {
+                    ReplayEngine_GetModuleLoadedEventList(self)
+                }
+                #[inline]
+                pub unsafe fn GetModuleUnloadedEventCount(&self) -> usize {
+                    ReplayEngine_GetModuleUnloadedEventCount(self)
+                }
+                #[inline]
+                pub unsafe fn GetModuleUnloadedEventList(&self) -> *const root::TTD::Replay::ModuleUnloadedEvent {
+                    ReplayEngine_GetModuleUnloadedEventList(self)
+                }
+                #[inline]
+                pub unsafe fn GetExceptionEventCount(&self) -> usize {
+                    ReplayEngine_GetExceptionEventCount(self)
+                }
+                #[inline]
+                pub unsafe fn GetExceptionEventList(&self) -> *const root::TTD::Replay::ExceptionEvent {
+                    ReplayEngine_GetExceptionEventList(self)
+                }
+                #[inline]
+                pub unsafe fn new() -> Self {
+                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
+                    ReplayEngine_ReplayEngine(__bindgen_tmp.as_mut_ptr());
+                    __bindgen_tmp.assume_init()
+                }
+                #[inline]
+                pub unsafe fn destruct(&mut self) {
+                    ReplayEngine_ReplayEngine_destructor(self)
+                }
             }
         }
     }
@@ -263,18 +541,6 @@ pub mod root {
         pub const SequenceId_Max: SequenceId = 18446744073709551614;
         pub const SequenceId_Invalid: SequenceId = 18446744073709551615;
         pub type SequenceId = u64;
-        unsafe extern "C" {
-            #[link_name = "\u{1}IsValid"]
-            pub fn TBufferView_IsValid(this: *const u8) -> bool;
-        }
-        unsafe extern "C" {
-            #[link_name = "\u{1}IsNull"]
-            pub fn TBufferView_IsNull(this: *const u8) -> bool;
-        }
-        unsafe extern "C" {
-            #[link_name = "\u{1}Reset"]
-            pub fn TBufferView_Reset(this: *mut u8);
-        }
         pub type ConstBufferView = root::__BindgenOpaqueArray<u64, 2usize>;
         pub type BufferView = root::__BindgenOpaqueArray<u64, 2usize>;
         pub const ThreadId_Invalid: ThreadId = 0;
@@ -667,22 +933,6 @@ pub mod root {
                 ["Offset of field: Position::Sequence"][::std::mem::offset_of!(Position, Sequence) - 0usize];
                 ["Offset of field: Position::Steps"][::std::mem::offset_of!(Position, Steps) - 8usize];
             };
-            unsafe extern "C" {
-                #[link_name = "\u{1}?IsValid@Position@Replay@TTD@@QEBA_NXZ"]
-                pub fn Position_IsValid(this: *const root::TTD::Replay::Position) -> bool;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}??0Position@Replay@TTD@@QEAA@XZ"]
-                pub fn Position_Position(this: *mut root::TTD::Replay::Position);
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}??0Position@Replay@TTD@@QEAA@W4SequenceId@2@@Z"]
-                pub fn Position_Position1(this: *mut root::TTD::Replay::Position, sequence: root::TTD::SequenceId);
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}??0Position@Replay@TTD@@QEAA@W4SequenceId@2@W4StepCount@12@@Z"]
-                pub fn Position_Position2(this: *mut root::TTD::Replay::Position, sequence: root::TTD::SequenceId, steps: root::TTD::Replay::StepCount);
-            }
             impl Default for Position {
                 fn default() -> Self {
                     let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
@@ -690,30 +940,6 @@ pub mod root {
                         ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
-                }
-            }
-            impl Position {
-                #[inline]
-                pub unsafe fn IsValid(&self) -> bool {
-                    Position_IsValid(self)
-                }
-                #[inline]
-                pub unsafe fn new() -> Self {
-                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
-                    Position_Position(__bindgen_tmp.as_mut_ptr());
-                    __bindgen_tmp.assume_init()
-                }
-                #[inline]
-                pub unsafe fn new1(sequence: root::TTD::SequenceId) -> Self {
-                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
-                    Position_Position1(__bindgen_tmp.as_mut_ptr(), sequence);
-                    __bindgen_tmp.assume_init()
-                }
-                #[inline]
-                pub unsafe fn new2(sequence: root::TTD::SequenceId, steps: root::TTD::Replay::StepCount) -> Self {
-                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
-                    Position_Position2(__bindgen_tmp.as_mut_ptr(), sequence, steps);
-                    __bindgen_tmp.assume_init()
                 }
             }
             #[repr(C)]
@@ -733,22 +959,6 @@ pub mod root {
                 ["Offset of field: PositionRange::Min"][::std::mem::offset_of!(PositionRange, Min) - 0usize];
                 ["Offset of field: PositionRange::Max"][::std::mem::offset_of!(PositionRange, Max) - 16usize];
             };
-            unsafe extern "C" {
-                #[link_name = "\u{1}?IsValid@PositionRange@Replay@TTD@@QEBA_NXZ"]
-                pub fn PositionRange_IsValid(this: *const root::TTD::Replay::PositionRange) -> bool;
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}??0PositionRange@Replay@TTD@@QEAA@XZ"]
-                pub fn PositionRange_PositionRange(this: *mut root::TTD::Replay::PositionRange);
-            }
-            unsafe extern "C" {
-                #[link_name = "\u{1}??0PositionRange@Replay@TTD@@QEAA@UPosition@12@0@Z"]
-                pub fn PositionRange_PositionRange1(
-                    this: *mut root::TTD::Replay::PositionRange,
-                    minimum: root::TTD::Replay::Position,
-                    maximum: root::TTD::Replay::Position,
-                );
-            }
             impl Default for PositionRange {
                 fn default() -> Self {
                     let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
@@ -756,24 +966,6 @@ pub mod root {
                         ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
-                }
-            }
-            impl PositionRange {
-                #[inline]
-                pub unsafe fn IsValid(&self) -> bool {
-                    PositionRange_IsValid(self)
-                }
-                #[inline]
-                pub unsafe fn new() -> Self {
-                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
-                    PositionRange_PositionRange(__bindgen_tmp.as_mut_ptr());
-                    __bindgen_tmp.assume_init()
-                }
-                #[inline]
-                pub unsafe fn new1(minimum: root::TTD::Replay::Position, maximum: root::TTD::Replay::Position) -> Self {
-                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
-                    PositionRange_PositionRange1(__bindgen_tmp.as_mut_ptr(), minimum, maximum);
-                    __bindgen_tmp.assume_init()
                 }
             }
             pub const GapKind_NoGap: GapKind = 0;
@@ -1113,10 +1305,6 @@ pub mod root {
                     }
                 }
             }
-            unsafe extern "C" {
-                #[link_name = "\u{1}??1IThreadView@Replay@TTD@@MEAA@XZ"]
-                pub fn IThreadView_IThreadView_destructor(this: *mut root::TTD::Replay::IThreadView);
-            }
             #[repr(C)]
             #[derive(Debug, Copy, Clone)]
             pub struct ICursorView_MemoryWatchpointResult {
@@ -1192,10 +1380,6 @@ pub mod root {
                 ["Offset of field: ICursorView_ReplayResult::InstructionsExecuted"]
                     [::std::mem::offset_of!(ICursorView_ReplayResult, InstructionsExecuted) - 16usize];
             };
-            unsafe extern "C" {
-                #[link_name = "\u{1}??0ReplayResult@ICursorView@Replay@TTD@@QEAA@XZ"]
-                pub fn ICursorView_ReplayResult_ReplayResult(this: *mut root::TTD::Replay::ICursorView_ReplayResult);
-            }
             impl Default for ICursorView_ReplayResult {
                 fn default() -> Self {
                     let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
@@ -1203,14 +1387,6 @@ pub mod root {
                         ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
                         s.assume_init()
                     }
-                }
-            }
-            impl ICursorView_ReplayResult {
-                #[inline]
-                pub unsafe fn new() -> Self {
-                    let mut __bindgen_tmp = ::std::mem::MaybeUninit::uninit();
-                    ICursorView_ReplayResult_ReplayResult(__bindgen_tmp.as_mut_ptr());
-                    __bindgen_tmp.assume_init()
                 }
             }
         }
