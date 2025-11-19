@@ -62,7 +62,7 @@ TTD_FFI::Replay::Initialize()
 i32
 TTD_FFI::Replay::Load(const u16* trace)
 {
-    dbg(L"Loading trace %s", trace.c_str());
+    dbg(L"Loading trace %s", trace);
     if ( !g_Engine->Initialize((PCWSTR)trace) )
     {
         err(L"Initialize('%s') failed", trace);
