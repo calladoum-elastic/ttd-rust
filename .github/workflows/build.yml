@@ -39,6 +39,8 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git/db
+            ./target/debug/deps
+            ./target/release/deps
           restore-keys:
             cargo-${{ matrix.os }}-${{ matrix.build }}-
 
