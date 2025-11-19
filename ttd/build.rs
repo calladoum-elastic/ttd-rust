@@ -6,6 +6,9 @@ const _: () = assert!(false, "TTD bindings only work on Windows");
 #[cfg(target_arch = "x86_64")]
 const ARCH: &str = "x64";
 
+#[cfg(target_arch = "aarch64")]
+const ARCH: &str = "arm64";
+
 const TTD_SDK_PACKAGE_NAME: &str = "microsoft.timetraveldebugging.apis";
 const TTD_SDK_PACKAGE_VERSION: &str = "0.9.5";
 const NUGET_DOWNLOAD_LINK: &str = const_format::formatcp!(
