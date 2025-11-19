@@ -79,11 +79,12 @@ jobs:
           name: ttd_${{ matrix.build }}_${{ matrix.os }}_${{ github.sha }}
           if-no-files-found: warn
           path: |
-            ./ttd/ttd_ffi_tests/tests
-            ./ttd/ttd_ffi/install
+            ./ttd/ttd_ffi_tests/tests/*.exe
+            ./ttd/ttd_ffi_tests/tests/*.pdb
+            ./ttd/ttd_ffi/install/*.exe
+            ./ttd/ttd_ffi/install/*.pdb
             ./TTD*.dll
-            ./target/**/ttd.rlib
-            ./target/**/ttd.dll
-            ./target/**/ttd.pdb
-            ./target/**/auto_unpack.exe
-            ./target/**/auto_unpack.pdb
+            ./target/**/*.rlib
+            ./target/**/*.exe
+            ./target/**/*.pdb
+            ./target/**/*.dll
