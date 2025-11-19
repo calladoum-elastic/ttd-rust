@@ -29,4 +29,17 @@ TEST_CASE("TTD FFI Tests", "[" NS "]")
         REQUIRE(TTD_FFI::Replay::Load((const u16*)invalid_path.c_str()) == -1);
         REQUIRE(TTD_FFI::Replay::Load((const u16*)valid_path.c_str()) == 0);
     }
+
+    SECTION("Navigate trace")
+    {
+        REQUIRE(TTD_FFI::Replay::Initialize() == 0);
+        const auto valid_path = GetTemp() / "test.run";
+        REQUIRE(TTD_FFI::Replay::Load((const u16*)valid_path.c_str()) == 0);
+
+        auto const CurPos = TTD_FFI::Replay::GetPosition();
+        REQUIRE(CurPos != TTD::Replay::Position::Invalid);
+
+        TTD_FFI::Replay::SetPosition(CurPos + 1);
+        REQUIRE(TTD_FFI::Replay::GetPosition() == CurPos + 1);
+    }
 }

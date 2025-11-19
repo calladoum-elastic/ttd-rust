@@ -48,7 +48,7 @@ jobs:
           ttd -acceptEula -out $env:TEMP\test -launch c:\windows\system32\cmd.exe "/c whoami"
           ./ttd/ttd_ffi/install/ttd_ffi_tests/Tests/ttd_ffi_tests.exe
 
-          cp .\ttd*.dll .\target\debug\deps\
+          cp .\ttd*.dll .\target\${{ matrix.build }}\deps\
           cargo test
 
       - name: Upload Artifact
