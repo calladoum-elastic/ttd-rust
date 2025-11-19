@@ -62,22 +62,12 @@ TTD_FFI::Replay::Initialize()
 i32
 TTD_FFI::Replay::Load(const u16* trace)
 {
-    // const std::filesystem::path tracePath {(const i16*)trace};
-    // if ( !std::filesystem::exists(tracePath) )
-    // {
-    //     err(L"File %S doesn't exist", tracePath.c_str());
-    //     return -1;
-    // }
-
-    // dbg(L"Loading trace %s", tracePath.wstring().c_str());
-    // const std::wstring ws = tracePath.wstring();
-    // LPWSTR ptr            = (LPWSTR)tracePath.wstring().c_str();
+    dbg(L"Loading trace %s", trace.c_str());
     if ( !g_Engine->Initialize((PCWSTR)trace) )
     {
         err(L"Initialize('%s') failed", trace);
         return -1;
     }
-
     ok(L"Loaded %s...", trace);
 
     dbg(L"creating cursor");

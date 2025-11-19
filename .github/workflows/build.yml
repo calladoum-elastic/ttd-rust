@@ -43,13 +43,22 @@ jobs:
           cargo build --all-targets --release
           cargo clippy --release
 
-      - name: Run Tests
+      - name: Run C++ Tests
         run: |
           ttd -acceptEula -out $env:TEMP\test -launch c:\windows\system32\cmd.exe "/c whoami"
           ./ttd/ttd_ffi/install/ttd_ffi_tests/Tests/ttd_ffi_tests.exe
 
-          cp .\ttd*.dll .\target\${{ matrix.build }}\deps\
+      - name: Run Rust Tests (debug)
+        if: matrix.build == 'debug'
+        run: |
+          cp .\ttd*.dll .\target\debug\deps\
           cargo test
+
+      - name: Run Rust Tests (release)
+        if: matrix.build == 'release'
+        run: |
+          cp .\ttd*.dll .\target\release\deps\
+          cargo test --release
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v5
