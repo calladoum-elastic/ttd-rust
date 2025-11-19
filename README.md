@@ -1,1 +1,69 @@
-# TTD
+# `ttd-rust`
+
+Rust bindings for the **Microsoft Time Travel Debugging (TTD) SDK**.
+
+This crate provides a safe and ergonomic Rust interface to the TTD SDK, enabling developers to record, replay, and analyze program execution using Microsoft's time-travel debugging technology.
+
+## Overview
+
+[Microsoft Time Travel Debugging](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/time-travel-debugging-overview) (TTD) is a powerful debugging tool that allows you to step forward and backward through program execution.
+
+`ttd-rust` wraps the native TTD SDK, making it accessible from Rust without requiring manual FFI boilerplate.
+
+## Features
+- Safe Rust wrappers around TTD SDK functions.
+- Replay program execution from created traces. Trace recording bindings will be added soon.
+- Query events, memory state, and call stacks at any point in time.
+- Integration with existing Rust debugging workflows.
+
+## Requirements
+- **Microsoft TTD SDK** installed on your system.
+- `winget install --exact Microsoft.TimeTravelDebugging --source winget`
+- Rust 1.90+
+- Windows 10 or later (TTD is Windows-only).
+  - `winget` must be present
+- C++ build tools (for compiling native bindings) including
+  - `cmake`
+  - VisualStudio 2019/2022
+
+## Installation
+
+Add `ttd-rust` to your `Cargo.toml`:
+
+```toml
+[dependencies]
+ttd-rust = { git = "https://github.com/calladoum-elastic/ttd-rust" }
+```
+
+## Build
+
+`cargo` will entirely handle the build. If the libraries/dlls are missing, it will automatically download them.
+
+```pwsh
+cargo build --all-targets
+```
+
+## Test
+
+### Test the C++ layer
+
+```pwsh
+cargo build
+ctest -C Debug -T test --test-dir .\ttd\ttd_ffi\build\tests
+```
+
+### Test the Rust layer
+
+```pwsh
+cargo test
+```
+
+## License
+
+This project is licensed under the Apache-2.0 License.
+See LICENSE for details.
+
+## Disclaimer
+
+`ttd-rust` is not a Microsoft product.
+It is a community maintained project that depends on the Microsoft TTD SDK.
