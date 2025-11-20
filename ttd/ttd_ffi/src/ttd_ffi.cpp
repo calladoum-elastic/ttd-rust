@@ -38,7 +38,8 @@ static std::mutex g_CursorsMutex {};
 #pragma region TTD_FFI::Replay::ReplayEngine
 
 #define GetEngineSafe()                                                                                                \
-    std::lock_guard _lock(g_EnginesMutex);                                                                             \
+    std::lock_guard ___lock_engine(g_EnginesMutex);                                                                    \
+    dbg(L"fetching engines[%x]", this->m_Index);                                                                       \
     if ( this->m_Index < 0 || this->m_Index > g_Engines.size() )                                                       \
     {                                                                                                                  \
         throw "Out-of-bound index for engine ";                                                                        \
@@ -251,22 +252,18 @@ TTD_FFI::Replay::ReplayEngine::GetExceptionEventList() const
 #pragma region TTD_FFI::Replay::ReplayCursor
 
 #define GetCursorSafe()                                                                                                \
-    std::lock_guard _lock(g_CursorsMutex);                                                                             \
-    dbg(L"cursor_idx=%x", this->m_Index);                                                                              \
+    std::lock_guard ___lock_cursor(g_CursorsMutex);                                                                    \
+    dbg(L"fetching cursors[%x]", this->m_Index);                                                                       \
     if ( this->m_Index < 0 || this->m_Index > g_Cursors.size() )                                                       \
     {                                                                                                                  \
-        throw "Incorrect index";                                                                                       \
+        throw "Out-of-bound index for cursor";                                                                         \
     }                                                                                                                  \
     auto& cursor = g_Cursors[this->m_Index];                                                                           \
     if ( !cursor )                                                                                                     \
     {                                                                                                                  \
-        throw "Corrupted state";                                                                                       \
+        throw "Invalid cursor";                                                                                        \
     }                                                                                                                  \
-    auto& engine = g_Engines[this->m_EngineIndex];                                                                     \
-    if ( !engine )                                                                                                     \
-    {                                                                                                                  \
-        throw "Corrupted state";                                                                                       \
-    }
+    GetEngineSafe()
 
 TTD_FFI::Replay::ReplayCursor::ReplayCursor(i32 EngineIndex) :
     m_Index {LIBTTD_INVALID_VALUE},
@@ -367,35 +364,37 @@ TTD_FFI::Replay::ReplayCursor::ReplayForward(TTD::Replay::Position const& limit)
     GetCursorSafe();
 
 #ifdef _DEBUG
-    wchar_t from[100] {};
-    wchar_t to[100] {};
+    // std::array<wchar_t, 64> from {};
+    // std::array<wchar_t, 64> to {};
 
-    const auto cur = cursor->GetPosition();
-    TTD::Replay::PositionToString(cur, from, _countof(from));
-    TTD::Replay::PositionToString(limit, to, _countof(to));
-    dbg(L"Forward replaying from %s to %s", from, to);
+    // const auto& cur = cursor->GetPosition();
+    // TTD::Replay::PositionToString(cur, from.data(), from.size() / 2);
+    // TTD::Replay::PositionToString(limit, to.data(), from.size() / 2);
+    // dbg(L"Forward replaying from %s to %s", from, to);
 #endif // _DEBUG
 
-    return cursor->ReplayForward(limit);
+    auto const res = cursor->ReplayForward(limit);
+    return res;
 }
 
 
 TTD::Replay::ICursorView::ReplayResult
-TTD_FFI::Replay::ReplayCursor::ReplayBackward(TTD::Replay::Position limit)
+TTD_FFI::Replay::ReplayCursor::ReplayBackward(TTD::Replay::Position const& limit)
 {
     GetCursorSafe();
 
 #ifdef _DEBUG
-    wchar_t from[100] {};
-    wchar_t to[100] {};
+    // std::array<wchar_t, 64> from {};
+    // std::array<wchar_t, 64> to {};
 
-    const auto cur = cursor->GetPosition();
-    TTD::Replay::PositionToString(cur, from, _countof(from));
-    TTD::Replay::PositionToString(limit, to, _countof(to));
-    dbg(L"Backward replaying from %s to %s", from, to);
+    // const auto& cur = cursor->GetPosition();
+    // TTD::Replay::PositionToString(cur, from.data(), from.size() / 2);
+    // TTD::Replay::PositionToString(limit, to.data(), from.size() / 2);
+    // dbg(L"Backward replaying from %s to %s", from, to);
 #endif // _DEBUG
 
-    return cursor->ReplayBackward(limit);
+    auto const res = cursor->ReplayBackward(limit);
+    return res;
 }
 
 i32
@@ -425,16 +424,16 @@ TTD_FFI::Replay::ReplayCursor::SetPosition(TTD::Replay::Position const& pos)
     return cursor->SetPosition(pos);
 }
 
-TTD::Replay::Position
+TTD::Replay::Position const&
 TTD_FFI::Replay::ReplayCursor::GetPosition() const
 {
     GetCursorSafe();
-    TTD::Replay::Position CurPos = cursor->GetPosition();
+    auto const& CurPos = cursor->GetPosition();
     dbg(L"Current position is %llx:%llx", (uint64_t)CurPos.Sequence, (uint64_t)CurPos.Steps);
     return CurPos;
 }
 
-TTD::Replay::Position
+TTD::Replay::Position const&
 TTD_FFI::Replay::ReplayCursor::GetPreviousPosition() const
 {
     GetCursorSafe();

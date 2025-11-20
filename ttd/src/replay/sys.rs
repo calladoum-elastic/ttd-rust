@@ -164,7 +164,8 @@ impl<'a> ReplayCursor<'a> {
         unsafe {
             match until {
                 Some(pos) => self.inner.ReplayForward(&pos),
-                None => self.inner.ReplayForward(&ffi::TTD::Replay::Position_Max),
+                // None => self.inner.ReplayForward(&ffi::TTD::Replay::Position_Max),
+                None => self.inner.ReplayForward(&self.engine.get_lifetime().Max),
             }
         }
     }
@@ -172,8 +173,9 @@ impl<'a> ReplayCursor<'a> {
     pub(crate) fn replay_backward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> ffi::TTD::Replay::ICursorView_ReplayResult {
         unsafe {
             match until {
-                Some(pos) => self.inner.ReplayBackward(pos),
-                None => self.inner.ReplayBackward(ffi::TTD::Replay::Position_Min),
+                Some(pos) => self.inner.ReplayBackward(&pos),
+                // None => self.inner.ReplayBackward(&ffi::TTD::Replay::Position_Min),
+                None => self.inner.ReplayBackward(&self.engine.get_lifetime().Min),
             }
         }
     }
@@ -182,12 +184,12 @@ impl<'a> ReplayCursor<'a> {
         unsafe { self.inner.SetPosition(pos) };
     }
 
-    pub(crate) fn get_position(&self) -> ffi::TTD::Replay::Position {
-        unsafe { self.inner.GetPosition() }
+    pub(crate) fn get_position(&self) -> &ffi::TTD::Replay::Position {
+        unsafe { std::mem::transmute(self.inner.GetPosition()) }
     }
 
-    pub(crate) fn get_previous_position(&mut self) -> ffi::TTD::Replay::Position {
-        unsafe { self.inner.GetPreviousPosition() }
+    pub(crate) fn get_previous_position(&mut self) -> &ffi::TTD::Replay::Position {
+        unsafe { std::mem::transmute(self.inner.GetPreviousPosition()) }
     }
 
     pub(crate) fn get_thread_info(&self) -> &ffi::TTD::Replay::ThreadInfo {
@@ -391,7 +393,7 @@ mod test {
 
     fn get_test_trace() -> Vec<u16> {
         let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
-        trace_path.push("test.run");
+        trace_path.push("test.run\0");
         trace_path.to_string_lossy().encode_utf16().collect()
     }
 
@@ -403,23 +405,30 @@ mod test {
         let trace_path = get_test_trace();
         assert_eq!(replay.load(trace_path.as_ref()), 0);
 
+        let lt = replay.get_lifetime();
+
         for i in 1..10 {
             let mut cursor = replay.cursor().unwrap();
             let cursor_idx = cursor.index();
             assert_eq!(cursor_idx, 0);
 
+            // new cursor point to the lifetime min
             let pos = cursor.get_position();
-            unsafe {
-                assert_eq!(pos.Sequence, Position_Min.Sequence);
-                assert_eq!(pos.Steps, Position_Min.Steps);
-            }
+            assert_eq!(*pos, lt.Min);
 
+            // replay until the litetime end
             let res = cursor.replay_forward(None);
+            assert_eq!(res.StopReason, 7); // end of process
             assert_ne!(res.InstructionsExecuted, 0);
-            assert_ne!(res.StopReason, 0);
+            let pos = cursor.get_position();
+            assert_eq!(*pos, lt.Max);
 
-            // cursor.replay_backward(None);
-            assert_eq!(cursor_idx, cursor.index());
+            // rewind
+            let res = cursor.replay_backward(None);
+            assert_ne!(res.StopReason, 7); // start of process
+            assert_ne!(res.InstructionsExecuted, 0);
+            let pos = cursor.get_position();
+            assert_eq!(*pos, lt.Min);
         }
     }
 
@@ -434,8 +443,9 @@ mod test {
 
         let info = engine.system_info();
         assert_eq!(info.MajorVersion, 1);
-        assert_eq!(info.MinorVersion, 9);
-        assert_eq!(info.ProcessId, 11968);
+        assert!(info.MinorVersion > 0);
+        assert!(info.MinorVersion < 12);
+        assert_ne!(info.ProcessId, 0);
         assert_eq!(info.SystemName.len(), 64);
         assert_eq!(info.UserName.len(), 64);
     }

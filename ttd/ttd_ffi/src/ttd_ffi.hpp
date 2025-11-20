@@ -143,15 +143,15 @@ public:
     ReplayForward(TTD::Replay::Position const& limit);
 
     TTD::Replay::ICursorView::ReplayResult
-    ReplayBackward(TTD::Replay::Position limit);
+    ReplayBackward(TTD::Replay::Position const& limit);
 
     void
     SetPosition(TTD::Replay::Position const& pos);
 
-    TTD::Replay::Position
+    TTD::Replay::Position const&
     GetPosition() const;
 
-    TTD::Replay::Position
+    TTD::Replay::Position const&
     GetPreviousPosition() const;
 
     TTD::Replay::ThreadInfo const&

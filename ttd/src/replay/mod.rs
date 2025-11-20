@@ -290,12 +290,12 @@ impl<'a> ReplayCursor<'a> {
     }
 
     pub fn replay_forward_steps(&mut self, steps: u64) -> Result<ReplayResult> {
-        let until = self.inner.get_position() + steps;
+        let until = *self.inner.get_position() + steps;
         Ok(self.inner.replay_forward(Some(until)).into())
     }
 
     pub fn replay_backward_steps(&mut self, steps: u64) -> Result<ReplayResult> {
-        let until = self.inner.get_position() + steps;
+        let until = *self.inner.get_position() + steps;
         Ok(self.inner.replay_backward(Some(until)).into())
     }
 
@@ -303,11 +303,11 @@ impl<'a> ReplayCursor<'a> {
         self.inner.set_position(pos)
     }
 
-    pub fn get_position(&self) -> Result<ReplayPosition> {
+    pub fn get_position(&self) -> Result<&ReplayPosition> {
         Ok(self.inner.get_position())
     }
 
-    pub fn get_previous_position(&mut self) -> Result<ReplayPosition> {
+    pub fn get_previous_position(&mut self) -> Result<&ReplayPosition> {
         Ok(self.inner.get_previous_position())
     }
 
