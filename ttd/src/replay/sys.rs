@@ -51,14 +51,18 @@ impl ReplayEngine {
             if !(0..=ffi::TTD_FFI::Replay::MAX_ENGINE as i32).contains(&eng_idx) || !(0..=ffi::TTD_FFI::Replay::MAX_CURSOR as i32).contains(&cur_idx) {
                 return Err(Error::InitializationError);
             }
+
+            // New cursors always should point to the start of the trace
+            cursor.SetPosition(&self.get_lifetime().Min);
+
             cursor
         };
 
-        // New cursors always should point to the start of the trace
-        unsafe {
-            cursor.SetPosition(&ffi::TTD::Replay::Position_Min);
-        }
         Ok(ReplayCursor { inner: cursor, engine: self })
+    }
+
+    pub fn get_lifetime(&self) -> &ffi::TTD::Replay::PositionRange {
+        unsafe { std::mem::transmute(self.inner.GetLifetime()) }
     }
 
     pub(crate) fn system_info(&self) -> &ffi::TTD::SystemInfo {
