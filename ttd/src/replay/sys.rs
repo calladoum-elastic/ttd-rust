@@ -25,18 +25,18 @@ impl ReplayEngine {
     pub(crate) fn new() -> Result<Self> {
         let engine = unsafe {
             let mut engine = ffi::TTD_FFI::Replay::ReplayEngine::new();
-            engine.Initialize();
+            let eng_idx = engine.Index();
+            if !(0..=ffi::TTD_FFI::Replay::MAX_ENGINE as i32).contains(&eng_idx) {
+                return Err(Error::InitializationError);
+            }
             engine
         };
-        if engine.m_Index == -1 {
-            return Err(Error::InitializationError);
-        }
 
         Ok(Self { inner: engine })
     }
 
     pub(crate) fn index(&self) -> i32 {
-        self.inner.m_Index
+        unsafe { self.inner.Index() }
     }
 
     pub(crate) fn load(&self, trace: &[u16]) -> i32 {
@@ -45,13 +45,14 @@ impl ReplayEngine {
 
     pub fn cursor(&'_ self) -> Result<ReplayCursor<'_>> {
         let mut cursor = unsafe {
-            let mut cursor = ffi::TTD_FFI::Replay::ReplayCursor::new();
-            cursor.Initialize(self.index());
+            let mut cursor = ffi::TTD_FFI::Replay::ReplayCursor::new(self.index());
+            let cur_idx = cursor.Index();
+            let eng_idx = cursor.EngineIndex();
+            if !(0..=ffi::TTD_FFI::Replay::MAX_ENGINE as i32).contains(&eng_idx) || !(0..=ffi::TTD_FFI::Replay::MAX_CURSOR as i32).contains(&cur_idx) {
+                return Err(Error::InitializationError);
+            }
             cursor
         };
-        if !(0 <= cursor.m_Index && cursor.m_Index < 256) || !(0 <= cursor.m_EngineIndex && cursor.m_EngineIndex < 256) {
-            return Err(Error::InitializationError);
-        }
 
         // New cursors always should point to the start of the trace
         unsafe {

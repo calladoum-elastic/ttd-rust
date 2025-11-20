@@ -23,20 +23,113 @@ using uptr  = usize;
 #include "TTD/IReplayEngineRegisters.h"
 #include "TTD/IReplayEngineStl.h"
 
+
+#define LIBTTD_INVALID_VALUE ((i32) - 1)
+#define LIBTTD_ERROR_GENERIC ((i32) - 1)
+#define LIBTTD_ERROR_NOT_FOUND ((i32) - 2)
+#define LIBTTD_ERROR_INITIALIZATION ((i32) - 3)
+#define LIBTTD_ERROR_INVALID_INDEX ((i32) - 4)
+
+
 namespace TTD_FFI::Replay
 {
 
-struct ReplayCursor
+const static size_t MAX_ENGINE = 256;
+const static size_t MAX_CURSOR = 256;
+
+
+class ReplayEngine
 {
+private:
+    i32 m_Index {LIBTTD_INVALID_VALUE};
+
+    /// Initialize the engine
+    i32
+    Initialize();
+
+public:
+    ReplayEngine();
+
+    ~ReplayEngine();
+
+    /// Get the index of the allocated engine
+    i32
+    Index() const;
+
+
+    /// Load trace from the `.run` filepath passed as argument
+    i32
+    Load(const u16* trace) const;
+
+    /// Unload the engine
+    i32
+    Reset();
+
+    /// Get system info from the replay engine
+    TTD::SystemInfo const&
+    GetSystemInfo() const;
+
+    /// Build a trace index, to boost search speed
+    u32
+    BuildIndex() const;
+
+    size_t
+    GetModuleCount() const;
+
+    TTD::Replay::Module const*
+    GetModuleList() const;
+
+    size_t
+    GetModuleInstanceCount() const;
+
+    TTD::Replay::ModuleInstance const*
+    GetModuleInstanceList() const;
+
+    size_t
+    GetThreadCount() const;
+
+    TTD::Replay::ThreadInfo const*
+    GetThreadList() const;
+
+    size_t
+    GetModuleLoadedEventCount() const;
+
+    TTD::Replay::ModuleLoadedEvent const*
+    GetModuleLoadedEventList() const;
+
+    size_t
+    GetModuleUnloadedEventCount() const;
+
+    TTD::Replay::ModuleUnloadedEvent const*
+    GetModuleUnloadedEventList() const;
+
+    size_t
+    GetExceptionEventCount() const;
+
+    TTD::Replay::ExceptionEvent const*
+    GetExceptionEventList() const;
+};
+
+
+class ReplayCursor
+{
+private:
     i32 m_Index;
     i32 m_EngineIndex;
 
-    ReplayCursor();
+    /// Initialize the cursor with a specific engine
+    i32 Initialize(i32);
+
+public:
+    ReplayCursor(i32);
 
     ~ReplayCursor();
 
-    /// Initialize the cursor with a specific engine
-    i32 Initialize(i32);
+    i32
+    Index() const;
+
+    i32
+    EngineIndex() const;
 
     /// Unload the cursor
     i32
@@ -113,72 +206,6 @@ struct ReplayCursor
     void
     SetRegisterChangedCallback(TTD::Replay::ICursorView::RegisterChangedCallback*, uptr context);
 #pragma endregion Cursor Callbacks
-};
-
-
-struct ReplayEngine
-{
-    i32 m_Index; // {-1};
-
-    ReplayEngine();
-
-    ~ReplayEngine();
-
-    /// Initialize the engine
-    i32
-    Initialize();
-
-    /// Load trace from the `.run` filepath passed as argument
-    i32
-    Load(const u16* trace) const;
-
-    /// Unload the engine
-    i32
-    Reset();
-
-    /// Get system info from the replay engine
-    TTD::SystemInfo const&
-    GetSystemInfo() const;
-
-    /// Build a trace index, to boost search speed
-    u32
-    BuildIndex() const;
-
-    size_t
-    GetModuleCount() const;
-
-    TTD::Replay::Module const*
-    GetModuleList() const;
-
-    size_t
-    GetModuleInstanceCount() const;
-
-    TTD::Replay::ModuleInstance const*
-    GetModuleInstanceList() const;
-
-    size_t
-    GetThreadCount() const;
-
-    TTD::Replay::ThreadInfo const*
-    GetThreadList() const;
-
-    size_t
-    GetModuleLoadedEventCount() const;
-
-    TTD::Replay::ModuleLoadedEvent const*
-    GetModuleLoadedEventList() const;
-
-    size_t
-    GetModuleUnloadedEventCount() const;
-
-    TTD::Replay::ModuleUnloadedEvent const*
-    GetModuleUnloadedEventList() const;
-
-    size_t
-    GetExceptionEventCount() const;
-
-    TTD::Replay::ExceptionEvent const*
-    GetExceptionEventList() const;
 };
 
 

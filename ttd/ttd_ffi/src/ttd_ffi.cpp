@@ -29,10 +29,10 @@
 #define err(fmt, ...)
 #endif // _DEBUG
 
-static std::array<TTD::Replay::UniqueReplayEngine, 256> g_Engines {};
+static std::array<TTD::Replay::UniqueReplayEngine, TTD_FFI::Replay::MAX_ENGINE> g_Engines {};
 static std::mutex g_EnginesMutex {};
 
-static std::array<TTD::Replay::UniqueCursor, 256> g_Cursors {};
+static std::array<TTD::Replay::UniqueCursor, TTD_FFI::Replay::MAX_CURSOR> g_Cursors {};
 static std::mutex g_CursorsMutex {};
 
 #pragma region TTD_FFI::Replay::ReplayEngine
@@ -41,16 +41,17 @@ static std::mutex g_CursorsMutex {};
     std::lock_guard _lock(g_EnginesMutex);                                                                             \
     if ( this->m_Index < 0 || this->m_Index > g_Engines.size() )                                                       \
     {                                                                                                                  \
-        throw "Corrupted state";                                                                                       \
+        throw "Out-of-bound index for engine ";                                                                        \
     }                                                                                                                  \
     auto& engine = g_Engines.at(this->m_Index);                                                                        \
     if ( !engine )                                                                                                     \
     {                                                                                                                  \
-        throw "Corrupted state";                                                                                       \
+        throw "Invalid engine";                                                                                        \
     }
 
-TTD_FFI::Replay::ReplayEngine::ReplayEngine() : m_Index {-1}
+TTD_FFI::Replay::ReplayEngine::ReplayEngine()
 {
+    this->m_Index = this->Initialize();
 }
 
 TTD_FFI::Replay::ReplayEngine::~ReplayEngine()
@@ -61,6 +62,13 @@ TTD_FFI::Replay::ReplayEngine::~ReplayEngine()
 }
 
 i32
+TTD_FFI::Replay::ReplayEngine::Index() const
+{
+    return this->m_Index;
+}
+
+
+i32
 TTD_FFI::Replay::ReplayEngine::Initialize()
 {
     std::lock_guard _lock(g_EnginesMutex);
@@ -69,8 +77,11 @@ TTD_FFI::Replay::ReplayEngine::Initialize()
         return this->m_Index;
     }
 
+    dbg("ReplayEngine::Initialize()");
+
     for ( auto [idx, cur& ] : std::views::enumerate(g_Engines) )
     {
+        dbg("- engine[%llx] = %p", idx, &cur);
         if ( cur )
         {
             continue;
@@ -85,7 +96,7 @@ TTD_FFI::Replay::ReplayEngine::Initialize()
 
         cur           = std::move(engine);
         this->m_Index = idx;
-        dbg("Allocated new replay engine at Idx=%d", this->m_Index);
+        dbg("Allocated new replay engine at Idx=%lx", this->m_Index);
         break;
     }
 
@@ -101,14 +112,14 @@ TTD_FFI::Replay::ReplayEngine::Load(const u16* trace) const
     if ( !std::filesystem::exists(tracePath) )
     {
         err(L"File %S doesn't exist", tracePath.string().c_str());
-        return -2;
+        return ERROR_NOT_FOUND;
     }
 
     dbg(L"Loading trace %s", tracePath.wstring().c_str());
     if ( !engine->Initialize(tracePath.wstring().c_str()) )
     {
         err(L"Initialize('%S') failed", tracePath.string().c_str());
-        return -1;
+        return LIBTTD_ERROR_INITIALIZATION;
     }
 
     ok(L"Loaded %s...", tracePath.wstring().c_str());
@@ -244,8 +255,11 @@ TTD_FFI::Replay::ReplayEngine::GetExceptionEventList() const
         throw "Corrupted state";                                                                                       \
     }
 
-TTD_FFI::Replay::ReplayCursor::ReplayCursor() : m_Index {-1}, m_EngineIndex {-1}
+TTD_FFI::Replay::ReplayCursor::ReplayCursor(i32 EngineIndex) :
+    m_Index {LIBTTD_INVALID_VALUE},
+    m_EngineIndex {LIBTTD_INVALID_VALUE}
 {
+    this->m_Index = this->Initialize(EngineIndex);
 }
 
 TTD_FFI::Replay::ReplayCursor::~ReplayCursor()
@@ -255,21 +269,41 @@ TTD_FFI::Replay::ReplayCursor::~ReplayCursor()
 }
 
 i32
+TTD_FFI::Replay::ReplayCursor::Index() const
+{
+    return this->m_Index;
+}
+
+i32
+TTD_FFI::Replay::ReplayCursor::EngineIndex() const
+{
+
+    return this->m_EngineIndex;
+}
+
+i32
 TTD_FFI::Replay::ReplayCursor::Initialize(i32 EngineIndex)
 {
     std::lock_guard _lock(g_EnginesMutex);
     std::lock_guard _lock2(g_CursorsMutex);
 
-    if ( this->m_Index >= 0 )
+    if ( this->m_Index >= 0 && this->m_EngineIndex >= 0 )
     {
         return this->m_Index;
     }
 
-    this->m_Index = -1;
-    auto& engine  = g_Engines[EngineIndex];
+    this->m_Index       = LIBTTD_INVALID_VALUE;
+    this->m_EngineIndex = LIBTTD_INVALID_VALUE;
+
+    if ( !(0 <= EngineIndex && EngineIndex < MAX_ENGINE) )
+    {
+        return LIBTTD_ERROR_INVALID_INDEX;
+    }
+
+    auto& engine = g_Engines.at(EngineIndex);
     if ( !engine )
     {
-        return -1;
+        return LIBTTD_ERROR_INVALID_INDEX;
     }
 
     for ( auto [idx, cur& ] : std::views::enumerate(g_Cursors) )
@@ -300,16 +334,17 @@ i32
 TTD_FFI::Replay::ReplayCursor::Reset()
 {
     std::lock_guard _lock(g_CursorsMutex);
-    auto& cursor = g_Cursors[m_Index];
+
+    auto& cursor = g_Cursors.at(this->m_Index);
     if ( !cursor )
     {
         err(L"not initialized");
-        return 1;
+        return LIBTTD_ERROR_INITIALIZATION;
     }
 
     dbg(L"deallocating engine");
     cursor  = nullptr;
-    m_Index = -1;
+    m_Index = LIBTTD_INVALID_VALUE;
     return 0;
 }
 
@@ -355,7 +390,7 @@ TTD_FFI::Replay::ReplayCursor::QueryMemoryBuffer(u64 address, u8* buf, usize buf
 {
     GetCursorSafe();
 
-    dbg(L"QueryMemoryBuffer(addr=%llx ,buf=%p, bufsz=%lu)", address, buf, bufsz);
+    dbg(L"QueryMemoryBuffer(addr=%llx ,buf=%p, bufsz=%llu)", address, buf, bufsz);
     const TTD::Replay::MemoryBuffer res = cursor->QueryMemoryBuffer(
         TTD::GuestAddress {address},
         TTD::BufferView {buf, bufsz},
@@ -372,7 +407,7 @@ TTD_FFI::Replay::ReplayCursor::QueryMemoryBuffer(u64 address, u8* buf, usize buf
 void
 TTD_FFI::Replay::ReplayCursor::SetPosition(TTD::Replay::Position const& pos)
 {
-    dbg(L"Setting position %lx:%lx", (uint64_t)pos.Sequence, (uint64_t)pos.Steps);
+    dbg(L"Setting position %llx:%llx", (uint64_t)pos.Sequence, (uint64_t)pos.Steps);
     GetCursorSafe();
     return cursor->SetPosition(pos);
 }
@@ -381,7 +416,9 @@ TTD::Replay::Position
 TTD_FFI::Replay::ReplayCursor::GetPosition() const
 {
     GetCursorSafe();
-    return cursor->GetPosition();
+    TTD::Replay::Position CurPos = cursor->GetPosition();
+    dbg(L"Current position is %llx:%llx", (uint64_t)CurPos.Sequence, (uint64_t)CurPos.Steps);
+    return CurPos;
 }
 
 TTD::Replay::Position
