@@ -144,6 +144,14 @@ TTD_FFI::Replay::ReplayEngine::GetSystemInfo() const
 }
 
 
+TTD::Replay::PositionRange const&
+TTD_FFI::Replay::ReplayEngine::GetLifetime() const
+{
+    GetEngineSafe();
+    return engine->GetLifetime();
+}
+
+
 u32
 TTD_FFI::Replay::ReplayEngine::BuildIndex() const
 {
@@ -251,6 +259,11 @@ TTD_FFI::Replay::ReplayEngine::GetExceptionEventList() const
     }                                                                                                                  \
     auto& cursor = g_Cursors[this->m_Index];                                                                           \
     if ( !cursor )                                                                                                     \
+    {                                                                                                                  \
+        throw "Corrupted state";                                                                                       \
+    }                                                                                                                  \
+    auto& engine = g_Engines[this->m_EngineIndex];                                                                     \
+    if ( !engine )                                                                                                     \
     {                                                                                                                  \
         throw "Corrupted state";                                                                                       \
     }

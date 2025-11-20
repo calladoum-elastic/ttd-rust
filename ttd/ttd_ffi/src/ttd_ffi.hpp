@@ -65,6 +65,10 @@ public:
     i32
     Reset();
 
+    /// Get the trace entire life range
+    TTD::Replay::PositionRange const&
+    GetLifetime() const;
+
     /// Get system info from the replay engine
     TTD::SystemInfo const&
     GetSystemInfo() const;

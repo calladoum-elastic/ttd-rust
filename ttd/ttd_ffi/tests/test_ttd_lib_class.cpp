@@ -41,6 +41,9 @@ TEST_CASE_METHOD(ReplayEngineTestClass, "Basic Test", "Navigate trace")
 
     REQUIRE(Cursor.GetPosition() == TTD::Replay::Position::Invalid);
 
-    // Cursor.SetPosition(Engine.GetLifetime().Min);
-    // REQUIRE(Cursor.GetPosition() == Engine.GetLifetime().Min);
+    Cursor.SetPosition(Engine.GetLifetime().Min);
+    REQUIRE(Cursor.GetPosition() == Engine.GetLifetime().Min);
+
+    Cursor.SetPosition(Engine.GetLifetime().Max);
+    REQUIRE(Cursor.GetPosition() == Engine.GetLifetime().Max);
 }
