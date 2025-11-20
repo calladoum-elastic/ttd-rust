@@ -165,14 +165,12 @@ fn generate_ttd_bindings() {
         let bindings = bindgen::Builder::default()
             .generate_comments(true)
             .header(src.as_path().to_string_lossy())
-            .clang_arg("-x")
-            .clang_arg("c++")
-            .clang_arg("-std=c++23")
+            .clang_args(["-x", "c++", "-std=c++23"])
             .clang_arg(format!("-I{}", TTD_FFI_INSTALL_INCLUDE_DIR))
-            // .blocklist_type("std::.*")
+            .opaque_type("std::.*")
             .use_core()
-            .blocklist_type("TTD::TBufferView.*")
-            .blocklist_function("TTD::.*GetEndAddress.*") // FIXME (calladoum) leave this for now
+            .opaque_type("TTD::TBufferView.*")
+            .blocklist_function("TTD::.*GetEndAddress.*")
             .allowlist_function("TTD_FFI::.*")
             .allowlist_type("TTD_FFI::.*")
             .allowlist_item("TTD_FFI::.*")
@@ -186,20 +184,16 @@ fn generate_ttd_bindings() {
             .derive_copy(true)
             .derive_hash(true)
             .derive_partialeq(true)
-            .derive_partialord(true)
+            // .derive_partialord(true)
             .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
             .generate()
             .expect("bindgen failed");
 
-        // TODO (calladoum) might want to revisit later to tighten those allow lints
-
         std::fs::write(
             dst.as_path(),
             format!(
-                "
-//! Auto-generated bindings
+                "//! Auto-generated bindings
 #![allow(unused)]
-
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
@@ -257,14 +251,13 @@ fn generate_constant_file() {
     std::fs::write(
         "./src/constants.rs",
         format!(
-            "
-//! Auto-generated constants
+            "//! Auto-generated constants
 #![allow(unused)]
 
-///
+/// The `winget` package name for TTD
 const TTD_PACKAGE_NAME: &str = \"{}\";
 
-///
+/// The `winget` package version for TTD
 const TTD_PACKAGE_VERSION: &str = \"{}\";
 
 ",

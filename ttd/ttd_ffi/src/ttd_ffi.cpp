@@ -15,7 +15,6 @@
 #include <ranges>
 
 #include <TTD/IReplayEngineStl.h>
-
 #include <TTD/TTDLiveRecorder.h>
 // clang-format on
 
@@ -29,18 +28,16 @@
 #define err(fmt, ...)
 #endif // _DEBUG
 
+#pragma region TTD_FFI::Replay::ReplayEngine
+
 static std::array<TTD::Replay::UniqueReplayEngine, TTD_FFI::Replay::MAX_ENGINE> g_Engines {};
 static std::mutex g_EnginesMutex {};
 
-static std::array<TTD::Replay::UniqueCursor, TTD_FFI::Replay::MAX_CURSOR> g_Cursors {};
-static std::mutex g_CursorsMutex {};
-
-#pragma region TTD_FFI::Replay::ReplayEngine
 
 #define GetEngineSafe()                                                                                                \
     std::lock_guard ___lock_engine(g_EnginesMutex);                                                                    \
     dbg(L"fetching engines[%x]", this->m_Index);                                                                       \
-    if ( this->m_Index < 0 || this->m_Index > g_Engines.size() )                                                       \
+    if ( this->m_Index < 0 || this->m_Index >= g_Engines.size() )                                                      \
     {                                                                                                                  \
         throw "Out-of-bound index for engine ";                                                                        \
     }                                                                                                                  \
@@ -131,7 +128,7 @@ i32
 TTD_FFI::Replay::ReplayEngine::Reset()
 {
     GetEngineSafe();
-    dbg(L"deallocating engine");
+    dbg(L"deallocating engines[%ld]", this->m_Index);
     engine  = nullptr;
     m_Index = -1;
     return 0;
@@ -251,19 +248,32 @@ TTD_FFI::Replay::ReplayEngine::GetExceptionEventList() const
 
 #pragma region TTD_FFI::Replay::ReplayCursor
 
+static std::array<TTD::Replay::UniqueCursor, TTD_FFI::Replay::MAX_CURSOR> g_Cursors {};
+static std::mutex g_CursorsMutex {};
+
 #define GetCursorSafe()                                                                                                \
     std::lock_guard ___lock_cursor(g_CursorsMutex);                                                                    \
+    std::lock_guard ___lock_engine(g_EnginesMutex);                                                                    \
     dbg(L"fetching cursors[%x]", this->m_Index);                                                                       \
-    if ( this->m_Index < 0 || this->m_Index > g_Cursors.size() )                                                       \
+    if ( this->m_Index < 0 || this->m_Index >= g_Cursors.size() )                                                      \
     {                                                                                                                  \
         throw "Out-of-bound index for cursor";                                                                         \
+    }                                                                                                                  \
+    dbg(L"fetching engines[%x]", this->m_EngineIndex);                                                                 \
+    if ( this->m_EngineIndex < 0 || this->m_EngineIndex >= g_Engines.size() )                                          \
+    {                                                                                                                  \
+        throw "Out-of-bound index for engine ";                                                                        \
     }                                                                                                                  \
     auto& cursor = g_Cursors[this->m_Index];                                                                           \
     if ( !cursor )                                                                                                     \
     {                                                                                                                  \
         throw "Invalid cursor";                                                                                        \
     }                                                                                                                  \
-    GetEngineSafe()
+    auto& engine = g_Engines.at(this->m_EngineIndex);                                                                  \
+    if ( !engine )                                                                                                     \
+    {                                                                                                                  \
+        throw "Invalid engine";                                                                                        \
+    }
 
 TTD_FFI::Replay::ReplayCursor::ReplayCursor(i32 EngineIndex) :
     m_Index {LIBTTD_INVALID_VALUE},
@@ -348,11 +358,11 @@ TTD_FFI::Replay::ReplayCursor::Reset()
     auto& cursor = g_Cursors.at(this->m_Index);
     if ( !cursor )
     {
-        err(L"not initialized");
+        err(L"cursor not initialized for index %d", this->m_Index);
         return LIBTTD_ERROR_INITIALIZATION;
     }
 
-    dbg(L"deallocating engine");
+    dbg(L"deallocating cursors[%d]", this->m_Index);
     cursor  = nullptr;
     m_Index = LIBTTD_INVALID_VALUE;
     return 0;

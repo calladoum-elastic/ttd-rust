@@ -40,12 +40,25 @@ TEST_CASE_METHOD(ReplayEngineTestClass, "Basic Test", "Navigate trace")
     REQUIRE(Cursor.EngineIndex() < TTD_FFI::Replay::MAX_ENGINE);
     REQUIRE(Cursor.GetPosition() == TTD::Replay::Position::Invalid);
 
+    // Move cursor positions
     for ( auto i = 0; i < 10; i++ )
     {
         Cursor.SetPosition(Engine.GetLifetime().Min);
         REQUIRE(Cursor.GetPosition() == Engine.GetLifetime().Min);
 
         Cursor.SetPosition(Engine.GetLifetime().Max);
+        REQUIRE(Cursor.GetPosition() == Engine.GetLifetime().Max);
+    }
+
+    auto const& Lifetime = Engine.GetLifetime();
+
+    // Replay forward/backward
+    for ( auto i = 0; i < 10; i++ )
+    {
+        Cursor.ReplayBackward(Lifetime.Min);
+        REQUIRE(Cursor.GetPosition() == Engine.GetLifetime().Min);
+
+        Cursor.ReplayForward(Lifetime.Max);
         REQUIRE(Cursor.GetPosition() == Engine.GetLifetime().Max);
     }
 }
