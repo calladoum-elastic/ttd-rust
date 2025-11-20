@@ -364,13 +364,13 @@ TTD_FFI::Replay::ReplayCursor::ReplayForward(TTD::Replay::Position const& limit)
     GetCursorSafe();
 
 #ifdef _DEBUG
-    // std::array<wchar_t, 64> from {};
-    // std::array<wchar_t, 64> to {};
+    std::array<wchar_t, 64> from {};
+    std::array<wchar_t, 64> to {};
 
-    // const auto& cur = cursor->GetPosition();
-    // TTD::Replay::PositionToString(cur, from.data(), from.size() / 2);
-    // TTD::Replay::PositionToString(limit, to.data(), from.size() / 2);
-    // dbg(L"Forward replaying from %s to %s", from, to);
+    const auto& cur = cursor->GetPosition();
+    TTD::Replay::PositionToString(cur, from.data(), from.size() / 2);
+    TTD::Replay::PositionToString(limit, to.data(), from.size() / 2);
+    dbg(L"Forward replaying from %s to %s", from, to);
 #endif // _DEBUG
 
     auto const res = cursor->ReplayForward(limit);
@@ -384,13 +384,13 @@ TTD_FFI::Replay::ReplayCursor::ReplayBackward(TTD::Replay::Position const& limit
     GetCursorSafe();
 
 #ifdef _DEBUG
-    // std::array<wchar_t, 64> from {};
-    // std::array<wchar_t, 64> to {};
+    std::array<wchar_t, 64> from {};
+    std::array<wchar_t, 64> to {};
 
-    // const auto& cur = cursor->GetPosition();
-    // TTD::Replay::PositionToString(cur, from.data(), from.size() / 2);
-    // TTD::Replay::PositionToString(limit, to.data(), from.size() / 2);
-    // dbg(L"Backward replaying from %s to %s", from, to);
+    const auto& cur = cursor->GetPosition();
+    TTD::Replay::PositionToString(cur, from.data(), from.size() / 2);
+    TTD::Replay::PositionToString(limit, to.data(), from.size() / 2);
+    dbg(L"Backward replaying from %s to %s", from, to);
 #endif // _DEBUG
 
     auto const res = cursor->ReplayBackward(limit);

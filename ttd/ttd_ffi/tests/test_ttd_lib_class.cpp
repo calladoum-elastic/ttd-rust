@@ -38,12 +38,14 @@ TEST_CASE_METHOD(ReplayEngineTestClass, "Basic Test", "Navigate trace")
     REQUIRE(Cursor.Index() < TTD_FFI::Replay::MAX_CURSOR);
     REQUIRE(0 <= Cursor.EngineIndex());
     REQUIRE(Cursor.EngineIndex() < TTD_FFI::Replay::MAX_ENGINE);
-
     REQUIRE(Cursor.GetPosition() == TTD::Replay::Position::Invalid);
 
-    Cursor.SetPosition(Engine.GetLifetime().Min);
-    REQUIRE(Cursor.GetPosition() == Engine.GetLifetime().Min);
+    for ( auto i = 0; i < 10; i++ )
+    {
+        Cursor.SetPosition(Engine.GetLifetime().Min);
+        REQUIRE(Cursor.GetPosition() == Engine.GetLifetime().Min);
 
-    Cursor.SetPosition(Engine.GetLifetime().Max);
-    REQUIRE(Cursor.GetPosition() == Engine.GetLifetime().Max);
+        Cursor.SetPosition(Engine.GetLifetime().Max);
+        REQUIRE(Cursor.GetPosition() == Engine.GetLifetime().Max);
+    }
 }
