@@ -99,6 +99,7 @@ fn cmake_build_ffi() {
                 .args(["--build", TTD_FFI_BUILD_DIR])
                 .args(["--parallel", NB_CPU.to_string().as_str()])
                 .args(["--config", BUILD_TYPE])
+                // .args(["--", "-D_LIBTTD_VERBOSE_OUTPUT"]) // Uncomment for verbose output from ttd_ffi
                 .spawn()
                 .unwrap()
                 .wait()

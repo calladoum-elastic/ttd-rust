@@ -1,7 +1,7 @@
 //! Contains the thin wrapper for the unsafe stuff
 
 use derive_more::Display;
-use std::ffi::c_void;
+use std::ffi::{CString, c_void};
 use std::ops::{Add, Sub};
 
 use crate::bindings::root as ffi;
@@ -30,6 +30,45 @@ impl std::fmt::Display for ffi::TTD::Replay::Position {
         write!(f, "{:x}:{:x}", self.Sequence, self.Steps)
     }
 }
+
+// region: EngineInfo
+
+/// General information about the replay engine
+pub struct EngineInfo {
+    pub major: usize,
+    pub minor: usize,
+    pub patch: usize,
+    pub license: String,
+    pub author: String,
+    pub banner: String,
+    pub name: String,
+}
+
+impl Default for EngineInfo {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl EngineInfo {
+    pub fn new() -> Self {
+        let license = unsafe { CString::from_vec_unchecked(crate::bindings::root::TTD_FFI::LibraryLicense.to_vec()) };
+        let author = unsafe { CString::from_vec_unchecked(crate::bindings::root::TTD_FFI::LibraryAuthor.to_vec()) };
+        let banner = unsafe { CString::from_vec_unchecked(crate::bindings::root::TTD_FFI::LibraryBanner.to_vec()) };
+        let name = unsafe { CString::from_vec_unchecked(crate::bindings::root::TTD_FFI::LibraryName.to_vec()) };
+
+        EngineInfo {
+            major: crate::bindings::root::TTD_FFI::LibraryVersionMajor,
+            minor: crate::bindings::root::TTD_FFI::LibraryVersionMinor,
+            patch: crate::bindings::root::TTD_FFI::LibraryVersionPatch,
+            license: license.to_string_lossy().into(),
+            author: author.to_string_lossy().into(),
+            banner: banner.to_string_lossy().into(),
+            name: name.to_string_lossy().into(),
+        }
+    }
+}
+// endregion: EngineInfo
 
 pub struct ReplayEngine {
     inner: ffi::TTD_FFI::Replay::ReplayEngine,
@@ -88,7 +127,17 @@ impl ReplayEngine {
     }
 
     pub fn get_module_list(&self) -> Vec<ffi::TTD::Replay::Module> {
-        unsafe { core::slice::from_raw_parts(self.inner.GetModuleList(), self.get_module_count()).into() }
+        unsafe {
+            let cnt = self.get_module_count();
+            match cnt {
+                0 => vec![],
+                _ => {
+                    let data = self.inner.GetModuleList();
+                    assert!(!data.is_null());
+                    core::slice::from_raw_parts(data, cnt).into()
+                }
+            }
+        }
     }
 
     pub fn get_module_instance_count(&self) -> usize {
@@ -96,7 +145,17 @@ impl ReplayEngine {
     }
 
     pub fn get_module_instance_list(&self) -> Vec<ffi::TTD::Replay::ModuleInstance> {
-        unsafe { core::slice::from_raw_parts(self.inner.GetModuleInstanceList(), self.get_module_instance_count()).into() }
+        unsafe {
+            let cnt = self.get_module_instance_count();
+            match cnt {
+                0 => vec![],
+                _ => {
+                    let data = self.inner.GetModuleInstanceList();
+                    assert!(!data.is_null());
+                    core::slice::from_raw_parts(data, cnt).into()
+                }
+            }
+        }
     }
 
     pub fn get_thread_count(&self) -> usize {
@@ -105,9 +164,15 @@ impl ReplayEngine {
 
     pub fn get_thread_list(&self) -> Vec<ffi::TTD::Replay::ThreadInfo> {
         unsafe {
-            let data = self.inner.GetThreadList();
             let cnt = self.get_thread_count();
-            core::slice::from_raw_parts(data, cnt).into()
+            match cnt {
+                0 => vec![],
+                _ => {
+                    let data = self.inner.GetThreadList();
+                    assert!(!data.is_null());
+                    core::slice::from_raw_parts(data, cnt).into()
+                }
+            }
         }
     }
 
@@ -117,9 +182,15 @@ impl ReplayEngine {
 
     pub fn get_module_loaded_event_list(&self) -> Vec<ffi::TTD::Replay::ModuleLoadedEvent> {
         unsafe {
-            let data = self.inner.GetModuleLoadedEventList();
             let cnt = self.get_module_loaded_event_count();
-            core::slice::from_raw_parts(data, cnt).into()
+            match cnt {
+                0 => vec![],
+                _ => {
+                    let data = self.inner.GetModuleLoadedEventList();
+                    assert!(!data.is_null());
+                    core::slice::from_raw_parts(data, cnt).into()
+                }
+            }
         }
     }
 
@@ -129,9 +200,15 @@ impl ReplayEngine {
 
     pub fn get_module_unloaded_event_list(&self) -> Vec<ffi::TTD::Replay::ModuleUnloadedEvent> {
         unsafe {
-            let data = self.inner.GetModuleUnloadedEventList();
             let cnt = self.get_module_unloaded_event_count();
-            core::slice::from_raw_parts(data, cnt).into()
+            match cnt {
+                0 => vec![],
+                _ => {
+                    let data = self.inner.GetModuleUnloadedEventList();
+                    assert!(!data.is_null());
+                    core::slice::from_raw_parts(data, cnt).into()
+                }
+            }
         }
     }
 
@@ -141,9 +218,15 @@ impl ReplayEngine {
 
     pub fn get_exception_event_list(&self) -> Vec<ffi::TTD::Replay::ExceptionEvent> {
         unsafe {
-            let data = self.inner.GetExceptionEventList();
             let cnt = self.get_exception_event_count();
-            core::slice::from_raw_parts(data, cnt).into()
+            match cnt {
+                0 => vec![],
+                _ => {
+                    let data = self.inner.GetExceptionEventList();
+                    assert!(!data.is_null());
+                    core::slice::from_raw_parts(data, cnt).into()
+                }
+            }
         }
     }
 }
@@ -462,12 +545,22 @@ pub enum ExtendedRegisterContext {
 
 #[cfg(test)]
 mod test {
-    use crate::replay::ReplayEngine;
+    use crate::replay::{EngineInfo, ReplayEngine};
 
     fn get_test_trace() -> Vec<u16> {
         let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
         trace_path.push("test.run\0");
         trace_path.to_string_lossy().encode_utf16().collect()
+    }
+
+    #[test]
+    fn test_version() {
+        let info = EngineInfo::new();
+        assert_eq!((info.major, info.minor, info.patch), (0, 1, 0));
+        assert_ne!(info.license.len(), 0);
+        assert_ne!(info.author.len(), 0);
+        assert_ne!(info.banner.len(), 0);
+        assert_ne!(info.name.len(), 0);
     }
 
     #[test]

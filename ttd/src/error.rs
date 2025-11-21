@@ -1,9 +1,9 @@
 use derive_more::{Display, From};
 
-/// The result type specific to this crate
+/// `ttd` crate specifc result type
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[allow(dead_code)]
+/// `ttd` crate specifc error type
 #[derive(From, Debug, Display, Default)]
 pub enum Error {
     #[default]
@@ -26,10 +26,6 @@ pub enum Error {
 
     #[from]
     Utf16Error(std::string::FromUtf16Error),
-
-    #[from]
-    #[allow(clippy::enum_variant_names)]
-    WindowsError(windows::core::Error),
 
     #[from]
     Null(std::ffi::NulError),

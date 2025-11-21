@@ -3,11 +3,10 @@
 //
 use derive_more::Display;
 
+use ttd_sys as sys;
 use ttd_sys::bindings;
 
 use crate::prelude::*;
-
-use ttd_sys as sys;
 
 use std::ffi::CString;
 use std::ops::{Add, Sub};
@@ -15,6 +14,8 @@ use std::os::windows::ffi::OsStringExt;
 use std::str::FromStr;
 
 use bitflags::bitflags;
+
+pub mod events;
 
 pub type SystemInfo = bindings::root::TTD::SystemInfo;
 pub type ThreadInfo = bindings::root::TTD::Replay::ThreadInfo;
@@ -154,96 +155,7 @@ impl From<bindings::root::TTD::Replay::ICursorView_ReplayResult> for ReplayResul
     }
 }
 
-pub mod events {
-
-    use derive_more::Display;
-
-    use crate::prelude::*;
-    use crate::replay::{ReplayModule, ReplayPosition};
-
-    #[derive(Debug)]
-    pub struct ModuleLoaded {
-        pub position: ReplayPosition,
-        pub module: ReplayModule,
-    }
-
-    impl TryFrom<&ttd_sys::bindings::root::TTD::Replay::ModuleLoadedEvent> for ModuleLoaded {
-        fn try_from(value: &ttd_sys::bindings::root::TTD::Replay::ModuleLoadedEvent) -> Result<Self> {
-            let module = unsafe { (*value.pModule) };
-            Ok(Self {
-                position: value.Position,
-                module: ReplayModule::try_from(&module)?,
-            })
-        }
-        type Error = crate::error::Error;
-    }
-
-    #[derive(Debug)]
-    pub struct ModuleUnloaded {
-        pub position: ReplayPosition,
-        pub module: ReplayModule,
-    }
-    impl TryFrom<&ttd_sys::bindings::root::TTD::Replay::ModuleUnloadedEvent> for ModuleUnloaded {
-        fn try_from(value: &ttd_sys::bindings::root::TTD::Replay::ModuleUnloadedEvent) -> Result<Self> {
-            let module = unsafe { (*value.pModule) };
-            Ok(Self {
-                position: value.Position,
-                module: ReplayModule::try_from(&module)?,
-            })
-        }
-        type Error = crate::error::Error;
-    }
-
-    #[derive(Debug)]
-    pub struct Exception {}
-    impl TryFrom<&ttd_sys::bindings::root::TTD::Replay::ExceptionEvent> for Exception {
-        fn try_from(value: &ttd_sys::bindings::root::TTD::Replay::ExceptionEvent) -> Result<Self> {
-            todo!()
-        }
-        type Error = crate::error::Error;
-    }
-}
-
-// region: EngineInfo
-pub struct EngineInfo {
-    pub major: usize,
-    pub minor: usize,
-    pub patch: usize,
-    pub license: String,
-    pub author: String,
-    pub banner: String,
-    pub name: String,
-}
-
-impl Default for EngineInfo {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl EngineInfo {
-    pub fn new() -> Self {
-        let license = unsafe { CString::from_vec_unchecked(bindings::root::TTD_FFI::LibraryLicense.to_vec()) };
-
-        let author = unsafe { CString::from_vec_unchecked(bindings::root::TTD_FFI::LibraryAuthor.to_vec()) };
-
-        let banner = unsafe { CString::from_vec_unchecked(bindings::root::TTD_FFI::LibraryBanner.to_vec()) };
-
-        let name = unsafe { CString::from_vec_unchecked(bindings::root::TTD_FFI::LibraryName.to_vec()) };
-
-        EngineInfo {
-            major: bindings::root::TTD_FFI::LibraryVersionMajor,
-            minor: bindings::root::TTD_FFI::LibraryVersionMinor,
-            patch: bindings::root::TTD_FFI::LibraryVersionPatch,
-            license: license.to_string_lossy().into(),
-            author: author.to_string_lossy().into(),
-            banner: banner.to_string_lossy().into(),
-            name: name.to_string_lossy().into(),
-        }
-    }
-}
-// endregion: EngineInfo
-
+// region: TTD Replay Cursor
 pub struct ReplayCursor<'a> {
     inner: crate::replay::sys::replay::ReplayCursor<'a>,
 }
@@ -323,9 +235,8 @@ impl<'a> ReplayCursor<'a> {
         Ok(self.inner.get_replay_flags())
     }
 
-    pub fn set_replay_flags(&mut self, flags: ReplayFlags) -> Result<()> {
+    pub fn set_replay_flags(&mut self, flags: ReplayFlags) {
         self.inner.set_replay_flags(flags);
-        Ok(())
     }
 
     pub fn add_memory_watchpoint(&mut self, watch_point: &MemoryWatchpointData) -> Result<bool> {
@@ -354,7 +265,9 @@ impl<'a> ReplayCursor<'a> {
         self.inner.set_register_changed_callback(unsafe { *ptr });
     }
 }
+// endregion: TTD Replay Cursor
 
+// region: TTD Replay Engine
 pub struct ReplayEngine {
     inner: ttd_sys::replay::ReplayEngine,
 }
@@ -470,11 +383,14 @@ impl ReplayEngine {
         Ok(matches.first().ok_or(Error::NotFound)?.module.address)
     }
 }
-// endregion: TTD Replay
+// endregion: TTD Replay Engine
 
 #[cfg(test)]
 mod test {
-    use crate::replay::{EngineInfo, EventType, ReplayCursor, ReplayEngine};
+    use crate::{
+        Error,
+        replay::{EventType, ReplayCursor, ReplayEngine},
+    };
 
     fn get_test_trace() -> std::path::PathBuf {
         let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
@@ -483,17 +399,7 @@ mod test {
     }
 
     #[test]
-    fn test_ffi_version() {
-        let info = EngineInfo::new();
-        assert_eq!((info.major, info.minor, info.patch), (0, 1, 0));
-        assert_ne!(info.license.len(), 0);
-        assert_ne!(info.author.len(), 0);
-        assert_ne!(info.banner.len(), 0);
-        assert_ne!(info.name.len(), 0);
-    }
-
-    #[test]
-    fn test_ffi_load_simple() {
+    fn test_load_simple() {
         let mut engine = ReplayEngine::new().expect("failed to create a new replayer");
 
         let trace_path = get_test_trace();
@@ -527,14 +433,207 @@ mod test {
     }
 
     #[test]
-    fn test_ffi_system_info() {
+    fn test_system_info() {
         let engine = ReplayEngine::new().expect("failed to create a new replayer");
 
         let trace_path = get_test_trace();
-        assert!(engine.load(trace_path.as_path()).is_ok());
 
         let info = engine.system_info().unwrap();
         assert_eq!(info.SystemName.len(), 64);
         assert_eq!(info.UserName.len(), 64);
+    }
+
+    #[test]
+    fn test_get_module_base_address() {
+        let engine = ReplayEngine::new().expect("failed to create a new replayer");
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+
+        let testcases = ["ntdll.dll", "kernel32.dll", "kernelbase.dll"];
+
+        // valid
+        for tc in testcases {
+            let res = engine.get_module_base_address(tc);
+            assert!(res.is_ok_and(|v| v != 0));
+        }
+
+        // invalid
+        let res = engine.get_module_base_address("___fooobar__.dll");
+        assert!(res.is_err());
+        assert!(matches!(res.unwrap_err(), Error::NotFound));
+    }
+
+    #[test]
+    fn test_get_module_list() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        let res = engine.get_module_list();
+        assert!(res.is_ok());
+        let val = res.unwrap();
+        assert!(val.len() == 0);
+
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let res = engine.get_module_list();
+        assert!(res.is_ok());
+        let val = res.unwrap();
+        assert!(val.len() > 0);
+    }
+
+    #[test]
+    fn test_get_thread_list() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        let res = engine.get_thread_list();
+        assert!(res.is_ok());
+        let val = res.unwrap();
+        assert!(val.len() == 0);
+
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let res = engine.get_thread_list();
+        assert!(res.is_ok());
+        let val = res.unwrap();
+        assert!(val.len() > 0);
+    }
+
+    #[test]
+    fn test_get_module_loaded_event_list() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        let res = engine.get_module_loaded_event_list();
+        assert!(res.is_ok());
+        let val = res.unwrap();
+        assert!(val.len() == 0);
+
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let res = engine.get_module_loaded_event_list();
+        assert!(res.is_ok());
+        let val = res.unwrap();
+        assert!(val.len() > 0);
+    }
+
+    #[test]
+    fn test_get_module_unloaded_event_list() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        let res = engine.get_module_unloaded_event_list();
+        assert!(res.is_ok());
+        let val = res.unwrap();
+        assert!(val.len() == 0);
+
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let res = engine.get_module_unloaded_event_list();
+        assert!(res.is_ok());
+        let val = res.unwrap();
+        assert!(val.len() > 0);
+    }
+
+    #[test]
+    fn test_get_exception_event_list() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        let res = engine.get_exception_event_list();
+        assert!(res.is_ok());
+        let val = res.unwrap();
+        assert!(val.len() == 0);
+
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let res = engine.get_exception_event_list();
+        assert!(res.is_ok());
+    }
+
+    #[test]
+    fn test_replay_forward_steps() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let mut cursor = engine.cursor().expect("failed to create a new cursor");
+
+        for step in 1..10u64 {
+            let curpos = cursor.get_position().unwrap();
+            let res = cursor.replay_forward_steps(step).unwrap();
+            assert_eq!(step, res.steps_executed);
+            assert_eq!(res.stop_reason, EventType::Position);
+
+            let res = cursor.replay_backward_steps(step).unwrap();
+            assert_eq!(res.stop_reason, EventType::Position);
+            assert_eq!(0, res.steps_executed);
+        }
+    }
+
+    #[test]
+    fn test_get_set_replay_flags() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let cursor = engine.cursor().expect("failed to create a new cursor");
+        unimplemented!();
+        //cursor.get_replay_flags()
+        //cursor.set_replay_flags()
+    }
+
+    #[test]
+    fn test_add_remove_memory_watchpoint() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let cursor = engine.cursor().expect("failed to create a new cursor");
+        unimplemented!();
+        //cursor.add_memory_watchpoint()
+        //cursor.remove_memory_watchpoint()
+    }
+
+    #[test]
+    fn test_add_remote_position_watchpoint() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let cursor = engine.cursor().expect("failed to create a new cursor");
+        unimplemented!();
+        //cursor.add_position_watchpoint()
+        //cursor.remove_position_watchpoint()
+    }
+
+    #[test]
+    fn test_get_thread_info() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let cursor = engine.cursor().expect("failed to create a new cursor");
+        unimplemented!();
+        //cursor.get_thread_info()
+    }
+
+    #[test]
+    fn test_get_teb_address() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let cursor = engine.cursor().expect("failed to create a new cursor");
+        let addr = cursor.get_teb_address().unwrap();
+        assert_ne!(addr, 0);
+    }
+
+    #[test]
+    fn test_get_program_counter() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let cursor = engine.cursor().expect("failed to create a new cursor");
+        unimplemented!();
+        //cursor.get_program_counter()
+    }
+
+    #[test]
+    fn test_get_stack_pointer() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let cursor = engine.cursor().expect("failed to create a new cursor");
+        unimplemented!();
+        //cursor.get_stack_pointer()
+    }
+
+    #[test]
+    fn test_get_frame_pointer() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let cursor = engine.cursor().expect("failed to create a new cursor");
+        unimplemented!();
+        //cursor.get_frame_pointer()
+    }
+
+    #[test]
+    fn test_get_thread_context() {
+        let engine = ReplayEngine::new().expect("failed to create a new replay engine");
+        assert!(engine.load(get_test_trace().as_path()).is_ok());
+        let cursor = engine.cursor().expect("failed to create a new cursor");
+        unimplemented!();
+        //cursor.get_thread_context()
     }
 }

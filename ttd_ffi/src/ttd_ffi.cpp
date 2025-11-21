@@ -18,16 +18,20 @@
 #include <TTD/TTDLiveRecorder.h>
 // clang-format on
 
-#ifdef _DEBUG
-#define dbg(fmt, ...) ::wprintf("[*] %S " fmt L"\n", __FUNCTION__, __VA_ARGS__)
+#ifdef _LIBTTD_VERBOSE_OUTPUT
 #define ok(fmt, ...) ::wprintf("[+] " fmt L"\n", __VA_ARGS__)
 #define err(fmt, ...) ::wprintf("[-] " fmt L"\n", __VA_ARGS__)
+#ifdef _DEBUG
+#define dbg(fmt, ...) ::wprintf("[*] %S " fmt L"\n", __FUNCTION__, __VA_ARGS__)
 #else
-#define trace(fmt, ...)
+#define dbg(fmt, ...)
+#endif // _DEBUG
+#else
 #define dbg(fmt, ...)
 #define ok(fmt, ...)
 #define err(fmt, ...)
-#endif // _DEBUG
+#endif // _LIBTTD_VERBOSE_OUTPUT
+
 
 #pragma region TTD_FFI::Replay::ReplayEngine
 
@@ -219,7 +223,7 @@ TTD_FFI::Replay::ReplayCursor::ReplayForward(
     dbg(L"Forward replaying from %s to %s", from.data(), to.data());
 #endif // _DEBUG
 
-    TTD::Replay::ICursorView::ReplayResult const res = this->m_Cursor->ReplayForward();
+    TTD::Replay::ICursorView::ReplayResult const res = this->m_Cursor->ReplayForward(limit);
     if ( res.StopReason == TTD::Replay::EventType::Invalid )
         return -1;
 
