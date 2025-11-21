@@ -62,7 +62,7 @@ jobs:
         run: |
           ttd -acceptEula -out $env:TEMP\test -launch c:\windows\system32\cmd.exe "/c whoami"
 
-      - name: Run Rust Tests (debug)
+      - name: Run Tests (debug)
         if: matrix.build == 'debug'
         run: |
           cp .\ttd*.dll .\target\debug\deps\
@@ -70,7 +70,7 @@ jobs:
           ctest --build-config Debug -T test --test-dir .\ttd\ttd_ffi\build\tests
           cargo test
 
-      - name: Run Rust Tests (release)
+      - name: Run Tests (release)
         if: matrix.build == 'release'
         run: |
           cp .\ttd*.dll .\target\release\deps\

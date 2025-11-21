@@ -20,8 +20,8 @@ set(COMMON_TEST_DIR ${PROJECT_TEST_DIR})
 set(
     SOURCE_FILES
 
-    ${COMMON_TEST_DIR}/main.cpp
-    ${COMMON_TEST_DIR}/test_ttd_lib.cpp
+    ${COMMON_TEST_DIR}/test_ttd_lib_basic.cpp
+    ${COMMON_TEST_DIR}/test_ttd_lib_class.cpp
 )
 
 add_compile_definitions(_UNICODE UNICODE)

@@ -1,20 +1,21 @@
+//! For this demonstation unpacker, we want to extract any shellcode that is encoded
+// or encrypted in the trace. We achieve this by watching VirtualProtect
+// calls with the PAGE_EXECUTE_READWRITE.
+// For each of those calls, we jump ahead to the time the culprit address
+// is being executed, and we print the disassembled payload.
+//
+
 use std::ops::Add;
 
 use anyhow::{Result, bail};
 use log::{debug, info, warn};
 
-use ttd::replay::{DataAccessMask, MemoryWatchpointData, RegisterContext, ReplayEngine};
+use ttd::replay::{DataAccessMask, MemoryWatchpointData, RegisterContext, ReplayEngine, ReplayPosition};
 
 fn find_export(_replay: &ReplayEngine, _module_name: &str, _export_name: &str) -> Result<u64> {
     Ok(0x0104290)
 }
 
-/// For this ONweek demo, we want to extract any shellcode that is encoded
-/// or encrypted in the trace. We achieve this by watching VirtualProtect
-/// calls with the PAGE_EXECUTE_READWRITE.
-/// For each of those calls, we jump ahead to the time the culprit address
-/// is being executed, and we print the disassembled payload.
-///
 fn main() -> Result<()> {
     // region: Preamble boiler plate
     env_logger::Builder::new().filter_level(log::LevelFilter::max()).init();
@@ -41,19 +42,23 @@ fn main() -> Result<()> {
     //
     // 2. Set a (execute) memory breakpoint to kernelbase!virtualprotect
     //
+    let mut cursor = replay.cursor()?;
     let watch_point = MemoryWatchpointData {
         Address: virtualprotect_address,
         Size: 1,
         AccessMask: DataAccessMask::Execute.bits(),
         ..Default::default()
     };
-    if !replay.add_memory_watchpoint(&watch_point)? {
-        bail!("Failed to set watchpoint at {:x}", virtualprotect_address);
+    if !cursor.add_memory_watchpoint(&watch_point)? {
+        bail!("Failed to set watchpoint at {:#x}", virtualprotect_address);
     }
+    info!("Watchpoint for execution at {:#x} set", virtualprotect_address);
 
-    let read_u64 = |addr: u32| -> Result<u32> {
-        let mem = replay.read_current_memory(addr.into(), replay.pointer_size()?)?;
-        Ok(u32::from_le_bytes(mem.try_into().unwrap()))
+    let read_u64_at = |addr: u32, pos: &ReplayPosition| -> Result<u32> {
+        let mut cursor = replay.cursor()?;
+        cursor.set_position(pos);
+        let mem = cursor.read_current_memory(addr.into(), cursor.pointer_size()?)?;
+        Ok(u32::from_le_bytes(mem.to_owned().try_into().unwrap()))
     };
 
     let fmt = zydis::Formatter::intel();
@@ -63,22 +68,27 @@ fn main() -> Result<()> {
         //
         // 3. Play the trace
         //
-        let result = replay.replay_forward(None)?;
+        let result = &cursor.replay_forward(None)?;
         if result.stop_reason != ttd::replay::EventType::MemoryWatchpoint {
             break;
         }
         debug!("fwdreplay reason: {}, executed {} insns", result.stop_reason, result.instructions_executed);
-        debug!("context at {}:\n{}", &replay.get_position()?, &replay.get_thread_context()?);
+        debug!("context at {}:\n{}", &cursor.get_position()?, &cursor.get_thread_context()?);
 
         //
         // 4. Inspect the `flNewProtect` argument, looking PAGE_EXECUTE_READWRITE
         //
         const PAGE_EXECUTE_READWRITE: u32 = 0x40;
 
-        let (arg0, arg1, arg2, arg3) = match replay.get_thread_context()? {
+        let (arg0, arg1, arg2, arg3) = match cursor.get_thread_context()? {
             RegisterContext::X86(ctx) => {
-                let esp = ctx.Esp;
-                (read_u64(esp + 0x04)?, read_u64(esp + 0x08)?, read_u64(esp + 0x0c)?, read_u64(esp + 0x10)?)
+                let curpos = cursor.get_position()?;
+                (
+                    read_u64_at(ctx.Esp + 0x04, &curpos)?,
+                    read_u64_at(ctx.Esp + 0x08, &curpos)?,
+                    read_u64_at(ctx.Esp + 0x0c, &curpos)?,
+                    read_u64_at(ctx.Esp + 0x10, &curpos)?,
+                )
             }
             _ => unimplemented!(),
         };
@@ -92,21 +102,21 @@ fn main() -> Result<()> {
         // 5. Set an execution watchpoint on execution to that address
         // And advance to this address
         //
-        replay.remove_memory_watchpoint(&watch_point)?;
-        replay.add_memory_watchpoint(&MemoryWatchpointData {
+        cursor.remove_memory_watchpoint(&watch_point)?;
+        cursor.add_memory_watchpoint(&MemoryWatchpointData {
             Address: arg0.into(),
             Size: 1,
             AccessMask: DataAccessMask::Execute.bits(),
             ..Default::default()
         })?;
 
-        replay.replay_forward(None)?;
+        cursor.replay_forward(None)?;
 
-        let ctx = match replay.get_thread_context()? {
+        let ctx = match cursor.get_thread_context()? {
             RegisterContext::X86(ctx) => ctx,
             _ => unimplemented!(),
         };
-        let mem = replay.read_current_memory(ctx.Eip.into(), arg1 as usize)?;
+        let mem = cursor.read_current_memory(ctx.Eip.into(), arg1 as usize)?;
 
         //
         // 6. When the watchpoint is hit, dump all the instructions
@@ -128,7 +138,7 @@ fn main() -> Result<()> {
         break;
     }
 
-    debug!("end position {}", &replay.get_position()?);
+    debug!("end position {}", &cursor.get_position()?);
     debug!("done in {:.4?}", now.elapsed());
     Ok(())
 }

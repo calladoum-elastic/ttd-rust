@@ -12,175 +12,251 @@
 #include <array>
 #include <atomic>
 #include <mutex>
+#include <ranges>
 
 #include <TTD/IReplayEngineStl.h>
-
 #include <TTD/TTDLiveRecorder.h>
 // clang-format on
 
-
 #ifdef _DEBUG
-#define dbg(fmt, ...) ::wprintf("[*] " fmt L"\n", __VA_ARGS__)
+#define dbg(fmt, ...) ::wprintf("[*] %S " fmt L"\n", __FUNCTION__, __VA_ARGS__)
 #define ok(fmt, ...) ::wprintf("[+] " fmt L"\n", __VA_ARGS__)
 #define err(fmt, ...) ::wprintf("[-] " fmt L"\n", __VA_ARGS__)
 #else
+#define trace(fmt, ...)
 #define dbg(fmt, ...)
 #define ok(fmt, ...)
 #define err(fmt, ...)
 #endif // _DEBUG
 
+#pragma region TTD_FFI::Replay::ReplayEngine
 
-static TTD::Replay::UniqueReplayEngine g_Engine {nullptr};
-static TTD::Replay::UniqueCursor g_Cursor {nullptr};
 
-i32
-TTD_FFI::Replay::Initialize()
+TTD_FFI::Replay::ReplayEngine::ReplayEngine()
 {
-    dbg(L"Initializing %S...", TTD_FFI::LibraryBanner);
-
-    if ( g_Engine )
+    auto [eng, res] = TTD::Replay::MakeReplayEngine();
+    if ( res != 0 || !eng )
     {
-        ok(L"already initialized");
+        throw "CRITICAL - Cannot create replay engine";
+    }
+
+    this->m_Engine = std::move(eng);
+}
+
+TTD_FFI::Replay::ReplayEngine::~ReplayEngine()
+{
+    this->m_Engine = nullptr;
+}
+
+const uptr
+TTD_FFI::Replay::ReplayEngine::NewCursor() const
+{
+    auto cur = this->m_Engine->NewCursor();
+    if ( !cur )
+    {
+        err("CRITICAL - Cannot create cursor from ReplayEngine");
         return 0;
     }
 
-    ok(L"Initialized %S...", TTD_FFI::LibraryBanner);
-
-    auto [engine, result] = TTD::Replay::MakeReplayEngine();
-    if ( result != 0 || !engine )
-    {
-        err(L"MakeReplayEngine() failed: retcode=%x", result);
-        return -1;
-    }
-
-    g_Engine = std::move(engine);
-
-    return 0;
+    return (uptr)cur;
 }
-
 
 i32
-TTD_FFI::Replay::Load(const u16* trace)
+TTD_FFI::Replay::ReplayEngine::Load(const u16* trace) const
 {
-    dbg(L"Loading trace %s", trace);
-    if ( !g_Engine->Initialize((PCWSTR)trace) )
+    const std::filesystem::path tracePath {(const wchar_t*)trace};
+    if ( !std::filesystem::exists(tracePath) )
     {
-        err(L"Initialize('%s') failed", trace);
-        return -1;
+        err(L"File %S doesn't exist", tracePath.string().c_str());
+        return ERROR_NOT_FOUND;
     }
-    ok(L"Loaded %s...", trace);
 
-    dbg(L"creating cursor");
-    TTD::Replay::UniqueCursor cursor(g_Engine->NewCursor());
-    dbg(L"setting cursor to start of trace");
-    cursor->SetPosition(g_Engine->GetLifetime().Min);
+    dbg(L"Loading trace %s", tracePath.wstring().c_str());
+    if ( !this->m_Engine->Initialize(tracePath.wstring().c_str()) )
+    {
+        err(L"Initialize('%S') failed", tracePath.string().c_str());
+        return LIBTTD_ERROR_INITIALIZATION;
+    }
 
-    g_Cursor = std::move(cursor);
+    ok(L"Loaded %s...", tracePath.wstring().c_str());
     return 0;
 }
 
-int32_t
-TTD_FFI::Replay::Reset()
+TTD::SystemInfo const&
+TTD_FFI::Replay::ReplayEngine::GetSystemInfo() const
 {
-    if ( !g_Engine )
-    {
-        err(L"not initialized");
-        return 1;
-    }
-
-    dbg(L"deallocating engine");
-    g_Engine = nullptr;
-    g_Cursor = nullptr;
-
-    return 0;
+    return this->m_Engine->GetSystemInfo();
 }
 
 
-TTD::SystemInfo
-TTD_FFI::Replay::GetSystemInfo()
+TTD::Replay::PositionRange const&
+TTD_FFI::Replay::ReplayEngine::GetLifetime() const
 {
-    return g_Engine->GetSystemInfo();
+    return this->m_Engine->GetLifetime();
 }
 
 
 u32
-TTD_FFI::Replay::BuildIndex()
+TTD_FFI::Replay::ReplayEngine::BuildIndex() const
 {
     auto progress_cb = [](void const* pCallerContext, TTD::Replay::IndexBuildProgressType const* pProgressData) {};
 
     return std::underlying_type_t<TTD::Replay::IndexStatus>(
-        g_Engine->BuildIndex(progress_cb, nullptr, TTD::Replay::IndexBuildFlags::None));
+        this->m_Engine->BuildIndex(progress_cb, nullptr, TTD::Replay::IndexBuildFlags::None));
 }
 
-
-TTD::Replay::ICursorView::ReplayResult
-TTD_FFI::Replay::ReplayForward()
+size_t
+TTD_FFI::Replay::ReplayEngine::GetModuleCount() const
 {
-    return ReplayForward(TTD::Replay::Position::Max);
+
+    return this->m_Engine->GetModuleCount();
 }
 
-
-TTD::Replay::ICursorView::ReplayResult
-TTD_FFI::Replay::ReplayForward(TTD::Replay::Position limit)
+TTD::Replay::Module const*
+TTD_FFI::Replay::ReplayEngine::GetModuleList() const
 {
-#ifdef _DEBUG
-    wchar_t from[1000] {};
-    wchar_t to[1000] {};
 
-    const auto cur = TTD_FFI::Replay::GetPosition();
-    TTD::Replay::PositionToString(cur, from, _countof(from));
-    TTD::Replay::PositionToString(limit, to, _countof(to));
-
-    dbg(L"Forward replaying from %s to %s", from, to);
-#endif // _DEBUG
-
-    return g_Cursor->ReplayForward(limit);
+    return this->m_Engine->GetModuleList();
 }
 
-
-TTD::Replay::ICursorView::ReplayResult
-TTD_FFI::Replay::ReplayBackward()
+size_t
+TTD_FFI::Replay::ReplayEngine::GetModuleInstanceCount() const
 {
-    return ReplayBackward(TTD::Replay::Position::Min);
+
+    return this->m_Engine->GetModuleInstanceCount();
 }
 
-
-TTD::Replay::ICursorView::ReplayResult
-TTD_FFI::Replay::ReplayBackward(TTD::Replay::Position limit)
+TTD::Replay::ModuleInstance const*
+TTD_FFI::Replay::ReplayEngine::GetModuleInstanceList() const
 {
-#ifdef _DEBUG
-    wchar_t from[1000] {};
-    wchar_t to[1000] {};
 
-    const auto cur = TTD_FFI::Replay::GetPosition();
-    TTD::Replay::PositionToString(cur, from, _countof(from));
-    TTD::Replay::PositionToString(limit, to, _countof(to));
-
-    dbg(L"Backward replaying from %s to %s", from, to);
-#endif // _DEBUG
-
-    return g_Cursor->ReplayBackward(limit);
+    return this->m_Engine->GetModuleInstanceList();
 }
 
-
-void
-TTD_FFI::Replay::SetPosition(TTD::Replay::Position const& pos)
+size_t
+TTD_FFI::Replay::ReplayEngine::GetThreadCount() const
 {
-    dbg(L"Setting position %x:%x", pos.Sequence, pos.Steps);
-    return g_Cursor->SetPosition(pos);
+
+    return this->m_Engine->GetThreadCount();
 }
 
-TTD::Replay::Position
-TTD_FFI::Replay::GetPosition()
+TTD::Replay::ThreadInfo const*
+TTD_FFI::Replay::ReplayEngine::GetThreadList() const
 {
-    return g_Cursor->GetPosition();
+
+    return this->m_Engine->GetThreadList();
+}
+
+size_t
+TTD_FFI::Replay::ReplayEngine::GetModuleLoadedEventCount() const
+{
+
+    return this->m_Engine->GetModuleLoadedEventCount();
+}
+
+TTD::Replay::ModuleLoadedEvent const*
+TTD_FFI::Replay::ReplayEngine::GetModuleLoadedEventList() const
+{
+
+    return this->m_Engine->GetModuleLoadedEventList();
+}
+
+size_t
+TTD_FFI::Replay::ReplayEngine::GetModuleUnloadedEventCount() const
+{
+
+    return this->m_Engine->GetModuleUnloadedEventCount();
+}
+
+TTD::Replay::ModuleUnloadedEvent const*
+TTD_FFI::Replay::ReplayEngine::GetModuleUnloadedEventList() const
+{
+
+    return this->m_Engine->GetModuleUnloadedEventList();
+}
+
+size_t
+TTD_FFI::Replay::ReplayEngine::GetExceptionEventCount() const
+{
+
+    return this->m_Engine->GetExceptionEventCount();
+}
+
+TTD::Replay::ExceptionEvent const*
+TTD_FFI::Replay::ReplayEngine::GetExceptionEventList() const
+{
+    return this->m_Engine->GetExceptionEventList();
+}
+
+#pragma endregion TTD_FFI::Replay::ReplayEngine
+
+#pragma region TTD_FFI::Replay::ReplayCursor
+
+TTD_FFI::Replay::ReplayCursor::ReplayCursor(const uptr raw_cursor) :
+    m_Cursor {TTD::Replay::UniqueCursor((TTD::Replay::ICursor*)raw_cursor)}
+{
+    dbg(L"Allocating cursor");
+}
+
+TTD_FFI::Replay::ReplayCursor::~ReplayCursor()
+{
+    dbg(L"Destroying cursor");
+    this->m_Cursor = nullptr;
 }
 
 i32
-TTD_FFI::Replay::QueryMemoryBuffer(u64 address, u8* buf, usize bufsz)
+TTD_FFI::Replay::ReplayCursor::ReplayForward(
+    TTD::Replay::Position const& limit,
+    TTD::Replay::ICursorView::ReplayResult* out)
 {
-    dbg(L"QueryMemoryBuffer(addr=%llx ,buf=%p, bufsz=%d)", address, buf, bufsz);
-    const TTD::Replay::MemoryBuffer res = g_Cursor->QueryMemoryBuffer(
+#ifdef _DEBUG
+    std::array<wchar_t, 64> from {};
+    std::array<wchar_t, 64> to {};
+
+    const auto& cur = this->m_Cursor->GetPosition();
+    TTD::Replay::PositionToString(cur, from.data(), from.size());
+    TTD::Replay::PositionToString(limit, to.data(), from.size());
+    dbg(L"Forward replaying from %s to %s", from.data(), to.data());
+#endif // _DEBUG
+
+    TTD::Replay::ICursorView::ReplayResult const res = this->m_Cursor->ReplayForward();
+    if ( res.StopReason == TTD::Replay::EventType::Invalid )
+        return -1;
+
+    ::memcpy(out, &res, sizeof(res));
+    return 0;
+}
+
+
+i32
+TTD_FFI::Replay::ReplayCursor::ReplayBackward(
+    TTD::Replay::Position const& limit,
+    TTD::Replay::ICursorView::ReplayResult* out)
+{
+#ifdef _DEBUG
+    std::array<wchar_t, 64> from {};
+    std::array<wchar_t, 64> to {};
+
+    const auto& cur = this->m_Cursor->GetPosition();
+    TTD::Replay::PositionToString(cur, from.data(), from.size());
+    TTD::Replay::PositionToString(limit, to.data(), from.size());
+    dbg(L"Backward replaying from %s to %s", from.data(), to.data());
+#endif // _DEBUG
+
+    TTD::Replay::ICursorView::ReplayResult const res = this->m_Cursor->ReplayBackward(limit);
+    if ( res.StopReason == TTD::Replay::EventType::Invalid )
+        return -1;
+
+    ::memcpy(out, &res, sizeof(res));
+    return 0;
+}
+
+i32
+TTD_FFI::Replay::ReplayCursor::QueryMemoryBuffer(u64 address, u8* buf, usize bufsz) const
+{
+
+    dbg(L"QueryMemoryBuffer(addr=%llx ,buf=%p, bufsz=%llu)", address, buf, bufsz);
+    const TTD::Replay::MemoryBuffer res = this->m_Cursor->QueryMemoryBuffer(
         TTD::GuestAddress {address},
         TTD::BufferView {buf, bufsz},
         TTD::Replay::QueryMemoryPolicy::Default);
@@ -193,188 +269,132 @@ TTD_FFI::Replay::QueryMemoryBuffer(u64 address, u8* buf, usize bufsz)
     return 0;
 }
 
+void
+TTD_FFI::Replay::ReplayCursor::SetPosition(TTD::Replay::Position const& pos)
+{
+    dbg(L"Setting position %llx:%llx", (uint64_t)pos.Sequence, (uint64_t)pos.Steps);
+    return this->m_Cursor->SetPosition(pos);
+}
+
+TTD::Replay::Position const&
+TTD_FFI::Replay::ReplayCursor::GetPosition() const
+{
+    auto const& CurPos = this->m_Cursor->GetPosition();
+    dbg(L"Current position is %llx:%llx", (uint64_t)CurPos.Sequence, (uint64_t)CurPos.Steps);
+    return CurPos;
+}
+
+TTD::Replay::Position const&
+TTD_FFI::Replay::ReplayCursor::GetPreviousPosition() const
+{
+    return this->m_Cursor->GetPreviousPosition();
+}
+
 TTD::Replay::ThreadInfo const&
-TTD_FFI::Replay::GetThreadInfo()
+TTD_FFI::Replay::ReplayCursor::GetThreadInfo() const
 {
-    return g_Cursor->GetThreadInfo();
-}
-
-TTD::Replay::Position
-TTD_FFI::Replay::GetPreviousPosition()
-{
-    return g_Cursor->GetPreviousPosition();
+    return this->m_Cursor->GetThreadInfo();
 }
 
 u64
-TTD_FFI::Replay::GetTebAddress()
+TTD_FFI::Replay::ReplayCursor::GetTebAddress() const
 {
-    return (u64)g_Cursor->GetTebAddress();
+    return (u64)this->m_Cursor->GetTebAddress();
 }
 
 u64
-TTD_FFI::Replay::GetProgramCounter()
+TTD_FFI::Replay::ReplayCursor::GetProgramCounter() const
 {
-    return (u64)g_Cursor->GetProgramCounter();
+    return (u64)this->m_Cursor->GetProgramCounter();
 }
 
 u64
-TTD_FFI::Replay::GetStackPointer()
+TTD_FFI::Replay::ReplayCursor::GetStackPointer() const
 {
-    return (u64)g_Cursor->GetStackPointer();
+    return (u64)this->m_Cursor->GetStackPointer();
 }
 
 u64
-TTD_FFI::Replay::GetFramePointer()
+TTD_FFI::Replay::ReplayCursor::GetFramePointer() const
 {
-    return (u64)g_Cursor->GetFramePointer();
+    return (u64)this->m_Cursor->GetFramePointer();
 }
 
-X86_NT5_CONTEXT
-TTD_FFI::Replay::GetX86RegisterContext()
+X86_NT5_CONTEXT*
+TTD_FFI::Replay::ReplayCursor::GetX86RegisterContext() const
 {
-    const auto ctx = reinterpret_cast<X86_NT5_CONTEXT*>(g_Cursor->GetCrossPlatformContext().Data);
-    return *ctx;
+    return reinterpret_cast<X86_NT5_CONTEXT*>(this->m_Cursor->GetCrossPlatformContext().Data);
 }
 
-AVX_EXTENDED_CONTEXT
-TTD_FFI::Replay::GetX86ExtendedRegisterContext()
+AVX_EXTENDED_CONTEXT*
+TTD_FFI::Replay::ReplayCursor::GetX86ExtendedRegisterContext() const
 {
-    const auto ctx = reinterpret_cast<AVX_EXTENDED_CONTEXT*>(g_Cursor->GetCrossPlatformContext().Data);
-    return *ctx;
+    return reinterpret_cast<AVX_EXTENDED_CONTEXT*>(this->m_Cursor->GetCrossPlatformContext().Data);
 }
 
-AMD64_CONTEXT
-TTD_FFI::Replay::GetX64RegisterContext()
+AMD64_CONTEXT*
+TTD_FFI::Replay::ReplayCursor::GetX64RegisterContext() const
 {
-    const auto ctx = reinterpret_cast<AMD64_CONTEXT*>(g_Cursor->GetCrossPlatformContext().Data);
-    return *ctx;
+    return reinterpret_cast<AMD64_CONTEXT*>(this->m_Cursor->GetCrossPlatformContext().Data);
 }
 
 
-AVX_EXTENDED_CONTEXT
-TTD_FFI::Replay::GetX64ExtendedRegisterContext()
+AVX_EXTENDED_CONTEXT*
+TTD_FFI::Replay::ReplayCursor::GetX64ExtendedRegisterContext() const
 {
-    const auto ctx = reinterpret_cast<AVX_EXTENDED_CONTEXT*>(g_Cursor->GetCrossPlatformContext().Data);
-    return *ctx;
+    return reinterpret_cast<AVX_EXTENDED_CONTEXT*>(this->m_Cursor->GetCrossPlatformContext().Data);
 }
 
 void
-TTD_FFI::Replay::SetReplayFlags(TTD::Replay::ReplayFlags flags)
+TTD_FFI::Replay::ReplayCursor::SetReplayFlags(TTD::Replay::ReplayFlags flags)
 {
-    return g_Cursor->SetReplayFlags(flags);
+    return this->m_Cursor->SetReplayFlags(flags);
 }
 
 TTD::Replay::ReplayFlags
-TTD_FFI::Replay::GetReplayFlags()
+TTD_FFI::Replay::ReplayCursor::GetReplayFlags() const
 {
-    return g_Cursor->GetReplayFlags();
+    return this->m_Cursor->GetReplayFlags();
+}
+
+bool
+TTD_FFI::Replay::ReplayCursor::AddMemoryWatchpoint(_In_ TTD::Replay::MemoryWatchpointData const& WatchPoint)
+{
+    return this->m_Cursor->AddMemoryWatchpoint(WatchPoint);
+}
+
+bool
+TTD_FFI::Replay::ReplayCursor::RemoveMemoryWatchpoint(_In_ TTD::Replay::MemoryWatchpointData const& WatchPoint)
+{
+    return this->m_Cursor->RemoveMemoryWatchpoint(WatchPoint);
+}
+
+bool
+TTD_FFI::Replay::ReplayCursor::AddPositionWatchpoint(_In_ TTD::Replay::PositionWatchpointData const& WatchPoint)
+{
+    return this->m_Cursor->AddPositionWatchpoint(WatchPoint);
+}
+
+bool
+TTD_FFI::Replay::ReplayCursor::RemovePositionWatchpoint(_In_ TTD::Replay::PositionWatchpointData const& WatchPoint)
+{
+    return this->m_Cursor->RemovePositionWatchpoint(WatchPoint);
 }
 
 void
-TTD_FFI::Replay::SetReplayProgressCallback(TTD::Replay::ICursorView::ReplayProgressCallback* cb, uptr context)
+TTD_FFI::Replay::ReplayCursor::SetReplayProgressCallback(
+    TTD::Replay::ICursorView::ReplayProgressCallback* cb,
+    uptr context)
 {
-    g_Cursor->SetReplayProgressCallback(cb, context);
+    this->m_Cursor->SetReplayProgressCallback(cb, context);
 }
 
 void
-TTD_FFI::Replay::SetRegisterChangedCallback(TTD::Replay::ICursorView::RegisterChangedCallback* cb, uptr context)
+TTD_FFI::Replay::ReplayCursor::SetRegisterChangedCallback(
+    TTD::Replay::ICursorView::RegisterChangedCallback* cb,
+    uptr context)
 {
-    g_Cursor->SetRegisterChangedCallback(cb, context);
+    this->m_Cursor->SetRegisterChangedCallback(cb, context);
 }
 
-
-bool
-TTD_FFI::Replay::AddMemoryWatchpoint(_In_ TTD::Replay::MemoryWatchpointData const& WatchPoint)
-{
-    return g_Cursor->AddMemoryWatchpoint(WatchPoint);
-}
-
-bool
-TTD_FFI::Replay::RemoveMemoryWatchpoint(_In_ TTD::Replay::MemoryWatchpointData const& WatchPoint)
-{
-    return g_Cursor->RemoveMemoryWatchpoint(WatchPoint);
-}
-
-bool
-TTD_FFI::Replay::AddPositionWatchpoint(_In_ TTD::Replay::PositionWatchpointData const& WatchPoint)
-{
-    return g_Cursor->AddPositionWatchpoint(WatchPoint);
-}
-
-bool
-TTD_FFI::Replay::RemovePositionWatchpoint(_In_ TTD::Replay::PositionWatchpointData const& WatchPoint)
-{
-    return g_Cursor->RemovePositionWatchpoint(WatchPoint);
-}
-
-size_t
-TTD_FFI::Replay::GetModuleCount()
-{
-    return g_Engine->GetModuleCount();
-}
-
-TTD::Replay::Module const*
-TTD_FFI::Replay::GetModuleList()
-{
-    return g_Engine->GetModuleList();
-}
-
-size_t
-TTD_FFI::Replay::GetModuleInstanceCount()
-{
-    return g_Engine->GetModuleInstanceCount();
-}
-
-TTD::Replay::ModuleInstance const*
-TTD_FFI::Replay::GetModuleInstanceList()
-{
-    return g_Engine->GetModuleInstanceList();
-}
-
-size_t
-TTD_FFI::Replay::GetThreadCount()
-{
-    return g_Engine->GetThreadCount();
-}
-
-TTD::Replay::ThreadInfo const*
-TTD_FFI::Replay::GetThreadList()
-{
-    return g_Engine->GetThreadList();
-}
-
-size_t
-TTD_FFI::Replay::GetModuleLoadedEventCount()
-{
-    return g_Engine->GetModuleLoadedEventCount();
-}
-
-TTD::Replay::ModuleLoadedEvent const*
-TTD_FFI::Replay::GetModuleLoadedEventList()
-{
-    return g_Engine->GetModuleLoadedEventList();
-}
-
-size_t
-TTD_FFI::Replay::GetModuleUnloadedEventCount()
-{
-    return g_Engine->GetModuleUnloadedEventCount();
-}
-
-TTD::Replay::ModuleUnloadedEvent const*
-TTD_FFI::Replay::GetModuleUnloadedEventList()
-{
-    return g_Engine->GetModuleUnloadedEventList();
-}
-
-size_t
-TTD_FFI::Replay::GetExceptionEventCount()
-{
-    return g_Engine->GetExceptionEventCount();
-}
-
-TTD::Replay::ExceptionEvent const*
-TTD_FFI::Replay::GetExceptionEventList()
-{
-    return g_Engine->GetExceptionEventList();
-}
+#pragma endregion TTD_FFI::Replay::ReplayCursor

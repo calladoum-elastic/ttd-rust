@@ -17,147 +17,198 @@ using isize = i64;
 using usize = u64;
 using uptr  = usize;
 
+#include <vector>
+
 #include "TTD/IReplayEngine.h"
 #include "TTD/IReplayEngineRegisters.h"
 #include "TTD/IReplayEngineStl.h"
 
+
+#define LIBTTD_INVALID_VALUE ((i32) - 1)
+#define LIBTTD_ERROR_GENERIC ((i32) - 1)
+#define LIBTTD_ERROR_NOT_FOUND ((i32) - 2)
+#define LIBTTD_ERROR_INITIALIZATION ((i32) - 3)
+#define LIBTTD_ERROR_INVALID_INDEX ((i32) - 4)
+
+
 namespace TTD_FFI::Replay
 {
 
-/// Initialize the engine
-i32
-Initialize();
+const static size_t MAX_ENGINE = 256;
+const static size_t MAX_CURSOR = 256;
 
-/// Load trace and allocate cursor
-i32
-Load(const u16* trace);
 
-/// Unload the engine
-i32
-Reset();
+class ReplayEngine
+{
+private:
+    TTD::Replay::UniqueReplayEngine m_Engine;
 
-/// Get system info from the replay engine
-TTD::SystemInfo
-GetSystemInfo();
+public:
+    /// Initialize the engine
+    ReplayEngine();
 
-/// Build a trace index, to boost search speed
-u32
-BuildIndex();
+    /// Destroy the engine
+    ~ReplayEngine();
 
-TTD::Replay::ICursorView::ReplayResult
-ReplayForward();
+    /// Creates a new cursor on the heap, and returns the pointer as raw value.
+    const uptr
+    NewCursor() const;
 
-TTD::Replay::ICursorView::ReplayResult
-ReplayForward(TTD::Replay::Position limit);
+    /// Load trace from the `.run` filepath passed as argument
+    i32
+    Load(const u16* trace) const;
 
-TTD::Replay::ICursorView::ReplayResult
-ReplayBackward();
+    /// Get the trace entire life range
+    TTD::Replay::PositionRange const&
+    GetLifetime() const;
 
-TTD::Replay::ICursorView::ReplayResult
-ReplayBackward(TTD::Replay::Position limit);
+    /// Get system info from the replay engine
+    TTD::SystemInfo const&
+    GetSystemInfo() const;
 
-void
-SetPosition(TTD::Replay::Position const& pos);
+    /// Build a trace index, to boost search speed
+    u32
+    BuildIndex() const;
 
-TTD::Replay::Position
-GetPosition();
+    size_t
+    GetModuleCount() const;
 
-i32
-QueryMemoryBuffer(u64 address, u8* buf, usize bufsz);
+    TTD::Replay::Module const*
+    GetModuleList() const;
 
-TTD::Replay::ThreadInfo const&
-GetThreadInfo();
+    size_t
+    GetModuleInstanceCount() const;
 
-TTD::Replay::Position
-GetPreviousPosition();
+    TTD::Replay::ModuleInstance const*
+    GetModuleInstanceList() const;
 
-u64
-GetTebAddress();
+    size_t
+    GetThreadCount() const;
 
-u64
-GetProgramCounter();
+    TTD::Replay::ThreadInfo const*
+    GetThreadList() const;
 
-u64
-GetStackPointer();
+    size_t
+    GetModuleLoadedEventCount() const;
 
-u64
-GetFramePointer();
+    TTD::Replay::ModuleLoadedEvent const*
+    GetModuleLoadedEventList() const;
 
-X86_NT5_CONTEXT
-GetX86RegisterContext();
+    size_t
+    GetModuleUnloadedEventCount() const;
 
-AVX_EXTENDED_CONTEXT
-GetX86ExtendedRegisterContext();
+    TTD::Replay::ModuleUnloadedEvent const*
+    GetModuleUnloadedEventList() const;
 
-AMD64_CONTEXT
-GetX64RegisterContext();
+    size_t
+    GetExceptionEventCount() const;
 
-AVX_EXTENDED_CONTEXT
-GetX64ExtendedRegisterContext();
+    TTD::Replay::ExceptionEvent const*
+    GetExceptionEventList() const;
+};
 
-void
-SetReplayFlags(TTD::Replay::ReplayFlags flags);
 
-TTD::Replay::ReplayFlags
-GetReplayFlags();
+class ReplayCursor
+{
+private:
+    TTD::Replay::UniqueCursor m_Cursor;
 
-bool
-AddMemoryWatchpoint(TTD::Replay::MemoryWatchpointData const&);
+public:
+    /// Initialize a `ReplayCursor`. The argument is a raw pointer to a `TTD::Replay::ICursor`
+    /// which will be owned and managed by this instance.
+    ReplayCursor(const uptr);
 
-bool
-RemoveMemoryWatchpoint(TTD::Replay::MemoryWatchpointData const&);
+    ~ReplayCursor();
 
-bool
-AddPositionWatchpoint(TTD::Replay::PositionWatchpointData const&);
+    i32
+    Index() const;
 
-bool
-RemovePositionWatchpoint(TTD::Replay::PositionWatchpointData const&);
+    i32
+    EngineIndex() const;
 
-size_t
-GetModuleCount();
+    /// Unload the cursor
+    i32
+    Reset();
 
-TTD::Replay::Module const*
-GetModuleList();
+    /// Replay the trace forward.
+    /// Note: it is the responsibility of the caller to allocate and manage the `ReplayResult*` structure
+    /// @returns 0 on success
+    i32
+    ReplayForward(TTD::Replay::Position const&, TTD::Replay::ICursorView::ReplayResult*);
 
-size_t
-GetModuleInstanceCount();
+    /// Replay the trace backward.
+    /// Note: it is the responsibility of the caller to allocate and manage the `ReplayResult*` structure
+    /// @returns 0 on success
+    i32
+    ReplayBackward(TTD::Replay::Position const&, TTD::Replay::ICursorView::ReplayResult*);
 
-TTD::Replay::ModuleInstance const*
-GetModuleInstanceList();
+    void
+    SetPosition(TTD::Replay::Position const& pos);
 
-size_t
-GetThreadCount();
+    TTD::Replay::Position const&
+    GetPosition() const;
 
-TTD::Replay::ThreadInfo const*
-GetThreadList();
+    TTD::Replay::Position const&
+    GetPreviousPosition() const;
 
-size_t
-GetModuleLoadedEventCount();
+    TTD::Replay::ThreadInfo const&
+    GetThreadInfo() const;
 
-TTD::Replay::ModuleLoadedEvent const*
-GetModuleLoadedEventList();
+    u64
+    GetTebAddress() const;
 
-size_t
-GetModuleUnloadedEventCount();
+    u64
+    GetProgramCounter() const;
 
-TTD::Replay::ModuleUnloadedEvent const*
-GetModuleUnloadedEventList();
+    u64
+    GetStackPointer() const;
 
-size_t
-GetExceptionEventCount();
+    u64
+    GetFramePointer() const;
 
-TTD::Replay::ExceptionEvent const*
-GetExceptionEventList();
+    X86_NT5_CONTEXT*
+    GetX86RegisterContext() const;
 
-// Cursor Callbacks
+    AVX_EXTENDED_CONTEXT*
+    GetX86ExtendedRegisterContext() const;
 
-void
-SetReplayProgressCallback(TTD::Replay::ICursorView::ReplayProgressCallback* cb, uptr context);
+    AMD64_CONTEXT*
+    GetX64RegisterContext() const;
 
-void
-SetRegisterChangedCallback(TTD::Replay::ICursorView::RegisterChangedCallback*, uptr context);
+    AVX_EXTENDED_CONTEXT*
+    GetX64ExtendedRegisterContext() const;
 
-// End of Cursor Callbacks
+    void
+    SetReplayFlags(TTD::Replay::ReplayFlags flags);
+
+    TTD::Replay::ReplayFlags
+    GetReplayFlags() const;
+
+    i32
+    QueryMemoryBuffer(u64 address, u8* buf, usize bufsz) const;
+
+    bool
+    AddMemoryWatchpoint(TTD::Replay::MemoryWatchpointData const&);
+
+    bool
+    RemoveMemoryWatchpoint(TTD::Replay::MemoryWatchpointData const&);
+
+    bool
+    AddPositionWatchpoint(TTD::Replay::PositionWatchpointData const&);
+
+    bool
+    RemovePositionWatchpoint(TTD::Replay::PositionWatchpointData const&);
+
+
+#pragma region Cursor Callbacks
+    void
+    SetReplayProgressCallback(TTD::Replay::ICursorView::ReplayProgressCallback* cb, uptr context);
+
+    void
+    SetRegisterChangedCallback(TTD::Replay::ICursorView::RegisterChangedCallback*, uptr context);
+#pragma endregion Cursor Callbacks
+};
+
 
 } // namespace TTD_FFI::Replay
 #endif // !__HAS_TTD_FFI
