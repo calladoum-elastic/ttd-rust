@@ -379,7 +379,6 @@ impl<'a> ReplayCursor<'a> {
     }
 }
 
-// #[derive(Default, Debug)]
 pub struct ReplayEngine {
     inner: crate::replay::sys::ReplayEngine,
 }
@@ -404,16 +403,20 @@ impl ReplayEngine {
         }
     }
 
+    /// The proper way to get a new cursor for the replay engine.
     pub fn cursor(&'_ self) -> Result<ReplayCursor<'_>> {
         Ok(ReplayCursor { inner: self.inner.cursor()? })
     }
 
-    pub fn get_lifetime(&self) -> Result<&PositionRange> {
-        Ok(self.inner.get_lifetime())
+    pub fn get_lifetime(&self) -> &PositionRange {
+        self.inner.get_lifetime()
     }
 
-    pub fn build_index(&self) -> Result<u32> {
-        Ok(self.inner.build_index())
+    pub fn build_index(&self) -> Result<()> {
+        match self.inner.build_index() {
+            0 => Ok(()),
+            _ => Err(Error::ForeignFunctionError),
+        }
     }
 
     pub fn system_info(&self) -> Result<&SystemInfo> {
@@ -525,28 +528,28 @@ mod test {
 
         for i in 1..10 {
             let mut cursor = engine.cursor().unwrap();
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Min);
+            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Min);
 
-            cursor.set_position(&engine.get_lifetime().unwrap().Max);
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Max);
+            cursor.set_position(&engine.get_lifetime().Max);
+            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Max);
 
-            cursor.set_position(&engine.get_lifetime().unwrap().Min);
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Min);
+            cursor.set_position(&engine.get_lifetime().Min);
+            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Min);
         }
 
         for i in 1..10 {
             let mut cursor = engine.cursor().unwrap();
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Min);
+            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Min);
 
             let res = cursor.replay_forward(None).unwrap();
             assert_eq!(res.stop_reason, EventType::Process);
             assert_ne!(res.instructions_executed, 0);
-            assert_eq!(*cursor.get_previous_position().unwrap(), engine.get_lifetime().unwrap().Max);
+            assert_eq!(*cursor.get_previous_position().unwrap(), engine.get_lifetime().Max);
 
             let res = cursor.replay_backward(None).unwrap();
             assert_eq!(res.stop_reason, EventType::Process);
             assert_ne!(res.instructions_executed, 0);
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Min);
+            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Min);
         }
     }
 
