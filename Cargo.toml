@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["ttd", "auto_unpack"]
+members = ["ttd_sys", "ttd", "auto_unpack"]
 
 [workspace.package]
 authors = ["Christophe Alladoum"]
