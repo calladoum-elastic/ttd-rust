@@ -66,16 +66,16 @@ jobs:
         if: matrix.build == 'debug'
         run: |
           cp .\ttd*.dll .\target\debug\deps\
-          cp .\ttd*.dll .\ttd\ttd_ffi\build\tests\
-          ctest --build-config Debug -T test --test-dir .\ttd\ttd_ffi\build\tests
+          cp .\ttd*.dll .\ttd_ffi\build\tests\
+          ctest --build-config Debug -T test --test-dir .\ttd_ffi\build\tests
           cargo test
 
       - name: Run Tests (release)
         if: matrix.build == 'release'
         run: |
           cp .\ttd*.dll .\target\release\deps\
-          cp .\ttd*.dll .\ttd\ttd_ffi\build\tests\
-          ctest --build-config Release -T test --test-dir .\ttd\ttd_ffi\build\tests
+          cp .\ttd*.dll .\ttd_ffi\build\tests\
+          ctest --build-config Release -T test --test-dir .\ttd_ffi\build\tests
           cargo test --release
 
       - name: Upload Artifact
@@ -84,10 +84,10 @@ jobs:
           name: ttd_${{ matrix.build }}_${{ matrix.os }}_${{ github.sha }}
           if-no-files-found: warn
           path: |
-            ./ttd/ttd_ffi_tests/tests/*.exe
-            ./ttd/ttd_ffi_tests/tests/*.pdb
-            ./ttd/ttd_ffi/install/*.exe
-            ./ttd/ttd_ffi/install/*.pdb
+            ./ttd_ffi_tests/tests/*.exe
+            ./ttd_ffi_tests/tests/*.pdb
+            ./ttd_ffi/install/*.exe
+            ./ttd_ffi/install/*.pdb
             ./TTD*.dll
             ./target/**/*.rlib
             ./target/**/*.exe

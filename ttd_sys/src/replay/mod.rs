@@ -1,13 +1,35 @@
 //! Contains the thin wrapper for the unsafe stuff
-use std::ffi::c_void;
-use std::ops::BitOr;
 
 use derive_more::Display;
+use std::ffi::c_void;
+use std::ops::{Add, Sub};
 
 use crate::bindings::root as ffi;
-use crate::bindings::root::TTD::Replay::{IThreadView, Position};
 use crate::prelude::*;
-use crate::replay::ReplayPosition;
+
+impl Add<u64> for ffi::TTD::Replay::Position {
+    type Output = ffi::TTD::Replay::Position;
+
+    fn add(mut self, rhs: u64) -> Self::Output {
+        self.Steps += rhs;
+        self
+    }
+}
+
+impl Sub<u64> for ffi::TTD::Replay::Position {
+    type Output = ffi::TTD::Replay::Position;
+
+    fn sub(mut self, rhs: u64) -> Self::Output {
+        self.Steps -= rhs;
+        self
+    }
+}
+
+impl std::fmt::Display for ffi::TTD::Replay::Position {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:x}:{:x}", self.Sequence, self.Steps)
+    }
+}
 
 pub struct ReplayEngine {
     inner: ffi::TTD_FFI::Replay::ReplayEngine,
@@ -22,21 +44,21 @@ impl Drop for ReplayEngine {
 }
 
 impl ReplayEngine {
-    pub(crate) fn new() -> Result<Self> {
+    pub fn new() -> Result<Self> {
         Ok(Self {
             inner: unsafe { ffi::TTD_FFI::Replay::ReplayEngine::new() },
         })
     }
 
-    pub(crate) fn load(&self, trace: &[u16]) -> i32 {
+    pub fn load(&self, trace: &[u16]) -> i32 {
         unsafe { self.inner.Load(trace.as_ptr()) }
     }
 
     pub fn cursor(&'_ self) -> Result<ReplayCursor<'_>> {
-        let mut cursor = unsafe {
+        let cursor = unsafe {
             let raw_cur = self.inner.NewCursor();
             if raw_cur == 0 {
-                return Err(Error::InitializationError);
+                return Err(Error::ForeignFunctionError);
             }
             let mut cursor = ffi::TTD_FFI::Replay::ReplayCursor::new(raw_cur as u64);
 
@@ -53,35 +75,35 @@ impl ReplayEngine {
         unsafe { std::mem::transmute(self.inner.GetLifetime()) }
     }
 
-    pub(crate) fn system_info(&self) -> &ffi::TTD::SystemInfo {
+    pub fn system_info(&self) -> &ffi::TTD::SystemInfo {
         unsafe { std::mem::transmute(self.inner.GetSystemInfo()) }
     }
 
-    pub(crate) fn build_index(&self) -> u32 {
+    pub fn build_index(&self) -> u32 {
         unsafe { self.inner.BuildIndex() }
     }
 
-    pub(crate) fn get_module_count(&self) -> usize {
+    pub fn get_module_count(&self) -> usize {
         unsafe { self.inner.GetModuleCount() }
     }
 
-    pub(crate) fn get_module_list(&self) -> Vec<ffi::TTD::Replay::Module> {
+    pub fn get_module_list(&self) -> Vec<ffi::TTD::Replay::Module> {
         unsafe { core::slice::from_raw_parts(self.inner.GetModuleList(), self.get_module_count()).into() }
     }
 
-    pub(crate) fn get_module_instance_count(&self) -> usize {
+    pub fn get_module_instance_count(&self) -> usize {
         unsafe { self.inner.GetModuleInstanceCount() }
     }
 
-    pub(crate) fn get_module_instance_list(&self) -> Vec<ffi::TTD::Replay::ModuleInstance> {
+    pub fn get_module_instance_list(&self) -> Vec<ffi::TTD::Replay::ModuleInstance> {
         unsafe { core::slice::from_raw_parts(self.inner.GetModuleInstanceList(), self.get_module_instance_count()).into() }
     }
 
-    pub(crate) fn get_thread_count(&self) -> usize {
+    pub fn get_thread_count(&self) -> usize {
         unsafe { self.inner.GetThreadCount() }
     }
 
-    pub(crate) fn get_thread_list(&self) -> Vec<ffi::TTD::Replay::ThreadInfo> {
+    pub fn get_thread_list(&self) -> Vec<ffi::TTD::Replay::ThreadInfo> {
         unsafe {
             let data = self.inner.GetThreadList();
             let cnt = self.get_thread_count();
@@ -89,11 +111,11 @@ impl ReplayEngine {
         }
     }
 
-    pub(crate) fn get_module_loaded_event_count(&self) -> usize {
+    pub fn get_module_loaded_event_count(&self) -> usize {
         unsafe { self.inner.GetModuleLoadedEventCount() }
     }
 
-    pub(crate) fn get_module_loaded_event_list(&self) -> Vec<ffi::TTD::Replay::ModuleLoadedEvent> {
+    pub fn get_module_loaded_event_list(&self) -> Vec<ffi::TTD::Replay::ModuleLoadedEvent> {
         unsafe {
             let data = self.inner.GetModuleLoadedEventList();
             let cnt = self.get_module_loaded_event_count();
@@ -101,11 +123,11 @@ impl ReplayEngine {
         }
     }
 
-    pub(crate) fn get_module_unloaded_event_count(&self) -> usize {
+    pub fn get_module_unloaded_event_count(&self) -> usize {
         unsafe { self.inner.GetModuleUnloadedEventCount() }
     }
 
-    pub(crate) fn get_module_unloaded_event_list(&self) -> Vec<ffi::TTD::Replay::ModuleUnloadedEvent> {
+    pub fn get_module_unloaded_event_list(&self) -> Vec<ffi::TTD::Replay::ModuleUnloadedEvent> {
         unsafe {
             let data = self.inner.GetModuleUnloadedEventList();
             let cnt = self.get_module_unloaded_event_count();
@@ -113,11 +135,11 @@ impl ReplayEngine {
         }
     }
 
-    pub(crate) fn get_exception_event_count(&self) -> usize {
+    pub fn get_exception_event_count(&self) -> usize {
         unsafe { self.inner.GetExceptionEventCount() }
     }
 
-    pub(crate) fn get_exception_event_list(&self) -> Vec<ffi::TTD::Replay::ExceptionEvent> {
+    pub fn get_exception_event_list(&self) -> Vec<ffi::TTD::Replay::ExceptionEvent> {
         unsafe {
             let data = self.inner.GetExceptionEventList();
             let cnt = self.get_exception_event_count();
@@ -126,7 +148,7 @@ impl ReplayEngine {
     }
 }
 
-pub(crate) struct ReplayCursor<'a> {
+pub struct ReplayCursor<'a> {
     inner: ffi::TTD_FFI::Replay::ReplayCursor,
     engine: &'a ReplayEngine,
 }
@@ -140,7 +162,7 @@ impl<'a> Drop for ReplayCursor<'a> {
 }
 
 impl<'a> ReplayCursor<'a> {
-    pub(crate) fn replay_forward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> Result<ffi::TTD::Replay::ICursorView_ReplayResult> {
+    pub fn replay_forward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> Result<ffi::TTD::Replay::ICursorView_ReplayResult> {
         unsafe {
             let mut out = ffi::TTD::Replay::ICursorView_ReplayResult::default();
             let limit = match until {
@@ -156,7 +178,7 @@ impl<'a> ReplayCursor<'a> {
         }
     }
 
-    pub(crate) fn replay_backward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> Result<ffi::TTD::Replay::ICursorView_ReplayResult> {
+    pub fn replay_backward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> Result<ffi::TTD::Replay::ICursorView_ReplayResult> {
         unsafe {
             let mut out = ffi::TTD::Replay::ICursorView_ReplayResult::default();
             let limit = match until {
@@ -172,39 +194,39 @@ impl<'a> ReplayCursor<'a> {
         }
     }
 
-    pub(crate) fn set_position(&mut self, pos: &ffi::TTD::Replay::Position) {
+    pub fn set_position(&mut self, pos: &ffi::TTD::Replay::Position) {
         unsafe { self.inner.SetPosition(pos) };
     }
 
-    pub(crate) fn get_position(&self) -> &ffi::TTD::Replay::Position {
+    pub fn get_position(&self) -> &ffi::TTD::Replay::Position {
         unsafe { std::mem::transmute(self.inner.GetPosition()) }
     }
 
-    pub(crate) fn get_previous_position(&mut self) -> &ffi::TTD::Replay::Position {
+    pub fn get_previous_position(&mut self) -> &ffi::TTD::Replay::Position {
         unsafe { std::mem::transmute(self.inner.GetPreviousPosition()) }
     }
 
-    pub(crate) fn get_thread_info(&self) -> &ffi::TTD::Replay::ThreadInfo {
+    pub fn get_thread_info(&self) -> &ffi::TTD::Replay::ThreadInfo {
         unsafe { std::mem::transmute(self.inner.GetThreadInfo()) }
     }
 
-    pub(crate) fn get_teb_address(&self) -> u64 {
+    pub fn get_teb_address(&self) -> u64 {
         unsafe { self.inner.GetTebAddress() }
     }
 
-    pub(crate) fn get_program_counter(&self) -> u64 {
+    pub fn get_program_counter(&self) -> u64 {
         unsafe { self.inner.GetProgramCounter() }
     }
 
-    pub(crate) fn get_stack_pointer(&self) -> u64 {
+    pub fn get_stack_pointer(&self) -> u64 {
         unsafe { self.inner.GetStackPointer() }
     }
 
-    pub(crate) fn get_frame_pointer(&self) -> u64 {
+    pub fn get_frame_pointer(&self) -> u64 {
         unsafe { self.inner.GetFramePointer() }
     }
 
-    pub(crate) fn get_thread_context(&self) -> Result<RegisterContext<'_>> {
+    pub fn get_thread_context(&self) -> Result<RegisterContext<'_>> {
         unsafe {
             let arch: ProcessorArchitecture = self.engine.system_info().System.ProcessorArchitecture.try_into()?;
             Ok(match arch {
@@ -227,7 +249,7 @@ impl<'a> ReplayCursor<'a> {
         }
     }
 
-    pub(crate) fn get_thread_extended_context(&self) -> Result<ExtendedRegisterContext> {
+    pub fn get_thread_extended_context(&self) -> Result<ExtendedRegisterContext> {
         unsafe {
             let arch: ProcessorArchitecture = self.engine.system_info().System.ProcessorArchitecture.try_into()?;
             match arch {
@@ -238,7 +260,7 @@ impl<'a> ReplayCursor<'a> {
         }
     }
 
-    pub(crate) fn read_current_memory(&self, address: u64, size: usize) -> Result<Vec<u8>> {
+    pub fn read_current_memory(&self, address: u64, size: usize) -> Result<Vec<u8>> {
         let mut buffer = vec![0; size];
         let res = unsafe { self.inner.QueryMemoryBuffer(address, buffer.as_mut_ptr(), buffer.len() as u64) };
 
@@ -248,42 +270,48 @@ impl<'a> ReplayCursor<'a> {
         }
     }
 
-    pub(crate) fn get_replay_flags(&self) -> ReplayFlags {
+    pub fn get_replay_flags(&self) -> ReplayFlags {
         unsafe { self.inner.GetReplayFlags().into() }
     }
 
-    pub(crate) fn set_replay_flags(&mut self, flags: ReplayFlags) {
+    pub fn set_replay_flags(&mut self, flags: ReplayFlags) {
         unsafe { self.inner.SetReplayFlags(flags.into()) }
     }
 
-    pub(crate) fn add_memory_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::MemoryWatchpointData) -> bool {
+    pub fn add_memory_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::MemoryWatchpointData) -> bool {
         unsafe { self.inner.AddMemoryWatchpoint(watch_point) }
     }
 
-    pub(crate) fn remove_memory_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::MemoryWatchpointData) -> bool {
+    pub fn remove_memory_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::MemoryWatchpointData) -> bool {
         unsafe { self.inner.RemoveMemoryWatchpoint(watch_point) }
     }
 
-    pub(crate) fn add_position_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::PositionWatchpointData) -> bool {
+    pub fn add_position_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::PositionWatchpointData) -> bool {
         unsafe { self.inner.AddPositionWatchpoint(watch_point) }
     }
 
-    pub(crate) fn remove_position_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::PositionWatchpointData) -> bool {
+    pub fn remove_position_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::PositionWatchpointData) -> bool {
         unsafe { self.inner.RemovePositionWatchpoint(watch_point) }
     }
 
-    pub(crate) fn set_register_changed_callback(&mut self, cb: RegisterChangedCallbackUnsafe) {
+    pub fn set_register_changed_callback(&mut self, cb: RegisterChangedCallbackUnsafe) {
         unsafe { self.inner.SetRegisterChangedCallback(Some(cb), 0) }
     }
-    pub(crate) fn set_replay_progress_callback(&mut self, cb: ReplayProgressCallbackUnsafe) {
+    pub fn set_replay_progress_callback(&mut self, cb: ReplayProgressCallbackUnsafe) {
         unsafe { self.inner.SetReplayProgressCallback(Some(cb), 0) }
     }
 }
 
-pub(crate) type RegisterChangedCallbackUnsafe =
-    unsafe extern "C" fn(context: usize, reg_id: u8, old_data: *const c_void, new_data: *const c_void, data_size_in_bytes: usize, thread: *const IThreadView);
+pub type RegisterChangedCallbackUnsafe = unsafe extern "C" fn(
+    context: usize,
+    reg_id: u8,
+    old_data: *const c_void,
+    new_data: *const c_void,
+    data_size_in_bytes: usize,
+    thread: *const ffi::TTD::Replay::IThreadView,
+);
 
-pub(crate) type ReplayProgressCallbackUnsafe = unsafe extern "C" fn(ctx: usize, pos: *const ffi::TTD::Replay::Position);
+pub type ReplayProgressCallbackUnsafe = unsafe extern "C" fn(ctx: usize, pos: *const ffi::TTD::Replay::Position);
 
 #[repr(u32)]
 #[derive(Default, Display)]
@@ -408,7 +436,7 @@ x28={:016x}   fp={:016x}   lr={:016x}   sp={:016x}
 }
 
 #[repr(u16)]
-pub(crate) enum ProcessorArchitecture {
+pub enum ProcessorArchitecture {
     X64 = 9,
     X86 = 0,
     ARM64 = 12,
@@ -434,10 +462,7 @@ pub enum ExtendedRegisterContext {
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        bindings::root::TTD::Replay::{Position, Position_Min},
-        replay::sys::ReplayEngine,
-    };
+    use crate::replay::ReplayEngine;
 
     fn get_test_trace() -> Vec<u16> {
         let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
@@ -455,7 +480,7 @@ mod test {
         let lt = replay.get_lifetime();
 
         // position navigation
-        for i in 1..10 {
+        for _i in 1..10 {
             let mut cursor = replay.cursor().unwrap();
             let pos = cursor.get_position();
             assert_eq!(*pos, lt.Min);
@@ -468,7 +493,7 @@ mod test {
         }
 
         // replay navigation
-        for i in 1..10 {
+        for _i in 1..10 {
             let mut cursor = replay.cursor().unwrap();
 
             // new cursor point to the lifetime min

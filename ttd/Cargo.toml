@@ -8,24 +8,18 @@ license.workspace = true
 crate-type = ["rlib"]
 
 [dependencies]
+ttd_sys = { path = "../ttd_sys", default-features = false }
 bitflags = "2.10.0"
 chrono = "0.4.42"
 derive_more = { version = "2.0.1", features = ["from", "debug", "display"] }
 log = { version = "0.4.28", features = ["std"] }
 windows = { version = "0.62.2" }
 
-[build-dependencies]
-bindgen = "0.72.1"
-const_format = "0.2.35"
-glob = "0.3.3"
-reqwest = { version = "0.12.24", features = ["blocking"] }
-zip = "6.0.0"
-
 [features]
 default = ["replay"]
 full = ["replay", "record"]
 
-replay = []
+replay = ["ttd_sys/replay"]
 record = []
 
 [lints.rust]

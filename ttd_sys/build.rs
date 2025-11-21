@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 #[cfg(not(target_os = "windows"))]
 const _: () = assert!(false, "TTD bindings only work on Windows");
 
@@ -27,7 +25,7 @@ const BUILD_TYPE: &str = "Release";
 
 const BASE_DIR: &str = "./ttd";
 
-const TTD_FFI_BASE_DIR: &str = "./ttd_ffi";
+const TTD_FFI_BASE_DIR: &str = "../ttd_ffi";
 const TTD_FFI_BUILD_DIR: &str = const_format::formatcp!("{TTD_FFI_BASE_DIR}/build");
 const TTD_FFI_INSTALL_DIR: &str = const_format::formatcp!("{TTD_FFI_BASE_DIR}/install");
 const TTD_FFI_INSTALL_INCLUDE_DIR: &str = const_format::formatcp!("{TTD_FFI_INSTALL_DIR}/ttd_ffi/Include");
@@ -186,7 +184,6 @@ fn generate_ttd_bindings() {
             .derive_copy(true)
             .derive_hash(true)
             .derive_partialeq(true)
-            // .derive_partialord(true)
             .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
             .generate()
             .expect("bindgen failed");
