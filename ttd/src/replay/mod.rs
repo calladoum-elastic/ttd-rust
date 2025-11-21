@@ -3,58 +3,34 @@
 //
 use derive_more::Display;
 
-use crate::{bindings::root::TTD::Replay::PositionRange, prelude::*};
+use ttd_sys::bindings;
 
-pub(crate) mod sys;
+use crate::prelude::*;
 
-use std::{
-    ffi::CString,
-    ops::{Add, Sub},
-    os::windows::ffi::OsStringExt,
-    str::FromStr,
-};
+use ttd_sys as sys;
+
+use std::ffi::CString;
+use std::ops::{Add, Sub};
+use std::os::windows::ffi::OsStringExt;
+use std::str::FromStr;
 
 use bitflags::bitflags;
 
-pub type SystemInfo = crate::bindings::root::TTD::SystemInfo;
-pub type ThreadInfo = crate::bindings::root::TTD::Replay::ThreadInfo;
-pub type ReplayPosition = crate::bindings::root::TTD::Replay::Position;
-pub type ReplayPositionRange = crate::bindings::root::TTD::Replay::PositionRange;
-pub type ThreadView = crate::bindings::root::TTD::Replay::IThreadView;
-pub type Amd64Context = crate::bindings::root::AMD64_CONTEXT;
-pub type Amd64ExtendedContext = crate::bindings::root::AVX_EXTENDED_CONTEXT;
+pub type SystemInfo = bindings::root::TTD::SystemInfo;
+pub type ThreadInfo = bindings::root::TTD::Replay::ThreadInfo;
+pub type ReplayPosition = bindings::root::TTD::Replay::Position;
+pub type ReplayPositionRange = bindings::root::TTD::Replay::PositionRange;
+pub type ThreadView = bindings::root::TTD::Replay::IThreadView;
+pub type Amd64Context = bindings::root::AMD64_CONTEXT;
+pub type Amd64ExtendedContext = bindings::root::AVX_EXTENDED_CONTEXT;
 
-pub type ReplayFlags = crate::replay::sys::ReplayFlags;
-pub type RegisterContext<'a> = crate::replay::sys::RegisterContext<'a>;
-pub type ExtendedRegisterContext = crate::replay::sys::ExtendedRegisterContext;
+pub type ReplayFlags = ttd_sys::replay::ReplayFlags;
+pub type RegisterContext<'a> = ttd_sys::replay::RegisterContext<'a>;
+pub type ExtendedRegisterContext = ttd_sys::replay::ExtendedRegisterContext;
 
-pub type SequenceId = crate::bindings::root::TTD::SequenceId;
-pub type PositionWatchpointData = crate::bindings::root::TTD::Replay::PositionWatchpointData;
-pub type MemoryWatchpointData = crate::bindings::root::TTD::Replay::MemoryWatchpointData;
-
-impl Add<u64> for ReplayPosition {
-    type Output = ReplayPosition;
-
-    fn add(mut self, rhs: u64) -> Self::Output {
-        self.Steps += rhs;
-        self
-    }
-}
-
-impl Sub<u64> for ReplayPosition {
-    type Output = ReplayPosition;
-
-    fn sub(mut self, rhs: u64) -> Self::Output {
-        self.Steps -= rhs;
-        self
-    }
-}
-
-impl std::fmt::Display for ReplayPosition {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:x}:{:x}", self.Sequence, self.Steps)
-    }
-}
+pub type SequenceId = bindings::root::TTD::SequenceId;
+pub type PositionWatchpointData = bindings::root::TTD::Replay::PositionWatchpointData;
+pub type MemoryWatchpointData = bindings::root::TTD::Replay::MemoryWatchpointData;
 
 pub type ReplayProgressCallback = fn(ctx: usize, pos: &ReplayPosition);
 pub type RegisterChangedCallback = fn(context: usize, reg_id: u8, old_data: &[u8; 8], new_data: &[u8; 8], ddata_size_in_bytes: usize, thread: &ThreadView);
@@ -78,17 +54,17 @@ pub enum EventType {
 impl From<u8> for EventType {
     fn from(value: u8) -> Self {
         match value {
-            crate::bindings::root::TTD::Replay::EventType_MemoryWatchpoint => EventType::MemoryWatchpoint,
-            crate::bindings::root::TTD::Replay::EventType_PositionWatchpoint => EventType::PositionWatchpoint,
-            crate::bindings::root::TTD::Replay::EventType_Exception => EventType::Exception,
-            crate::bindings::root::TTD::Replay::EventType_Gap => EventType::Gap,
-            crate::bindings::root::TTD::Replay::EventType_Thread => EventType::Thread,
-            crate::bindings::root::TTD::Replay::EventType_StepCount => EventType::StepCount,
-            crate::bindings::root::TTD::Replay::EventType_Position => EventType::Position,
-            crate::bindings::root::TTD::Replay::EventType_Process => EventType::Process,
-            crate::bindings::root::TTD::Replay::EventType_Interrupted => EventType::Interrupted,
-            crate::bindings::root::TTD::Replay::EventType_Error => EventType::Error,
-            crate::bindings::root::TTD::Replay::EventType_Count => EventType::Count,
+            bindings::root::TTD::Replay::EventType_MemoryWatchpoint => EventType::MemoryWatchpoint,
+            bindings::root::TTD::Replay::EventType_PositionWatchpoint => EventType::PositionWatchpoint,
+            bindings::root::TTD::Replay::EventType_Exception => EventType::Exception,
+            bindings::root::TTD::Replay::EventType_Gap => EventType::Gap,
+            bindings::root::TTD::Replay::EventType_Thread => EventType::Thread,
+            bindings::root::TTD::Replay::EventType_StepCount => EventType::StepCount,
+            bindings::root::TTD::Replay::EventType_Position => EventType::Position,
+            bindings::root::TTD::Replay::EventType_Process => EventType::Process,
+            bindings::root::TTD::Replay::EventType_Interrupted => EventType::Interrupted,
+            bindings::root::TTD::Replay::EventType_Error => EventType::Error,
+            bindings::root::TTD::Replay::EventType_Count => EventType::Count,
             _ => EventType::Invalid,
         }
     }
@@ -96,30 +72,30 @@ impl From<u8> for EventType {
 
 bitflags! {
     pub struct DataAccessType: u8 {
-        const Read          = crate::bindings::root::TTD::Replay::DataAccessType_Read;
-        const Write         =      crate::bindings::root::TTD::Replay::DataAccessType_Write;
-        const Execute       =     crate::bindings::root::TTD::Replay::DataAccessType_Execute;
-        const CodeFetch     =     crate::bindings::root::TTD::Replay::DataAccessType_CodeFetch;
-        const Overwrite     =     crate::bindings::root::TTD::Replay::DataAccessType_Overwrite;
-        const DataMismatch  =     crate::bindings::root::TTD::Replay::DataAccessType_DataMismatch;
-        const NewData       =     crate::bindings::root::TTD::Replay::DataAccessType_NewData;
-        const RedundantData =     crate::bindings::root::TTD::Replay::DataAccessType_RedundantData;
+        const Read          = bindings::root::TTD::Replay::DataAccessType_Read;
+        const Write         =      bindings::root::TTD::Replay::DataAccessType_Write;
+        const Execute       =     bindings::root::TTD::Replay::DataAccessType_Execute;
+        const CodeFetch     =     bindings::root::TTD::Replay::DataAccessType_CodeFetch;
+        const Overwrite     =     bindings::root::TTD::Replay::DataAccessType_Overwrite;
+        const DataMismatch  =     bindings::root::TTD::Replay::DataAccessType_DataMismatch;
+        const NewData       =     bindings::root::TTD::Replay::DataAccessType_NewData;
+        const RedundantData =     bindings::root::TTD::Replay::DataAccessType_RedundantData;
     }
 }
 
 bitflags! {
     pub struct DataAccessMask: u8 {
-    const Read          = crate::bindings::root::TTD::Replay::DataAccessMask_Read;
-    const Write         = crate::bindings::root::TTD::Replay::DataAccessMask_Write;
-    const Execute       = crate::bindings::root::TTD::Replay::DataAccessMask_Execute;
-    const CodeFetch     = crate::bindings::root::TTD::Replay::DataAccessMask_CodeFetch;
-    const Overwrite     = crate::bindings::root::TTD::Replay::DataAccessMask_Overwrite;
-    const DataMismatch  = crate::bindings::root::TTD::Replay::DataAccessMask_DataMismatch;
-    const NewData       = crate::bindings::root::TTD::Replay::DataAccessMask_NewData;
-    const RedundantData = crate::bindings::root::TTD::Replay::DataAccessMask_RedundantData;
-    const None      = crate::bindings::root::TTD::Replay::DataAccessMask_None;
-    const ReadWrite = crate::bindings::root::TTD::Replay::DataAccessMask_ReadWrite;
-    const All       = crate::bindings::root::TTD::Replay::DataAccessMask_All;
+    const Read          = bindings::root::TTD::Replay::DataAccessMask_Read;
+    const Write         = bindings::root::TTD::Replay::DataAccessMask_Write;
+    const Execute       = bindings::root::TTD::Replay::DataAccessMask_Execute;
+    const CodeFetch     = bindings::root::TTD::Replay::DataAccessMask_CodeFetch;
+    const Overwrite     = bindings::root::TTD::Replay::DataAccessMask_Overwrite;
+    const DataMismatch  = bindings::root::TTD::Replay::DataAccessMask_DataMismatch;
+    const NewData       = bindings::root::TTD::Replay::DataAccessMask_NewData;
+    const RedundantData = bindings::root::TTD::Replay::DataAccessMask_RedundantData;
+    const None      = bindings::root::TTD::Replay::DataAccessMask_None;
+    const ReadWrite = bindings::root::TTD::Replay::DataAccessMask_ReadWrite;
+    const All       = bindings::root::TTD::Replay::DataAccessMask_All;
 }
 }
 
@@ -132,8 +108,8 @@ pub struct ReplayModule {
     pub timestamp: u32,
 }
 
-impl TryFrom<&crate::bindings::root::TTD::Replay::Module> for ReplayModule {
-    fn try_from(value: &crate::bindings::root::TTD::Replay::Module) -> Result<Self> {
+impl TryFrom<&bindings::root::TTD::Replay::Module> for ReplayModule {
+    fn try_from(value: &bindings::root::TTD::Replay::Module) -> Result<Self> {
         let name_slice = unsafe { std::slice::from_raw_parts(value.pName, value.NameLength) };
 
         Ok(Self {
@@ -168,8 +144,8 @@ pub struct ReplayResult {
     pub instructions_executed: u64,
 }
 
-impl From<crate::bindings::root::TTD::Replay::ICursorView_ReplayResult> for ReplayResult {
-    fn from(value: crate::bindings::root::TTD::Replay::ICursorView_ReplayResult) -> Self {
+impl From<bindings::root::TTD::Replay::ICursorView_ReplayResult> for ReplayResult {
+    fn from(value: bindings::root::TTD::Replay::ICursorView_ReplayResult) -> Self {
         Self {
             stop_reason: value.StopReason.into(),
             steps_executed: value.StepsExecuted,
@@ -191,8 +167,8 @@ pub mod events {
         pub module: ReplayModule,
     }
 
-    impl TryFrom<&crate::bindings::root::TTD::Replay::ModuleLoadedEvent> for ModuleLoaded {
-        fn try_from(value: &crate::bindings::root::TTD::Replay::ModuleLoadedEvent) -> Result<Self> {
+    impl TryFrom<&ttd_sys::bindings::root::TTD::Replay::ModuleLoadedEvent> for ModuleLoaded {
+        fn try_from(value: &ttd_sys::bindings::root::TTD::Replay::ModuleLoadedEvent) -> Result<Self> {
             let module = unsafe { (*value.pModule) };
             Ok(Self {
                 position: value.Position,
@@ -207,8 +183,8 @@ pub mod events {
         pub position: ReplayPosition,
         pub module: ReplayModule,
     }
-    impl TryFrom<&crate::bindings::root::TTD::Replay::ModuleUnloadedEvent> for ModuleUnloaded {
-        fn try_from(value: &crate::bindings::root::TTD::Replay::ModuleUnloadedEvent) -> Result<Self> {
+    impl TryFrom<&ttd_sys::bindings::root::TTD::Replay::ModuleUnloadedEvent> for ModuleUnloaded {
+        fn try_from(value: &ttd_sys::bindings::root::TTD::Replay::ModuleUnloadedEvent) -> Result<Self> {
             let module = unsafe { (*value.pModule) };
             Ok(Self {
                 position: value.Position,
@@ -220,8 +196,8 @@ pub mod events {
 
     #[derive(Debug)]
     pub struct Exception {}
-    impl TryFrom<&crate::bindings::root::TTD::Replay::ExceptionEvent> for Exception {
-        fn try_from(value: &crate::bindings::root::TTD::Replay::ExceptionEvent) -> Result<Self> {
+    impl TryFrom<&ttd_sys::bindings::root::TTD::Replay::ExceptionEvent> for Exception {
+        fn try_from(value: &ttd_sys::bindings::root::TTD::Replay::ExceptionEvent) -> Result<Self> {
             todo!()
         }
         type Error = crate::error::Error;
@@ -247,18 +223,18 @@ impl Default for EngineInfo {
 
 impl EngineInfo {
     pub fn new() -> Self {
-        let license = unsafe { CString::from_vec_unchecked(crate::bindings::root::TTD_FFI::LibraryLicense.to_vec()) };
+        let license = unsafe { CString::from_vec_unchecked(bindings::root::TTD_FFI::LibraryLicense.to_vec()) };
 
-        let author = unsafe { CString::from_vec_unchecked(crate::bindings::root::TTD_FFI::LibraryAuthor.to_vec()) };
+        let author = unsafe { CString::from_vec_unchecked(bindings::root::TTD_FFI::LibraryAuthor.to_vec()) };
 
-        let banner = unsafe { CString::from_vec_unchecked(crate::bindings::root::TTD_FFI::LibraryBanner.to_vec()) };
+        let banner = unsafe { CString::from_vec_unchecked(bindings::root::TTD_FFI::LibraryBanner.to_vec()) };
 
-        let name = unsafe { CString::from_vec_unchecked(crate::bindings::root::TTD_FFI::LibraryName.to_vec()) };
+        let name = unsafe { CString::from_vec_unchecked(bindings::root::TTD_FFI::LibraryName.to_vec()) };
 
         EngineInfo {
-            major: crate::bindings::root::TTD_FFI::LibraryVersionMajor,
-            minor: crate::bindings::root::TTD_FFI::LibraryVersionMinor,
-            patch: crate::bindings::root::TTD_FFI::LibraryVersionPatch,
+            major: bindings::root::TTD_FFI::LibraryVersionMajor,
+            minor: bindings::root::TTD_FFI::LibraryVersionMinor,
+            patch: bindings::root::TTD_FFI::LibraryVersionPatch,
             license: license.to_string_lossy().into(),
             author: author.to_string_lossy().into(),
             banner: banner.to_string_lossy().into(),
@@ -269,7 +245,7 @@ impl EngineInfo {
 // endregion: EngineInfo
 
 pub struct ReplayCursor<'a> {
-    inner: crate::replay::sys::ReplayCursor<'a>,
+    inner: crate::replay::sys::replay::ReplayCursor<'a>,
 }
 
 impl<'a> ReplayCursor<'a> {
@@ -324,14 +300,14 @@ impl<'a> ReplayCursor<'a> {
     }
 
     pub fn get_thread_context(&self) -> Result<RegisterContext<'_>> {
-        self.inner.get_thread_context()
+        Ok(self.inner.get_thread_context()?)
     }
 
     pub fn pointer_size(&self) -> Result<usize> {
         match self.get_thread_context()? {
-            sys::RegisterContext::X64(_) => Ok(8),
-            sys::RegisterContext::X86(_) => Ok(4),
-            sys::RegisterContext::ARM64(_) => Ok(8),
+            ttd_sys::replay::RegisterContext::X64(_) => Ok(8),
+            ttd_sys::replay::RegisterContext::X86(_) => Ok(4),
+            ttd_sys::replay::RegisterContext::ARM64(_) => Ok(8),
         }
     }
 
@@ -340,7 +316,7 @@ impl<'a> ReplayCursor<'a> {
     }
 
     pub fn read_current_memory(&self, address: u64, size: usize) -> Result<Vec<u8>> {
-        self.inner.read_current_memory(address, size)
+        Ok(self.inner.read_current_memory(address, size)?)
     }
 
     pub fn get_replay_flags(&self) -> Result<ReplayFlags> {
@@ -369,25 +345,24 @@ impl<'a> ReplayCursor<'a> {
     }
 
     pub fn set_replay_progress_callback(&mut self, cb: ReplayProgressCallback) {
-        let ptr = cb as *mut sys::ReplayProgressCallbackUnsafe;
+        let ptr = cb as *mut ttd_sys::replay::ReplayProgressCallbackUnsafe;
         self.inner.set_replay_progress_callback(unsafe { *ptr });
     }
 
     pub fn set_register_changed_callback(&mut self, cb: RegisterChangedCallback) {
-        let ptr = cb as *mut sys::RegisterChangedCallbackUnsafe;
+        let ptr = cb as *mut ttd_sys::replay::RegisterChangedCallbackUnsafe;
         self.inner.set_register_changed_callback(unsafe { *ptr });
     }
 }
 
-// #[derive(Default, Debug)]
 pub struct ReplayEngine {
-    inner: crate::replay::sys::ReplayEngine,
+    inner: ttd_sys::replay::ReplayEngine,
 }
 
 impl ReplayEngine {
     pub fn new() -> Result<Self> {
         Ok(Self {
-            inner: crate::replay::sys::ReplayEngine::new()?,
+            inner: ttd_sys::replay::ReplayEngine::new()?,
         })
     }
 
@@ -404,16 +379,20 @@ impl ReplayEngine {
         }
     }
 
+    /// The proper way to get a new cursor for the replay engine.
     pub fn cursor(&'_ self) -> Result<ReplayCursor<'_>> {
         Ok(ReplayCursor { inner: self.inner.cursor()? })
     }
 
-    pub fn get_lifetime(&self) -> Result<&PositionRange> {
-        Ok(self.inner.get_lifetime())
+    pub fn get_lifetime(&self) -> &ReplayPositionRange {
+        self.inner.get_lifetime()
     }
 
-    pub fn build_index(&self) -> Result<u32> {
-        Ok(self.inner.build_index())
+    pub fn build_index(&self) -> Result<()> {
+        match self.inner.build_index() {
+            0 => Ok(()),
+            _ => Err(Error::ForeignFunctionError),
+        }
     }
 
     pub fn system_info(&self) -> Result<&SystemInfo> {
@@ -495,10 +474,7 @@ impl ReplayEngine {
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        bindings::root::TTD_FFI::Replay::{MAX_CURSOR, MAX_ENGINE},
-        replay::{EngineInfo, EventType, ReplayCursor, ReplayEngine},
-    };
+    use crate::replay::{EngineInfo, EventType, ReplayCursor, ReplayEngine};
 
     fn get_test_trace() -> std::path::PathBuf {
         let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
@@ -525,28 +501,28 @@ mod test {
 
         for i in 1..10 {
             let mut cursor = engine.cursor().unwrap();
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Min);
+            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Min);
 
-            cursor.set_position(&engine.get_lifetime().unwrap().Max);
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Max);
+            cursor.set_position(&engine.get_lifetime().Max);
+            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Max);
 
-            cursor.set_position(&engine.get_lifetime().unwrap().Min);
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Min);
+            cursor.set_position(&engine.get_lifetime().Min);
+            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Min);
         }
 
         for i in 1..10 {
             let mut cursor = engine.cursor().unwrap();
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Min);
+            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Min);
 
             let res = cursor.replay_forward(None).unwrap();
             assert_eq!(res.stop_reason, EventType::Process);
             assert_ne!(res.instructions_executed, 0);
-            assert_eq!(*cursor.get_previous_position().unwrap(), engine.get_lifetime().unwrap().Max);
+            assert_eq!(*cursor.get_previous_position().unwrap(), engine.get_lifetime().Max);
 
             let res = cursor.replay_backward(None).unwrap();
             assert_eq!(res.stop_reason, EventType::Process);
             assert_ne!(res.instructions_executed, 0);
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Min);
+            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Min);
         }
     }
 

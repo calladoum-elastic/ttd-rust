@@ -19,6 +19,9 @@ pub enum Error {
     ForeignFunctionError,
 
     #[from]
+    TtdSysError(ttd_sys::error::Error),
+
+    #[from]
     Utf8Error(std::str::Utf8Error),
 
     #[from]
