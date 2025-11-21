@@ -274,21 +274,21 @@ pub struct ReplayCursor<'a> {
 
 impl<'a> ReplayCursor<'a> {
     pub fn replay_forward(&mut self, until: Option<ReplayPosition>) -> Result<ReplayResult> {
-        Ok(self.inner.replay_forward(until).into())
+        Ok(self.inner.replay_forward(until)?.into())
     }
 
     pub fn replay_backward(&mut self, until: Option<ReplayPosition>) -> Result<ReplayResult> {
-        Ok(self.inner.replay_backward(until).into())
+        Ok(self.inner.replay_backward(until)?.into())
     }
 
     pub fn replay_forward_steps(&mut self, steps: u64) -> Result<ReplayResult> {
         let until = *self.inner.get_position() + steps;
-        Ok(self.inner.replay_forward(Some(until)).into())
+        Ok(self.inner.replay_forward(Some(until))?.into())
     }
 
     pub fn replay_backward_steps(&mut self, steps: u64) -> Result<ReplayResult> {
         let until = *self.inner.get_position() + steps;
-        Ok(self.inner.replay_backward(Some(until)).into())
+        Ok(self.inner.replay_backward(Some(until))?.into())
     }
 
     pub fn set_position(&mut self, pos: &ReplayPosition) {

@@ -140,7 +140,7 @@ impl<'a> Drop for ReplayCursor<'a> {
 }
 
 impl<'a> ReplayCursor<'a> {
-    pub(crate) fn replay_forward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> ffi::TTD::Replay::ICursorView_ReplayResult {
+    pub(crate) fn replay_forward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> Result<ffi::TTD::Replay::ICursorView_ReplayResult> {
         unsafe {
             let mut out = ffi::TTD::Replay::ICursorView_ReplayResult::default();
             let limit = match until {
@@ -148,12 +148,15 @@ impl<'a> ReplayCursor<'a> {
                 None => self.engine.get_lifetime().Max,
             };
 
-            self.inner.ReplayForward(&limit, &mut out); // TODO (calladoum) add retval check
-            out
+            if self.inner.ReplayForward(&limit, &mut out) != 0 {
+                return Err(Error::ForeignFunctionError);
+            }
+
+            Ok(out)
         }
     }
 
-    pub(crate) fn replay_backward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> ffi::TTD::Replay::ICursorView_ReplayResult {
+    pub(crate) fn replay_backward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> Result<ffi::TTD::Replay::ICursorView_ReplayResult> {
         unsafe {
             let mut out = ffi::TTD::Replay::ICursorView_ReplayResult::default();
             let limit = match until {
@@ -161,8 +164,11 @@ impl<'a> ReplayCursor<'a> {
                 None => self.engine.get_lifetime().Min,
             };
 
-            self.inner.ReplayBackward(&limit, &mut out); // TODO (calladoum) add retval check
-            out
+            if self.inner.ReplayBackward(&limit, &mut out) != 0 {
+                return Err(Error::ForeignFunctionError);
+            }
+
+            Ok(out)
         }
     }
 
@@ -415,7 +421,7 @@ mod test {
             assert_eq!(*pos, lt.Min);
 
             // replay until the litetime end
-            let res = cursor.replay_forward(None);
+            let res = cursor.replay_forward(None).expect("failed to replay forward");
             assert_eq!(res.StopReason, 7); // end of process
             assert_ne!(res.InstructionsExecuted, 0);
 
@@ -424,7 +430,7 @@ mod test {
             assert_eq!(*cursor.get_previous_position(), lt.Max);
 
             // rewind to start
-            let res = cursor.replay_backward(None);
+            let res = cursor.replay_backward(None).expect("failed to replay backward");
             assert_eq!(res.StopReason, 7); // start of process
             assert_ne!(res.InstructionsExecuted, 0);
             assert_eq!(*cursor.get_position(), lt.Min);
@@ -434,7 +440,6 @@ mod test {
     #[test]
     fn sys_ffi_system_info() {
         let engine = ReplayEngine::new().expect("failed to create a new replayer");
-        // assert_eq!(engine.index(), 0);
 
         // Note: a trace is needed to have TTD::Replay::SystemInfo populated
         let trace_path = get_test_trace();
