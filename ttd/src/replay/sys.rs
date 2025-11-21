@@ -23,20 +23,9 @@ impl Drop for ReplayEngine {
 
 impl ReplayEngine {
     pub(crate) fn new() -> Result<Self> {
-        let engine = unsafe {
-            let mut engine = ffi::TTD_FFI::Replay::ReplayEngine::new();
-            let eng_idx = engine.Index();
-            if !(0..=ffi::TTD_FFI::Replay::MAX_ENGINE as i32).contains(&eng_idx) {
-                return Err(Error::InitializationError);
-            }
-            engine
-        };
-
-        Ok(Self { inner: engine })
-    }
-
-    pub(crate) fn index(&self) -> i32 {
-        unsafe { self.inner.Index() }
+        Ok(Self {
+            inner: unsafe { ffi::TTD_FFI::Replay::ReplayEngine::new() },
+        })
     }
 
     pub(crate) fn load(&self, trace: &[u16]) -> i32 {
@@ -45,12 +34,11 @@ impl ReplayEngine {
 
     pub fn cursor(&'_ self) -> Result<ReplayCursor<'_>> {
         let mut cursor = unsafe {
-            let mut cursor = ffi::TTD_FFI::Replay::ReplayCursor::new(self.index());
-            let cur_idx = cursor.Index();
-            let eng_idx = cursor.EngineIndex();
-            if !(0..=ffi::TTD_FFI::Replay::MAX_ENGINE as i32).contains(&eng_idx) || !(0..=ffi::TTD_FFI::Replay::MAX_CURSOR as i32).contains(&cur_idx) {
+            let raw_cur = self.inner.NewCursor();
+            if raw_cur == 0 {
                 return Err(Error::InitializationError);
             }
+            let mut cursor = ffi::TTD_FFI::Replay::ReplayCursor::new(raw_cur as u64);
 
             // New cursors always should point to the start of the trace
             cursor.SetPosition(&self.get_lifetime().Min);
@@ -152,31 +140,29 @@ impl<'a> Drop for ReplayCursor<'a> {
 }
 
 impl<'a> ReplayCursor<'a> {
-    pub(crate) fn index(&self) -> i32 {
-        self.inner.m_Index
-    }
-
-    pub(crate) fn engine_index(&self) -> i32 {
-        self.inner.m_EngineIndex
-    }
-
     pub(crate) fn replay_forward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> ffi::TTD::Replay::ICursorView_ReplayResult {
         unsafe {
-            match until {
-                Some(pos) => self.inner.ReplayForward(&pos),
-                // None => self.inner.ReplayForward(&ffi::TTD::Replay::Position_Max),
-                None => self.inner.ReplayForward(&self.engine.get_lifetime().Max),
-            }
+            let mut out = ffi::TTD::Replay::ICursorView_ReplayResult::default();
+            let limit = match until {
+                Some(pos) => pos,
+                None => self.engine.get_lifetime().Max,
+            };
+
+            self.inner.ReplayForward(&limit, &mut out); // TODO (calladoum) add retval check
+            out
         }
     }
 
     pub(crate) fn replay_backward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> ffi::TTD::Replay::ICursorView_ReplayResult {
         unsafe {
-            match until {
-                Some(pos) => self.inner.ReplayBackward(&pos),
-                // None => self.inner.ReplayBackward(&ffi::TTD::Replay::Position_Min),
-                None => self.inner.ReplayBackward(&self.engine.get_lifetime().Min),
-            }
+            let mut out = ffi::TTD::Replay::ICursorView_ReplayResult::default();
+            let limit = match until {
+                Some(pos) => pos,
+                None => self.engine.get_lifetime().Min,
+            };
+
+            self.inner.ReplayBackward(&limit, &mut out); // TODO (calladoum) add retval check
+            out
         }
     }
 
@@ -400,17 +386,29 @@ mod test {
     #[test]
     fn test_ffi_load_simple() {
         let replay = ReplayEngine::new().expect("failed to create a new replayer");
-        assert!(replay.inner.m_Index >= 0);
+        // assert!(replay.inner.m_Index >= 0);
 
         let trace_path = get_test_trace();
         assert_eq!(replay.load(trace_path.as_ref()), 0);
 
         let lt = replay.get_lifetime();
 
+        // position navigation
         for i in 1..10 {
             let mut cursor = replay.cursor().unwrap();
-            let cursor_idx = cursor.index();
-            assert_eq!(cursor_idx, 0);
+            let pos = cursor.get_position();
+            assert_eq!(*pos, lt.Min);
+
+            cursor.set_position(&lt.Max);
+            assert_eq!(*cursor.get_position(), lt.Max);
+
+            cursor.set_position(&lt.Min);
+            assert_eq!(*cursor.get_position(), lt.Min);
+        }
+
+        // replay navigation
+        for i in 1..10 {
+            let mut cursor = replay.cursor().unwrap();
 
             // new cursor point to the lifetime min
             let pos = cursor.get_position();
@@ -420,22 +418,23 @@ mod test {
             let res = cursor.replay_forward(None);
             assert_eq!(res.StopReason, 7); // end of process
             assert_ne!(res.InstructionsExecuted, 0);
-            let pos = cursor.get_position();
-            assert_eq!(*pos, lt.Max);
 
-            // rewind
+            // TTD ends execution when reaching the last possible executable instruction
+            // which is the previous Position (i.e. maximum position - 1)
+            assert_eq!(*cursor.get_previous_position(), lt.Max);
+
+            // rewind to start
             let res = cursor.replay_backward(None);
-            assert_ne!(res.StopReason, 7); // start of process
+            assert_eq!(res.StopReason, 7); // start of process
             assert_ne!(res.InstructionsExecuted, 0);
-            let pos = cursor.get_position();
-            assert_eq!(*pos, lt.Min);
+            assert_eq!(*cursor.get_position(), lt.Min);
         }
     }
 
     #[test]
     fn sys_ffi_system_info() {
         let engine = ReplayEngine::new().expect("failed to create a new replayer");
-        assert_eq!(engine.index(), 0);
+        // assert_eq!(engine.index(), 0);
 
         // Note: a trace is needed to have TTD::Replay::SystemInfo populated
         let trace_path = get_test_trace();

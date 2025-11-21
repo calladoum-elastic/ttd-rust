@@ -170,6 +170,8 @@ fn generate_ttd_bindings() {
             .opaque_type("std::.*")
             .use_core()
             .opaque_type("TTD::TBufferView.*")
+            .opaque_type("TTD::Replay::UniqueReplayEngine")
+            .opaque_type("TTD::Replay::UniqueCursor")
             .blocklist_function("TTD::.*GetEndAddress.*")
             .allowlist_function("TTD_FFI::.*")
             .allowlist_type("TTD_FFI::.*")

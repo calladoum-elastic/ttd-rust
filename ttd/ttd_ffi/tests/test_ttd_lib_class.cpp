@@ -33,11 +33,10 @@ struct ReplayEngineTestClass
 
 TEST_CASE_METHOD(ReplayEngineTestClass, "Basic Test", "Navigate trace")
 {
-    auto Cursor = TTD_FFI::Replay::ReplayCursor(this->Engine.Index());
-    REQUIRE(0 <= Cursor.Index());
-    REQUIRE(Cursor.Index() < TTD_FFI::Replay::MAX_CURSOR);
-    REQUIRE(0 <= Cursor.EngineIndex());
-    REQUIRE(Cursor.EngineIndex() < TTD_FFI::Replay::MAX_ENGINE);
+    auto RawCursor = this->Engine.NewCursor();
+    REQUIRE(RawCursor != 0);
+
+    auto Cursor = TTD_FFI::Replay::ReplayCursor(RawCursor);
     REQUIRE(Cursor.GetPosition() == TTD::Replay::Position::Invalid);
 
     // Move cursor positions
@@ -55,10 +54,12 @@ TEST_CASE_METHOD(ReplayEngineTestClass, "Basic Test", "Navigate trace")
     // Replay forward/backward
     for ( auto i = 0; i < 10; i++ )
     {
-        Cursor.ReplayBackward(Lifetime.Min);
+        TTD::Replay::ICursorView::ReplayResult fwd_res {};
+        Cursor.ReplayBackward(Lifetime.Min, &fwd_res);
         REQUIRE(Cursor.GetPosition() == Engine.GetLifetime().Min);
 
-        Cursor.ReplayForward(Lifetime.Max);
+        TTD::Replay::ICursorView::ReplayResult bkw_res {};
+        Cursor.ReplayForward(Lifetime.Max, &bkw_res);
         REQUIRE(Cursor.GetPosition() == Engine.GetLifetime().Max);
     }
 }

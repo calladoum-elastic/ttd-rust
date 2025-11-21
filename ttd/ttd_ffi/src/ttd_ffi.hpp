@@ -41,29 +41,22 @@ const static size_t MAX_CURSOR = 256;
 class ReplayEngine
 {
 private:
-    i32 m_Index {LIBTTD_INVALID_VALUE};
-
-    /// Initialize the engine
-    i32
-    Initialize();
+    TTD::Replay::UniqueReplayEngine m_Engine;
 
 public:
+    /// Initialize the engine
     ReplayEngine();
 
+    /// Destroy the engine
     ~ReplayEngine();
 
-    /// Get the index of the allocated engine
-    i32
-    Index() const;
-
+    /// Creates a new cursor on the heap, and returns the pointer as raw value.
+    const uptr
+    NewCursor() const;
 
     /// Load trace from the `.run` filepath passed as argument
     i32
     Load(const u16* trace) const;
-
-    /// Unload the engine
-    i32
-    Reset();
 
     /// Get the trace entire life range
     TTD::Replay::PositionRange const&
@@ -118,14 +111,12 @@ public:
 class ReplayCursor
 {
 private:
-    i32 m_Index;
-    i32 m_EngineIndex;
-
-    /// Initialize the cursor with a specific engine
-    i32 Initialize(i32);
+    TTD::Replay::UniqueCursor m_Cursor;
 
 public:
-    ReplayCursor(i32);
+    /// Initialize a `ReplayCursor`. The argument is a raw pointer to a `TTD::Replay::ICursor`
+    /// which will be owned and managed by this instance.
+    ReplayCursor(const uptr);
 
     ~ReplayCursor();
 
@@ -139,11 +130,17 @@ public:
     i32
     Reset();
 
-    TTD::Replay::ICursorView::ReplayResult
-    ReplayForward(TTD::Replay::Position const& limit);
+    /// Replay the trace forward.
+    /// Note: it is the responsibility of the caller to allocate and manage the `ReplayResult*` structure
+    /// @returns 0 on success
+    i32
+    ReplayForward(TTD::Replay::Position const&, TTD::Replay::ICursorView::ReplayResult*);
 
-    TTD::Replay::ICursorView::ReplayResult
-    ReplayBackward(TTD::Replay::Position const& limit);
+    /// Replay the trace backward.
+    /// Note: it is the responsibility of the caller to allocate and manage the `ReplayResult*` structure
+    /// @returns 0 on success
+    i32
+    ReplayBackward(TTD::Replay::Position const&, TTD::Replay::ICursorView::ReplayResult*);
 
     void
     SetPosition(TTD::Replay::Position const& pos);

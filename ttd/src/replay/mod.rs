@@ -273,14 +273,6 @@ pub struct ReplayCursor<'a> {
 }
 
 impl<'a> ReplayCursor<'a> {
-    pub fn index(&self) -> i32 {
-        self.inner.index()
-    }
-
-    pub fn engine_index(&self) -> i32 {
-        self.inner.engine_index()
-    }
-
     pub fn replay_forward(&mut self, until: Option<ReplayPosition>) -> Result<ReplayResult> {
         Ok(self.inner.replay_forward(until).into())
     }
@@ -411,10 +403,6 @@ impl ReplayEngine {
         }
     }
 
-    pub fn index(&self) -> i32 {
-        self.inner.index()
-    }
-
     pub fn cursor(&'_ self) -> Result<ReplayCursor<'_>> {
         Ok(ReplayCursor { inner: self.inner.cursor()? })
     }
@@ -508,7 +496,7 @@ impl ReplayEngine {
 mod test {
     use crate::{
         bindings::root::TTD_FFI::Replay::{MAX_CURSOR, MAX_ENGINE},
-        replay::{EngineInfo, ReplayCursor, ReplayEngine},
+        replay::{EngineInfo, EventType, ReplayCursor, ReplayEngine},
     };
 
     fn get_test_trace() -> std::path::PathBuf {
@@ -529,37 +517,41 @@ mod test {
 
     #[test]
     fn test_ffi_load_simple() {
-        let engine = ReplayEngine::new().expect("failed to create a new replayer");
-        assert!(engine.inner.index() >= 0);
-        assert!(engine.inner.index() < MAX_ENGINE as i32);
+        let mut engine = ReplayEngine::new().expect("failed to create a new replayer");
 
         let trace_path = get_test_trace();
         assert!(engine.load(trace_path.as_path()).is_ok());
 
         for i in 1..10 {
             let mut cursor = engine.cursor().unwrap();
-            let cursor_idx = cursor.index();
-            assert!(cursor_idx >= 0);
-            assert!(cursor_idx < MAX_CURSOR as i32);
-
             assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Min);
 
             cursor.set_position(&engine.get_lifetime().unwrap().Max);
-            // cursor.replay_forward(None).unwrap();
             assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Max);
 
             cursor.set_position(&engine.get_lifetime().unwrap().Min);
-            // cursor.replay_backward(None).unwrap();
             assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Min);
-            assert_eq!(cursor_idx, cursor.index());
+        }
+
+        for i in 1..10 {
+            let mut cursor = engine.cursor().unwrap();
+            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Min);
+
+            let res = cursor.replay_forward(None).unwrap();
+            assert_eq!(res.stop_reason, EventType::Process);
+            assert_ne!(res.instructions_executed, 0);
+            assert_eq!(*cursor.get_previous_position().unwrap(), engine.get_lifetime().unwrap().Max);
+
+            let res = cursor.replay_backward(None).unwrap();
+            assert_eq!(res.stop_reason, EventType::Process);
+            assert_ne!(res.instructions_executed, 0);
+            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().unwrap().Min);
         }
     }
 
     #[test]
     fn test_ffi_system_info() {
         let engine = ReplayEngine::new().expect("failed to create a new replayer");
-        assert!(engine.inner.index() >= 0);
-        assert!(engine.inner.index() < MAX_ENGINE as i32);
 
         let trace_path = get_test_trace();
         assert!(engine.load(trace_path.as_path()).is_ok());

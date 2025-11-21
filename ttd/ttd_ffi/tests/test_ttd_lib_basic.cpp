@@ -25,8 +25,6 @@ TEST_CASE("TTD FFI Tests", "[" NS "]")
     SECTION("Load trace")
     {
         auto Engine = TTD_FFI::Replay::ReplayEngine();
-        REQUIRE(0 <= Engine.m_Index);
-        REQUIRE(Engine.m_Index < TTD_FFI::Replay::MAX_ENGINE);
 
         const auto invalid_path = GetTemp() / L"iDontExist";
         REQUIRE(Engine.Load((const u16*)invalid_path.c_str()) == ERROR_NOT_FOUND);
