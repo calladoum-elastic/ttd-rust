@@ -4,5 +4,5 @@ target/
 ./ttd_ffi/build
 ./ttd_ffi/install
 ./ttd_ffi/src/constants.hpp
-./ttd_ffi/src/bindings.rs
-./ttd_ffi/src/constants.rs
+./ttd_sys/src/bindings.rs
+./ttd_sys/src/constants.rs
