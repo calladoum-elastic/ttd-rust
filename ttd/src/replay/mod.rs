@@ -331,6 +331,7 @@ impl<'a> ReplayCursor<'a> {
         match self.get_thread_context()? {
             sys::RegisterContext::X64(_) => Ok(8),
             sys::RegisterContext::X86(_) => Ok(4),
+            sys::RegisterContext::ARM64(_) => Ok(8),
         }
     }
 
