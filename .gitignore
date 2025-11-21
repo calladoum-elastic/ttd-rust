@@ -1,8 +1,8 @@
 .vscode/
 *.dll
 target/
-ttd/ttd_ffi/build
-ttd/ttd_ffi/install
+./ttd_ffi/build
+./ttd_ffi/install
+./ttd_ffi/src/constants.hpp
 ttd/src/bindings.rs
 ttd/src/constants.rs
-ttd/ttd_ffi/src/constants.hpp
