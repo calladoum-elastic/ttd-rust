@@ -120,16 +120,6 @@ public:
 
     ~ReplayCursor();
 
-    i32
-    Index() const;
-
-    i32
-    EngineIndex() const;
-
-    /// Unload the cursor
-    i32
-    Reset();
-
     /// Replay the trace forward.
     /// Note: it is the responsibility of the caller to allocate and manage the `ReplayResult*` structure
     /// @returns 0 on success
@@ -177,6 +167,12 @@ public:
 
     AVX_EXTENDED_CONTEXT*
     GetX64ExtendedRegisterContext() const;
+
+    ARM64_CONTEXT*
+    GetArm64RegisterContext() const;
+
+    ARM64_NEON128*
+    GetArm64ExtendedRegisterContext() const;
 
     void
     SetReplayFlags(TTD::Replay::ReplayFlags flags);

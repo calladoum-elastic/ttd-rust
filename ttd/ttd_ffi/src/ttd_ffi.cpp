@@ -338,12 +338,24 @@ TTD_FFI::Replay::ReplayCursor::GetX64RegisterContext() const
     return reinterpret_cast<AMD64_CONTEXT*>(this->m_Cursor->GetCrossPlatformContext().Data);
 }
 
-
 AVX_EXTENDED_CONTEXT*
 TTD_FFI::Replay::ReplayCursor::GetX64ExtendedRegisterContext() const
 {
     return reinterpret_cast<AVX_EXTENDED_CONTEXT*>(this->m_Cursor->GetCrossPlatformContext().Data);
 }
+
+ARM64_CONTEXT*
+TTD_FFI::Replay::ReplayCursor::GetArm64RegisterContext() const
+{
+    return reinterpret_cast<ARM64_CONTEXT*>(this->m_Cursor->GetCrossPlatformContext().Data);
+}
+
+ARM64_NEON128*
+TTD_FFI::Replay::ReplayCursor::GetArm64ExtendedRegisterContext() const
+{
+    return reinterpret_cast<ARM64_NEON128*>(this->m_Cursor->GetCrossPlatformContext().Data);
+}
+
 
 void
 TTD_FFI::Replay::ReplayCursor::SetReplayFlags(TTD::Replay::ReplayFlags flags)

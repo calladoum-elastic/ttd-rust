@@ -218,6 +218,11 @@ impl<'a> ReplayCursor<'a> {
                     let _ref: &ffi::X86_NT5_CONTEXT = std::mem::transmute(_ptr);
                     RegisterContext::X86(_ref)
                 }
+                ProcessorArchitecture::ARM64 => {
+                    let _ptr: *mut ffi::ARM64_CONTEXT = self.inner.GetArm64RegisterContext();
+                    let _ref: &ffi::ARM64_CONTEXT = std::mem::transmute(_ptr);
+                    RegisterContext::ARM64(_ref)
+                }
             })
         }
     }
@@ -228,6 +233,7 @@ impl<'a> ReplayCursor<'a> {
             match arch {
                 ProcessorArchitecture::X64 => Ok(ExtendedRegisterContext::X64(*self.inner.GetX64ExtendedRegisterContext())),
                 ProcessorArchitecture::X86 => Ok(ExtendedRegisterContext::X86(*self.inner.GetX86ExtendedRegisterContext())),
+                ProcessorArchitecture::ARM64 => Ok(ExtendedRegisterContext::ARM64(*self.inner.GetArm64ExtendedRegisterContext())),
             }
         }
     }
@@ -308,6 +314,7 @@ impl From<u32> for ReplayFlags {
 
 #[allow(clippy::large_enum_variant)]
 pub enum RegisterContext<'a> {
+    ARM64(&'a ffi::ARM64_CONTEXT),
     X64(&'a ffi::AMD64_CONTEXT),
     X86(&'a ffi::X86_NT5_CONTEXT),
 }
@@ -349,6 +356,53 @@ r14={:016x} r15={:016x}",
 eip={:08x} esp={:08x} ebp={:08x} ",
                 ctx.Eax, ctx.Ebx, ctx.Ecx, ctx.Edx, ctx.Esi, ctx.Edi, ctx.Eip, ctx.Esp, ctx.Ebp,
             ),
+            RegisterContext::ARM64(ctx) => {
+                write!(
+                    f,
+                    "x0={:016x}   x1={:016x}   x2={:016x}   x3={:016x}
+x4={:016x}   x5={:016x}   x6={:016x}   x7={:016x}
+x8={:016x}   x9={:016x}  x10={:016x}  x11={:016x}
+x12={:016x}  x13={:016x}  x14={:016x}  x15={:016x}
+x16={:016x}  x17={:016x}  x18={:016x}  x19={:016x}
+x20={:016x}  x21={:016x}  x22={:016x}  x23={:016x}
+x24={:016x}  x25={:016x}  x26={:016x}  x27={:016x}
+x28={:016x}   fp={:016x}   lr={:016x}   sp={:016x}
+ pc={:016x}",
+                    ctx.X[0],
+                    ctx.X[1],
+                    ctx.X[2],
+                    ctx.X[3],
+                    ctx.X[4],
+                    ctx.X[5],
+                    ctx.X[6],
+                    ctx.X[7],
+                    ctx.X[8],
+                    ctx.X[9],
+                    ctx.X[10],
+                    ctx.X[11],
+                    ctx.X[12],
+                    ctx.X[13],
+                    ctx.X[14],
+                    ctx.X[15],
+                    ctx.X[16],
+                    ctx.X[17],
+                    ctx.X[18],
+                    ctx.X[19],
+                    ctx.X[20],
+                    ctx.X[21],
+                    ctx.X[22],
+                    ctx.X[23],
+                    ctx.X[24],
+                    ctx.X[25],
+                    ctx.X[26],
+                    ctx.X[27],
+                    ctx.X[28],
+                    ctx.Fp,
+                    ctx.Lr,
+                    ctx.Sp,
+                    ctx.Pc
+                )
+            }
         }
     }
 }
@@ -357,13 +411,14 @@ eip={:08x} esp={:08x} ebp={:08x} ",
 pub(crate) enum ProcessorArchitecture {
     X64 = 9,
     X86 = 0,
-    // ARM64 = 12,
+    ARM64 = 12,
 }
 impl TryFrom<u16> for ProcessorArchitecture {
     type Error = crate::error::Error;
 
     fn try_from(value: u16) -> Result<Self> {
         match value {
+            12 => Ok(ProcessorArchitecture::ARM64),
             9 => Ok(ProcessorArchitecture::X64),
             0 => Ok(ProcessorArchitecture::X86),
             _ => Err(Error::ConversionError),
@@ -372,6 +427,7 @@ impl TryFrom<u16> for ProcessorArchitecture {
 }
 
 pub enum ExtendedRegisterContext {
+    ARM64(ffi::ARM64_NEON128),
     X64(ffi::AVX_EXTENDED_CONTEXT),
     X86(ffi::AVX_EXTENDED_CONTEXT),
 }
@@ -392,7 +448,6 @@ mod test {
     #[test]
     fn test_ffi_load_simple() {
         let replay = ReplayEngine::new().expect("failed to create a new replayer");
-        // assert!(replay.inner.m_Index >= 0);
 
         let trace_path = get_test_trace();
         assert_eq!(replay.load(trace_path.as_ref()), 0);
