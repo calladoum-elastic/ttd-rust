@@ -19,7 +19,7 @@ pub mod events;
 
 pub type SystemInfo = bindings::root::TTD::SystemInfo;
 pub type ThreadInfo = bindings::root::TTD::Replay::ThreadInfo;
-pub type ReplayPosition = bindings::root::TTD::Replay::Position;
+// pub type ReplayPosition = bindings::root::TTD::Replay::Position;
 pub type ReplayPositionRange = bindings::root::TTD::Replay::PositionRange;
 pub type ThreadView = bindings::root::TTD::Replay::IThreadView;
 pub type Amd64Context = bindings::root::AMD64_CONTEXT;
@@ -35,6 +35,21 @@ pub type MemoryWatchpointData = bindings::root::TTD::Replay::MemoryWatchpointDat
 
 pub type ReplayProgressCallback = fn(ctx: usize, pos: &ReplayPosition);
 pub type RegisterChangedCallback = fn(context: usize, reg_id: u8, old_data: &[u8; 8], new_data: &[u8; 8], ddata_size_in_bytes: usize, thread: &ThreadView);
+
+#[derive(Display, Debug, PartialEq)]
+pub struct ReplayPosition<'a>(&'a bindings::root::TTD::Replay::Position);
+
+impl<'a> Into<&'a bindings::root::TTD::Replay::Position> for ReplayPosition<'a> {
+    fn into(self) -> &'a bindings::root::TTD::Replay::Position {
+        self.0
+    }
+}
+
+impl<'a> From<&'a bindings::root::TTD::Replay::Position> for ReplayPosition<'a> {
+    fn from(value: &'a bindings::root::TTD::Replay::Position) -> Self {
+        todo!()
+    }
+}
 
 #[derive(Display, Debug, PartialEq)]
 pub enum EventType {
@@ -135,8 +150,8 @@ pub struct ModuleInstance {
 #[derive(Debug)]
 pub struct ActiveThreadInfo {
     pub thread: ThreadInfo,
-    pub current_position: ReplayPosition,
-    pub last_valid_position: ReplayPosition,
+    pub current_position: bindings::root::TTD::Replay::Position,
+    pub last_valid_position: bindings::root::TTD::Replay::Position,
 }
 
 pub struct ReplayResult {
@@ -162,11 +177,19 @@ pub struct ReplayCursor<'a> {
 
 impl<'a> ReplayCursor<'a> {
     pub fn replay_forward(&mut self, until: Option<ReplayPosition>) -> Result<ReplayResult> {
-        Ok(self.inner.replay_forward(until)?.into())
+        Ok(match until {
+            Some(pos) => self.inner.replay_forward(Some(*pos.0))?,
+            None => self.inner.replay_forward(None)?,
+        }
+        .into())
     }
 
     pub fn replay_backward(&mut self, until: Option<ReplayPosition>) -> Result<ReplayResult> {
-        Ok(self.inner.replay_backward(until)?.into())
+        Ok(match until {
+            Some(pos) => self.inner.replay_backward(Some(*pos.0))?,
+            None => self.inner.replay_backward(None)?,
+        }
+        .into())
     }
 
     pub fn replay_forward_steps(&mut self, steps: u64) -> Result<ReplayResult> {
@@ -180,15 +203,15 @@ impl<'a> ReplayCursor<'a> {
     }
 
     pub fn set_position(&mut self, pos: &ReplayPosition) {
-        self.inner.set_position(pos)
+        self.inner.set_position(pos.0)
     }
 
-    pub fn get_position(&self) -> Result<&ReplayPosition> {
-        Ok(self.inner.get_position())
+    pub fn get_position(&self) -> Result<ReplayPosition<'_>> {
+        Ok(ReplayPosition(self.inner.get_position()))
     }
 
-    pub fn get_previous_position(&mut self) -> Result<&ReplayPosition> {
-        Ok(self.inner.get_previous_position())
+    pub fn get_previous_position(&mut self) -> Result<ReplayPosition<'_>> {
+        Ok(ReplayPosition(self.inner.get_previous_position()))
     }
 
     pub fn get_thread_info(&self) -> Result<&ThreadInfo> {
@@ -392,7 +415,7 @@ mod test {
     use ttd_sys::bindings::root::TTD::Replay::PositionWatchpointData;
 
     use crate::prelude::*;
-    use crate::replay::{DataAccessMask, EventType, MemoryWatchpointData, ReplayCursor, ReplayEngine};
+    use crate::replay::{DataAccessMask, EventType, MemoryWatchpointData, ReplayCursor, ReplayEngine, ReplayPosition};
 
     fn get_test_trace() -> std::path::PathBuf {
         let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
@@ -409,26 +432,28 @@ mod test {
 
         for i in 1..10 {
             let mut cursor = engine.cursor().unwrap();
-            let curpos = *cursor.get_position().unwrap();
-            assert_eq!(curpos, engine.get_lifetime().Min);
+            let curpos = cursor.get_position().unwrap();
+            assert_eq!(*curpos.0, engine.get_lifetime().Min);
 
-            cursor.set_position(&engine.get_lifetime().Max);
-            let curpos = *cursor.get_position().unwrap();
-            assert_eq!(curpos, engine.get_lifetime().Max);
+            let new_pos = ReplayPosition(&engine.get_lifetime().Max);
+            cursor.set_position(&new_pos);
+            let curpos = cursor.get_position().unwrap();
+            assert_eq!(*curpos.0, engine.get_lifetime().Max);
 
-            cursor.set_position(&engine.get_lifetime().Min);
-            let curpos = *cursor.get_position().unwrap();
-            assert_eq!(curpos, engine.get_lifetime().Min);
+            let new_pos = ReplayPosition(&engine.get_lifetime().Min);
+            cursor.set_position(&new_pos);
+            let curpos = cursor.get_position().unwrap();
+            assert_eq!(*curpos.0, engine.get_lifetime().Min);
         }
 
         for i in 1..10 {
             let mut cursor = engine.cursor().unwrap();
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Min);
+            assert_eq!(*cursor.get_position().unwrap().0, engine.get_lifetime().Min);
 
             let res = cursor.replay_forward(None).unwrap();
             assert_eq!(res.stop_reason, EventType::Process);
             assert_ne!(res.instructions_executed, 0);
-            assert_eq!(*cursor.get_previous_position().unwrap(), engine.get_lifetime().Max);
+            assert_eq!(*cursor.get_previous_position().unwrap().0, engine.get_lifetime().Max);
 
             let res = cursor.replay_backward(None).unwrap();
             assert_eq!(res.stop_reason, EventType::Process);
@@ -576,9 +601,13 @@ mod test {
 
         let pc = cursor.get_program_counter().unwrap();
         let next_pc = {
-            cursor.set_position(&(cursor.get_position().unwrap().to_owned() + 1));
+            let pos = cursor.get_position().unwrap().0.to_owned();
+            cursor.set_position(&ReplayPosition(&(pos + 1)));
+
             let pc = cursor.get_program_counter().unwrap();
-            cursor.set_position(&(cursor.get_position().unwrap().to_owned() - 1));
+
+            let pos = cursor.get_position().unwrap().0.to_owned();
+            cursor.set_position(&ReplayPosition(&(pos - 1)));
             pc
         };
 

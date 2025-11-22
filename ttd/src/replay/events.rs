@@ -5,7 +5,7 @@ use crate::replay::{ReplayModule, ReplayPosition};
 
 #[derive(Debug)]
 pub struct ModuleLoaded {
-    pub position: ReplayPosition,
+    pub position: ttd_sys::bindings::root::TTD::Replay::Position,
     pub module: ReplayModule,
 }
 
@@ -22,7 +22,7 @@ impl TryFrom<&ttd_sys::bindings::root::TTD::Replay::ModuleLoadedEvent> for Modul
 
 #[derive(Debug)]
 pub struct ModuleUnloaded {
-    pub position: ReplayPosition,
+    pub position: ttd_sys::bindings::root::TTD::Replay::Position,
     pub module: ReplayModule,
 }
 impl TryFrom<&ttd_sys::bindings::root::TTD::Replay::ModuleUnloadedEvent> for ModuleUnloaded {
