@@ -397,6 +397,10 @@ impl<'a> ReplayCursor<'a> {
 // endregion: TTD Replay Cursor
 
 // region: TTD Replay Engine
+
+/// High-level handle to the underlying TTD replay engine, wrapping the raw
+/// FFI `ttd_sys::replay::ReplayEngine`. Manages replay session loading, configuration,
+/// and creation of cursors while encapsulating ownership and resource cleanup.
 pub struct ReplayEngine {
     inner: ttd_sys::replay::ReplayEngine,
 }
@@ -408,6 +412,15 @@ impl ReplayEngine {
         })
     }
 
+    /// Load a TTD trace from the filesystem into the replay engine, preparing it
+/// for cursor creation and navigation. This does not start replaying; it
+/// initializes internal state from the specified trace file or directory.
+///
+/// Parameters:
+/// - trace_path: Filesystem path to the TTD trace file or trace directory.
+///
+/// Returns:
+/// - `Result`
     pub fn load(&self, trace_path: &std::path::Path) -> Result<()> {
         if !trace_path.exists() {
             return Err(Error::NotFound);
@@ -437,10 +450,19 @@ impl ReplayEngine {
         }
     }
 
+    /// Retrieve system information captured by the loaded TTD trace (CPU, OS
+    /// version, address width, endianness, and other environment details) part of the [`SystemInfo`] structure.
+    ///
+    /// Returns:
+    /// - [`Result<&SystemInfo>`]
     pub fn system_info(&self) -> Result<&SystemInfo> {
         Ok(self.inner.system_info())
     }
 
+    /// A convenience function leveraging `system_info()` to return the process id
+    ///
+    /// Returns:
+    /// - [`Result<u32>`]
     pub fn process_id(&self) -> Result<u32> {
         Ok(self.system_info()?.ProcessId)
     }
@@ -449,6 +471,12 @@ impl ReplayEngine {
         Ok(self.inner.get_module_count())
     }
 
+    /// Return the list of modules observed in the loaded TTD trace as a vector of
+    /// ReplayModule entries. Each element contains metadata (base address, size,
+    /// path, version/timestamp) for a module recorded during execution.
+    ///
+    /// Returns:
+    /// - `Result<Vec<ReplayModule>>`
     pub fn get_module_list(&self) -> Result<Vec<ReplayModule>> {
         let mut res = Vec::<ReplayModule>::with_capacity(self.get_module_count()?);
         for module in self.inner.get_module_list().iter() {
