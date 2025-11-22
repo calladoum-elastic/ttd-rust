@@ -36,6 +36,15 @@ pub type MemoryWatchpointData = bindings::root::TTD::Replay::MemoryWatchpointDat
 pub type ReplayProgressCallback = fn(ctx: usize, pos: &ReplayPosition);
 pub type RegisterChangedCallback = fn(context: usize, reg_id: u8, old_data: &[u8; 8], new_data: &[u8; 8], ddata_size_in_bytes: usize, thread: &ThreadView);
 
+/// Wrapper around the raw TTD SDK Replay::Position reference that provides a
+/// borrowed, ergonomic handle to a Time-Travel Debugging replay position
+/// without taking ownership. The lifetime 'a ties the wrapper to the
+/// referenced bindings::root::TTD::Replay::Position, preventing the wrapper
+/// from outliving the underlying SDK object.
+///
+/// Parameters:
+/// - 'a: Lifetime of the borrowed bindings::root::TTD::Replay::Position,
+///   ensuring the wrapper does not outlive the referenced SDK value.
 #[derive(Display, Debug, PartialEq)]
 pub struct ReplayPosition<'a>(&'a bindings::root::TTD::Replay::Position);
 
@@ -47,74 +56,16 @@ impl<'a> Into<&'a bindings::root::TTD::Replay::Position> for ReplayPosition<'a> 
 
 impl<'a> From<&'a bindings::root::TTD::Replay::Position> for ReplayPosition<'a> {
     fn from(value: &'a bindings::root::TTD::Replay::Position) -> Self {
-        todo!()
+        Self(value)
     }
 }
 
-#[derive(Display, Debug, PartialEq)]
-pub enum EventType {
-    MemoryWatchpoint,
-    PositionWatchpoint,
-    Exception,
-    Gap,
-    Thread,
-    StepCount,
-    Position,
-    Process,
-    Interrupted,
-    Error,
-    Count,
-    Invalid,
-}
-
-impl From<u8> for EventType {
-    fn from(value: u8) -> Self {
-        match value {
-            bindings::root::TTD::Replay::EventType_MemoryWatchpoint => EventType::MemoryWatchpoint,
-            bindings::root::TTD::Replay::EventType_PositionWatchpoint => EventType::PositionWatchpoint,
-            bindings::root::TTD::Replay::EventType_Exception => EventType::Exception,
-            bindings::root::TTD::Replay::EventType_Gap => EventType::Gap,
-            bindings::root::TTD::Replay::EventType_Thread => EventType::Thread,
-            bindings::root::TTD::Replay::EventType_StepCount => EventType::StepCount,
-            bindings::root::TTD::Replay::EventType_Position => EventType::Position,
-            bindings::root::TTD::Replay::EventType_Process => EventType::Process,
-            bindings::root::TTD::Replay::EventType_Interrupted => EventType::Interrupted,
-            bindings::root::TTD::Replay::EventType_Error => EventType::Error,
-            bindings::root::TTD::Replay::EventType_Count => EventType::Count,
-            _ => EventType::Invalid,
-        }
-    }
-}
-
-bitflags! {
-    pub struct DataAccessType: u8 {
-        const Read          = bindings::root::TTD::Replay::DataAccessType_Read;
-        const Write         =      bindings::root::TTD::Replay::DataAccessType_Write;
-        const Execute       =     bindings::root::TTD::Replay::DataAccessType_Execute;
-        const CodeFetch     =     bindings::root::TTD::Replay::DataAccessType_CodeFetch;
-        const Overwrite     =     bindings::root::TTD::Replay::DataAccessType_Overwrite;
-        const DataMismatch  =     bindings::root::TTD::Replay::DataAccessType_DataMismatch;
-        const NewData       =     bindings::root::TTD::Replay::DataAccessType_NewData;
-        const RedundantData =     bindings::root::TTD::Replay::DataAccessType_RedundantData;
-    }
-}
-
-bitflags! {
-    pub struct DataAccessMask: u8 {
-    const Read          = bindings::root::TTD::Replay::DataAccessMask_Read;
-    const Write         = bindings::root::TTD::Replay::DataAccessMask_Write;
-    const Execute       = bindings::root::TTD::Replay::DataAccessMask_Execute;
-    const CodeFetch     = bindings::root::TTD::Replay::DataAccessMask_CodeFetch;
-    const Overwrite     = bindings::root::TTD::Replay::DataAccessMask_Overwrite;
-    const DataMismatch  = bindings::root::TTD::Replay::DataAccessMask_DataMismatch;
-    const NewData       = bindings::root::TTD::Replay::DataAccessMask_NewData;
-    const RedundantData = bindings::root::TTD::Replay::DataAccessMask_RedundantData;
-    const None      = bindings::root::TTD::Replay::DataAccessMask_None;
-    const ReadWrite = bindings::root::TTD::Replay::DataAccessMask_ReadWrite;
-    const All       = bindings::root::TTD::Replay::DataAccessMask_All;
-}
-}
-
+/// Represents a module (loaded binary or library) observed during a TTD record
+/// or replay session. Encapsulates metadata such as module base address,
+/// size, file path, timestamp/version info, and identifiers used by the TTD
+/// SDK to correlate module load/unload events. Use this struct to inspect
+/// which modules were present at specific replay positions, resolve symbols,
+/// or present module lists to users.
 #[derive(Debug)]
 pub struct ReplayModule {
     pub name: String,
@@ -140,10 +91,20 @@ impl TryFrom<&bindings::root::TTD::Replay::Module> for ReplayModule {
     type Error = crate::error::Error;
 }
 
+/// Represents a specific in-process instantiation of a module observed during a
+/// TTD record or replay session. Contains instance-specific details such as the
+/// module's load base address, applied relocation or ASLR offset, instance lifetime
+/// (load/unload positions), and identifiers tying the instance back to the
+/// canonical module metadata. Use this struct to track which particular module
+/// image was active on a thread or at a replay position, to resolve addresses
+/// to module-relative offsets, and to correlate instance-level events.
 #[derive(Debug)]
 pub struct ModuleInstance {
+    /// The associated [`ReplayModule`]
     pub module: ReplayModule,
+    /// The module load timestamp
     pub load_time: SequenceId,
+    /// The module unload timestamp
     pub unload_time: SequenceId,
 }
 
@@ -154,9 +115,17 @@ pub struct ActiveThreadInfo {
     pub last_valid_position: bindings::root::TTD::Replay::Position,
 }
 
+/// Holds the outcome of a replay step or operation in ttd-rust, describing why
+/// replay stopped and quantitative execution metrics. Useful for callers that
+/// need to inspect the stop cause and how much work the replay performed.
 pub struct ReplayResult {
-    pub stop_reason: EventType,
+    /// The [`events.EventType`] of the reason why the replay stopped
+    pub stop_reason: events.EventType,
+
+    /// Indicates how many steps were ran
     pub steps_executed: u64,
+
+    /// Indicates how many instructions were ran
     pub instructions_executed: u64,
 }
 
@@ -171,11 +140,28 @@ impl From<bindings::root::TTD::Replay::ICursorView_ReplayResult> for ReplayResul
 }
 
 // region: TTD Replay Cursor
+
+/// A high-level, borrow-based cursor over a TTD replay stream that wraps the
+/// lower-level FFI crate::replay::sys::replay::ReplayCursor. Provides methods
+/// to navigate replay events and positions while preserving Rust lifetime safety
+/// for referenced SDK state. Use this type to iterate or seek through recorded
+/// execution without taking ownership of the underlying replay session.
 pub struct ReplayCursor<'a> {
     inner: crate::replay::sys::replay::ReplayCursor<'a>,
 }
 
 impl<'a> ReplayCursor<'a> {
+
+    /// Advance the cursor forward toward an optional target position. If until is
+    /// `Some`, replay proceeds until that `ReplayPosition` or a stopping event;
+    // if `None`, it advances until another event raised. On success the function
+    /// returns `ReplayResult` indicating the stop reason and other metrics.
+    ///
+    /// Parameters:
+    /// - `until`: Optional target [`ReplayPosition`] to stop at.
+    ///
+    /// Returns:
+    /// - [`Result<ReplayResult>`]
     pub fn replay_forward(&mut self, until: Option<ReplayPosition>) -> Result<ReplayResult> {
         Ok(match until {
             Some(pos) => self.inner.replay_forward(Some(*pos.0))?,
@@ -184,6 +170,13 @@ impl<'a> ReplayCursor<'a> {
         .into())
     }
 
+    /// Same as `replay_forward()` but backward
+    ///
+    /// Parameters:
+    /// - `until`: Optional target [`ReplayPosition`] to stop at.
+    ///
+    /// Returns:
+    /// - [`Result`]
     pub fn replay_backward(&mut self, until: Option<ReplayPosition>) -> Result<ReplayResult> {
         Ok(match until {
             Some(pos) => self.inner.replay_backward(Some(*pos.0))?,
@@ -192,52 +185,114 @@ impl<'a> ReplayCursor<'a> {
         .into())
     }
 
+    /// Advances forward the replay by a specific number of `steps`
+    ///
+    /// Parameters:
+    /// - `step`: The number of steps to move forward.
+    ///
+    /// Returns:
+    /// - [`Result<ReplayResult>`]
     pub fn replay_forward_steps(&mut self, steps: u64) -> Result<ReplayResult> {
         let until = *self.inner.get_position() + steps;
         Ok(self.inner.replay_forward(Some(until))?.into())
     }
 
+    /// Advances backward the replay by a specific number of `steps`
+    ///
+    /// Parameters:
+    /// - `step`: The number of steps to move backward.
+    ///
+    /// Returns:
+    /// - [`Result<ReplayResult>`]
     pub fn replay_backward_steps(&mut self, steps: u64) -> Result<ReplayResult> {
         let until = *self.inner.get_position() + steps;
         Ok(self.inner.replay_backward(Some(until))?.into())
     }
 
+    /// Set the cursor to the given replay position immediately. `set_position()`
+    ///  simply places the cursor at the intended `ReplayPosition`. As such it
+    /// will ignore any event occuring between the old and new position.
+    ///
+    /// Parameters:
+    /// - `pos`: Reference to the target ReplayPosition to set.
     pub fn set_position(&mut self, pos: &ReplayPosition) {
         self.inner.set_position(pos.0)
     }
 
+    /// Get the current position of the cursor.
+    ///
+    /// Returns:
+    /// - [`Result<ReplayPosition>`]
     pub fn get_position(&self) -> Result<ReplayPosition<'_>> {
         Ok(ReplayPosition(self.inner.get_position()))
     }
 
+    /// Get the previous position of the cursor.
+    ///
+    /// Returns:
+    /// - [`Result<ReplayPosition>`]
     pub fn get_previous_position(&mut self) -> Result<ReplayPosition<'_>> {
         Ok(ReplayPosition(self.inner.get_previous_position()))
     }
 
+    /// Get the thread information at the current point of replay as a
+    /// reference to [`ThreadInfo`].
+    ///
+    /// Returns:
+    /// - [`Result<&ThreadInfo>`]
     pub fn get_thread_info(&self) -> Result<&ThreadInfo> {
         Ok(self.inner.get_thread_info())
     }
 
+    /// Get the [TEB](https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/api/pebteb/teb/index.htm)
+    /// address of the current active thread.
+    ///
+    /// Returns:
+    /// - [`Result<u64>`]
     pub fn get_teb_address(&self) -> Result<u64> {
         Ok(self.inner.get_teb_address())
     }
 
+    /// Get the current PC value. Equivalent to getting the PC value
+    /// from [`get_thread_context()`]
+    ///
+    /// Returns:
+    /// - [`Result<u64>`]
     pub fn get_program_counter(&self) -> Result<u64> {
         Ok(self.inner.get_program_counter())
     }
 
+    /// Get the current SP value. Equivalent to getting the SP value
+    /// from [`get_thread_context()`]
+    ///
+    /// Returns:
+    /// - [`Result<u64>`]
     pub fn get_stack_pointer(&self) -> Result<u64> {
         Ok(self.inner.get_stack_pointer())
     }
 
+    /// Get the current FP value. Equivalent to getting the FP value
+    /// from [`get_thread_context()`]
+    ///
+    /// Returns:
+    /// - [`Result<u64>`]
     pub fn get_frame_pointer(&self) -> Result<u64> {
         Ok(self.inner.get_frame_pointer())
     }
 
+    /// Get the current [`RegisterContext`] with the state of all registers at
+    /// the current point of execution.
+    ///
+    /// Returns:
+    /// - [`Result<RegisterContext>`]
     pub fn get_thread_context(&self) -> Result<RegisterContext<'_>> {
         Ok(self.inner.get_thread_context()?)
     }
 
+    /// Get the size of pointer for the current architecture.
+    ///
+    /// Returns:
+    /// - [`Result<usize>`]
     pub fn pointer_size(&self) -> Result<usize> {
         match self.get_thread_context()? {
             ttd_sys::replay::RegisterContext::X64(_) => Ok(8),
@@ -246,10 +301,25 @@ impl<'a> ReplayCursor<'a> {
         }
     }
 
+    /// Get the current [`ExtendedRegisterContext`] with the state of all
+    /// extended registers at the current point of execution.
+    ///
+    /// Returns:
+    /// - [`Result<ExtendedRegisterContext>`]
     pub fn get_thread_extended_context(&self) {
         unimplemented!()
     }
 
+    /// Read size bytes from the replay's current memory state at address and
+    /// return them as a byte vector. This observes the memory view at the cursor's
+    /// current position.
+    ///
+    /// Parameters:
+    /// - address: Starting virtual address to read from.
+    /// - size: Number of bytes to read.
+    ///
+    /// Returns:
+    /// - Result<Vec>
     pub fn read_current_memory(&self, address: u64, size: usize) -> Result<Vec<u8>> {
         Ok(self.inner.read_current_memory(address, size)?)
     }
@@ -262,18 +332,54 @@ impl<'a> ReplayCursor<'a> {
         self.inner.set_replay_flags(flags);
     }
 
+    /// Add a memory watchpoint that triggers when the specified memory region is
+    /// accessed during replay. Returns true if the watchpoint was added; false if
+    /// it was ignored or already present.
+    ///
+    /// Parameters:
+    /// - watch_point: Reference to [`MemoryWatchpointData`] describing address, size, and access type.
+    ///
+    /// Returns:
+    /// - [`Result<bool>`]
     pub fn add_memory_watchpoint(&mut self, watch_point: &MemoryWatchpointData) -> Result<bool> {
         Ok(self.inner.add_memory_watchpoint(watch_point))
     }
 
+    /// Remove a memory watchpoint that triggers when the specified memory region is
+    /// accessed during replay. Returns true if the watchpoint was added; false if
+    /// it was ignored or already present.
+    ///
+    /// Parameters:
+    /// - watch_point: Reference to [`MemoryWatchpointData`] describing address, size, and access type.
+    ///
+    /// Returns:
+    /// - [`Result<bool>`]
     pub fn remove_memory_watchpoint(&mut self, watch_point: &MemoryWatchpointData) -> Result<bool> {
         Ok(self.inner.remove_memory_watchpoint(watch_point))
     }
 
+    /// Add a position-based watchpoint that triggers when the replay reaches the
+    /// specified ReplayPosition or meets its conditions. Returns true if the
+    /// watchpoint was registered, false if ignored or duplicated.
+    ///
+    /// Parameters:
+    /// - watch_point: Reference to [`PositionWatchpointData`] specifying the target position and trigger criteria.
+    ///
+    /// Returns:
+    /// - [`Result<bool>`]
     pub fn add_position_watchpoint(&mut self, watch_point: &PositionWatchpointData) -> Result<bool> {
         Ok(self.inner.add_position_watchpoint(watch_point))
     }
 
+    /// Remove a position-based watchpoint that triggers when the replay reaches the
+    /// specified ReplayPosition or meets its conditions. Returns true if the
+    /// watchpoint was registered, false if ignored or duplicated.
+    ///
+    /// Parameters:
+    /// - watch_point: Reference to [`PositionWatchpointData`] specifying the target position and trigger criteria.
+    ///
+    /// Returns:
+    /// - [`Result<bool>`]
     pub fn remove_position_watchpoint(&mut self, watch_point: &PositionWatchpointData) -> Result<bool> {
         Ok(self.inner.remove_position_watchpoint(watch_point))
     }
@@ -415,7 +521,7 @@ mod test {
     use ttd_sys::bindings::root::TTD::Replay::PositionWatchpointData;
 
     use crate::prelude::*;
-    use crate::replay::{DataAccessMask, EventType, MemoryWatchpointData, ReplayCursor, ReplayEngine, ReplayPosition};
+    use crate::replay::{DataAccessMask, events.EventType, MemoryWatchpointData, ReplayCursor, ReplayEngine, ReplayPosition};
 
     fn get_test_trace() -> std::path::PathBuf {
         let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
@@ -451,12 +557,12 @@ mod test {
             assert_eq!(*cursor.get_position().unwrap().0, engine.get_lifetime().Min);
 
             let res = cursor.replay_forward(None).unwrap();
-            assert_eq!(res.stop_reason, EventType::Process);
+            assert_eq!(res.stop_reason, events.EventType::Process);
             assert_ne!(res.instructions_executed, 0);
             assert_eq!(*cursor.get_previous_position().unwrap().0, engine.get_lifetime().Max);
 
             let res = cursor.replay_backward(None).unwrap();
-            assert_eq!(res.stop_reason, EventType::Process);
+            assert_eq!(res.stop_reason, events.EventType::Process);
             assert_ne!(res.instructions_executed, 0);
         }
     }
@@ -574,10 +680,10 @@ mod test {
             let curpos = cursor.get_position().unwrap();
             let res = cursor.replay_forward_steps(step).unwrap();
             assert_eq!(step, res.steps_executed);
-            assert_eq!(res.stop_reason, EventType::Position);
+            assert_eq!(res.stop_reason, events.EventType::Position);
 
             let res = cursor.replay_backward_steps(step).unwrap();
-            assert_eq!(res.stop_reason, EventType::Position);
+            assert_eq!(res.stop_reason, events.EventType::Position);
             assert_eq!(0, res.steps_executed);
         }
     }
