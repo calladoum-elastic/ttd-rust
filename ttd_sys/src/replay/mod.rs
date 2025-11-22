@@ -247,10 +247,11 @@ impl<'a> Drop for ReplayCursor<'a> {
 impl<'a> ReplayCursor<'a> {
     pub fn replay_forward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> Result<ffi::TTD::Replay::ICursorView_ReplayResult> {
         unsafe {
+            let max_pos = ReplayCursor::max();
             let mut out = ffi::TTD::Replay::ICursorView_ReplayResult::default();
             let limit = match until {
                 Some(pos) => pos,
-                None => self.engine.get_lifetime().Max,
+                None => max_pos,
             };
 
             if self.inner.ReplayForward(&limit, &mut out) != 0 {
@@ -263,10 +264,11 @@ impl<'a> ReplayCursor<'a> {
 
     pub fn replay_backward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> Result<ffi::TTD::Replay::ICursorView_ReplayResult> {
         unsafe {
+            let min_pos = ReplayCursor::min();
             let mut out = ffi::TTD::Replay::ICursorView_ReplayResult::default();
             let limit = match until {
                 Some(pos) => pos,
-                None => self.engine.get_lifetime().Min,
+                None => min_pos,
             };
 
             if self.inner.ReplayBackward(&limit, &mut out) != 0 {
@@ -274,6 +276,20 @@ impl<'a> ReplayCursor<'a> {
             }
 
             Ok(out)
+        }
+    }
+
+    pub fn max() -> ffi::TTD::Replay::Position {
+        ffi::TTD::Replay::Position {
+            Sequence: ffi::TTD::SequenceId_Max,
+            Steps: ffi::TTD::Replay::StepCount_Max,
+        }
+    }
+
+    pub fn min() -> ffi::TTD::Replay::Position {
+        ffi::TTD::Replay::Position {
+            Sequence: ffi::TTD::SequenceId_Min,
+            Steps: ffi::TTD::Replay::StepCount_Min,
         }
     }
 

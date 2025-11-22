@@ -18,19 +18,15 @@
 #include <TTD/TTDLiveRecorder.h>
 // clang-format on
 
-#ifdef _LIBTTD_VERBOSE_OUTPUT
+#ifdef _DEBUG
 #define ok(fmt, ...) ::wprintf("[+] " fmt L"\n", __VA_ARGS__)
 #define err(fmt, ...) ::wprintf("[-] " fmt L"\n", __VA_ARGS__)
-#ifdef _DEBUG
 #define dbg(fmt, ...) ::wprintf("[*] %S " fmt L"\n", __FUNCTION__, __VA_ARGS__)
-#else
-#define dbg(fmt, ...)
-#endif // _DEBUG
 #else
 #define dbg(fmt, ...)
 #define ok(fmt, ...)
 #define err(fmt, ...)
-#endif // _LIBTTD_VERBOSE_OUTPUT
+#endif // _DEBUG
 
 
 #pragma region TTD_FFI::Replay::ReplayEngine

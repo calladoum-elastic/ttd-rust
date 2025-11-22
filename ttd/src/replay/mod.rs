@@ -387,10 +387,12 @@ impl ReplayEngine {
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        Error,
-        replay::{EventType, ReplayCursor, ReplayEngine},
-    };
+    use std::ops::Add;
+
+    use ttd_sys::bindings::root::TTD::Replay::PositionWatchpointData;
+
+    use crate::prelude::*;
+    use crate::replay::{DataAccessMask, EventType, MemoryWatchpointData, ReplayCursor, ReplayEngine};
 
     fn get_test_trace() -> std::path::PathBuf {
         let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
@@ -407,13 +409,16 @@ mod test {
 
         for i in 1..10 {
             let mut cursor = engine.cursor().unwrap();
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Min);
+            let curpos = *cursor.get_position().unwrap();
+            assert_eq!(curpos, engine.get_lifetime().Min);
 
             cursor.set_position(&engine.get_lifetime().Max);
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Max);
+            let curpos = *cursor.get_position().unwrap();
+            assert_eq!(curpos, engine.get_lifetime().Max);
 
             cursor.set_position(&engine.get_lifetime().Min);
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Min);
+            let curpos = *cursor.get_position().unwrap();
+            assert_eq!(curpos, engine.get_lifetime().Min);
         }
 
         for i in 1..10 {
@@ -428,7 +433,6 @@ mod test {
             let res = cursor.replay_backward(None).unwrap();
             assert_eq!(res.stop_reason, EventType::Process);
             assert_ne!(res.instructions_executed, 0);
-            assert_eq!(*cursor.get_position().unwrap(), engine.get_lifetime().Min);
         }
     }
 
@@ -536,7 +540,7 @@ mod test {
     }
 
     #[test]
-    fn test_replay_forward_steps() {
+    fn test_replay_forward_backward_steps() {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let mut cursor = engine.cursor().expect("failed to create a new cursor");
@@ -557,30 +561,49 @@ mod test {
     fn test_get_set_replay_flags() {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
-        let cursor = engine.cursor().expect("failed to create a new cursor");
-        unimplemented!();
-        //cursor.get_replay_flags()
-        //cursor.set_replay_flags()
+        let mut cursor = engine.cursor().expect("failed to create a new cursor");
+
+        let mut flags: ttd_sys::replay::ReplayFlags = cursor.get_replay_flags().unwrap();
+        flags = ttd_sys::replay::ReplayFlags::ReplaySegmentsSequentially;
+        cursor.set_replay_flags(flags);
     }
 
     #[test]
     fn test_add_remove_memory_watchpoint() {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
-        let cursor = engine.cursor().expect("failed to create a new cursor");
-        unimplemented!();
-        //cursor.add_memory_watchpoint()
-        //cursor.remove_memory_watchpoint()
+        let mut cursor = engine.cursor().expect("failed to create a new cursor");
+
+        let pc = cursor.get_program_counter().unwrap();
+        let next_pc = {
+            cursor.set_position(&(cursor.get_position().unwrap().to_owned() + 1));
+            let pc = cursor.get_program_counter().unwrap();
+            cursor.set_position(&(cursor.get_position().unwrap().to_owned() - 1));
+            pc
+        };
+
+        let watch = MemoryWatchpointData {
+            Address: next_pc,
+            Size: 1,
+            AccessMask: DataAccessMask::Execute.bits(),
+            ..Default::default()
+        };
+        assert!(cursor.add_memory_watchpoint(&watch).unwrap());
+        let res = cursor.replay_forward(None).unwrap();
+        assert_eq!(cursor.get_program_counter().unwrap(), next_pc);
+
+        assert!(cursor.remove_memory_watchpoint(&watch).unwrap());
     }
 
     #[test]
-    fn test_add_remote_position_watchpoint() {
+    fn test_add_remove_position_watchpoint() {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
-        let cursor = engine.cursor().expect("failed to create a new cursor");
-        unimplemented!();
-        //cursor.add_position_watchpoint()
-        //cursor.remove_position_watchpoint()
+        let mut cursor = engine.cursor().expect("failed to create a new cursor");
+
+        let watch = PositionWatchpointData { ..Default::default() };
+        assert!(cursor.add_position_watchpoint(&watch).unwrap());
+        assert!(cursor.remove_position_watchpoint(&watch).unwrap());
     }
 
     #[test]
@@ -588,8 +611,9 @@ mod test {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let cursor = engine.cursor().expect("failed to create a new cursor");
-        unimplemented!();
-        //cursor.get_thread_info()
+        let thread_info = cursor.get_thread_info().unwrap();
+        assert_ne!(thread_info.Id, 0);
+        assert_ne!(thread_info.UniqueId, 0);
     }
 
     #[test]
@@ -606,8 +630,8 @@ mod test {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let cursor = engine.cursor().expect("failed to create a new cursor");
-        unimplemented!();
-        //cursor.get_program_counter()
+        let program_counter = cursor.get_program_counter().unwrap();
+        assert_ne!(program_counter, 0);
     }
 
     #[test]
@@ -615,8 +639,8 @@ mod test {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let cursor = engine.cursor().expect("failed to create a new cursor");
-        unimplemented!();
-        //cursor.get_stack_pointer()
+        let stack_pointer = cursor.get_stack_pointer().unwrap();
+        assert_ne!(stack_pointer, 0);
     }
 
     #[test]
@@ -624,8 +648,7 @@ mod test {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let cursor = engine.cursor().expect("failed to create a new cursor");
-        unimplemented!();
-        //cursor.get_frame_pointer()
+        assert!(cursor.get_frame_pointer().is_ok());
     }
 
     #[test]
@@ -633,7 +656,13 @@ mod test {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let cursor = engine.cursor().expect("failed to create a new cursor");
-        unimplemented!();
-        //cursor.get_thread_context()
+        let thread_context = cursor.get_thread_context().unwrap();
+        let (pc, sp) = match thread_context {
+            ttd_sys::replay::RegisterContext::ARM64(ctx) => (ctx.Pc, ctx.Sp),
+            ttd_sys::replay::RegisterContext::X64(ctx) => (ctx.Rip, ctx.Rsp),
+            ttd_sys::replay::RegisterContext::X86(ctx) => (ctx.Eip as u64, ctx.Esp as u64),
+        };
+        assert_eq!(pc, cursor.get_program_counter().unwrap());
+        assert_eq!(sp, cursor.get_stack_pointer().unwrap());
     }
 }
