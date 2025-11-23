@@ -489,6 +489,13 @@ impl ReplayEngine {
         Ok(self.inner.get_thread_count())
     }
 
+    /// Return the list of threads observed in the loaded TTD trace as a vector of
+    /// [`ThreadInfo`] entries. Each element describes a recorded thread's identifier,
+    /// creation/termination positions, and basic execution metadata useful for
+    /// correlating events and per-thread state during replay.
+    ///
+    /// Returns:
+    /// - Result<Vec<ThreadInfo>>
     pub fn get_thread_list(&self) -> Result<Vec<ThreadInfo>> {
         Ok(self.inner.get_thread_list())
     }
@@ -497,6 +504,12 @@ impl ReplayEngine {
         Ok(self.inner.get_module_loaded_event_count())
     }
 
+    /// Return the list of module-loaded events recorded in the trace as a vector
+/// of [`events::ModuleLoaded`]. Each entry represents a module load occurrence
+/// with associated replay position and module metadata.
+///
+/// Returns:
+/// - `Result<Vec<events::ModuleLoaded>>`
     pub fn get_module_loaded_event_list(&self) -> Result<Vec<events::ModuleLoaded>> {
         let mut res = Vec::<events::ModuleLoaded>::with_capacity(self.get_module_loaded_event_count()?);
         for module in self.inner.get_module_loaded_event_list().iter() {
@@ -509,6 +522,12 @@ impl ReplayEngine {
         Ok(self.inner.get_module_unloaded_event_count())
     }
 
+    /// Return the list of module-unloaded events recorded in the trace as a
+    /// vector of events::ModuleUnloaded. Each entry represents a module unload
+    /// occurrence with its replay position and associated module metadata.
+    ///
+    /// Returns:
+    /// - `Result<Vec<events::ModuleUnloaded>>`
     pub fn get_module_unloaded_event_list(&self) -> Result<Vec<events::ModuleUnloaded>> {
         let mut res = Vec::<events::ModuleUnloaded>::with_capacity(self.get_module_unloaded_event_count()?);
         for module in self.inner.get_module_unloaded_event_list().iter() {
@@ -521,6 +540,13 @@ impl ReplayEngine {
         Ok(self.inner.get_exception_event_count())
     }
 
+    /// Return the list of exception events recorded in the trace as a vector of
+    /// [`events::Exception`]. Each entry contains the replay position, thread ID,
+    /// exception code/type, and any associated context captured when the exception
+    /// occurred.
+    ///
+    /// Returns:
+    /// - `Result<Vec<events::Exception>>`
     pub fn get_exception_event_list(&self) -> Result<Vec<events::Exception>> {
         let mut res = Vec::<events::Exception>::with_capacity(self.get_exception_event_count()?);
         for module in self.inner.get_exception_event_list().iter() {
@@ -529,6 +555,15 @@ impl ReplayEngine {
         Ok(res)
     }
 
+    /// Lookup the base (load) virtual address for a module by name in the loaded
+    /// trace. Returns the module's base address if found; useful for resolving
+    /// symbols or converting module-relative offsets to absolute addresses.
+    ///
+    /// Parameters:
+    /// - module_name: Name or filename of the module to query (case-sensitive or as recorded).
+    ///
+    /// Returns:
+    /// - `Result<u64>`
     pub fn get_module_base_address(&self, module_name: &str) -> Result<u64> {
         let mod_lower = module_name.to_lowercase();
         let modules = self.get_module_loaded_event_list()?;
