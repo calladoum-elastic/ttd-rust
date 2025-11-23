@@ -119,8 +119,8 @@ pub struct ActiveThreadInfo {
 /// replay stopped and quantitative execution metrics. Useful for callers that
 /// need to inspect the stop cause and how much work the replay performed.
 pub struct ReplayResult {
-    /// The [`events.EventType`] of the reason why the replay stopped
-    pub stop_reason: events.EventType,
+    /// The [`events::EventType`] of the reason why the replay stopped
+    pub stop_reason: events::EventType,
 
     /// Indicates how many steps were ran
     pub steps_executed: u64,
@@ -620,12 +620,12 @@ mod test {
             assert_eq!(*cursor.get_position().unwrap().0, engine.get_lifetime().Min);
 
             let res = cursor.replay_forward(None).unwrap();
-            assert_eq!(res.stop_reason, events.EventType::Process);
+            assert_eq!(res.stop_reason, events::EventType::Process);
             assert_ne!(res.instructions_executed, 0);
             assert_eq!(*cursor.get_previous_position().unwrap().0, engine.get_lifetime().Max);
 
             let res = cursor.replay_backward(None).unwrap();
-            assert_eq!(res.stop_reason, events.EventType::Process);
+            assert_eq!(res.stop_reason, events::EventType::Process);
             assert_ne!(res.instructions_executed, 0);
         }
     }
@@ -743,10 +743,10 @@ mod test {
             let curpos = cursor.get_position().unwrap();
             let res = cursor.replay_forward_steps(step).unwrap();
             assert_eq!(step, res.steps_executed);
-            assert_eq!(res.stop_reason, events.EventType::Position);
+            assert_eq!(res.stop_reason, events::EventType::Position);
 
             let res = cursor.replay_backward_steps(step).unwrap();
-            assert_eq!(res.stop_reason, events.EventType::Position);
+            assert_eq!(res.stop_reason, events::EventType::Position);
             assert_eq!(0, res.steps_executed);
         }
     }
