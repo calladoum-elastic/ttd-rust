@@ -4,9 +4,14 @@ use crate::replay::{ReplayModule, ReplayPosition};
 use derive_more::Display;
 use ttd_sys::bindings;
 
+use bitflags::bitflags;
+
 // region: EventType
 
-/// Enum class of event kinds reported by the replay system
+/// Enumeration of event kinds produced by the TTD replay system. Each variant
+/// represents a distinct runtime event category (e.g.,
+/// memory/position watchpoint, exception, interruption, etc.)
+/// used for filtering, branching, and reporting during replay.
 #[derive(Display, Debug, PartialEq)]
 pub enum EventType {
     MemoryWatchpoint,
@@ -43,6 +48,10 @@ impl From<u8> for EventType {
 }
 
 bitflags! {
+    /// Small integer-backed enum representing specific data access kinds (e.g.,
+    /// read, write, execute) used in access filtering and watchpoint configuration.
+    /// The underlying u8 stores the bit or value for each access type for compact
+    /// FFI-friendly representation.
     pub struct DataAccessType: u8 {
         const Read          = bindings::root::TTD::Replay::DataAccessType_Read;
         const Write         =      bindings::root::TTD::Replay::DataAccessType_Write;
@@ -56,6 +65,10 @@ bitflags! {
 }
 
 bitflags! {
+    /// Bitmask type representing which categories of data access are monitored or
+    /// permitted (for example: reads, writes, execute, or metadata). Use this mask
+    /// to specify or query access filters for memory watchpoints, logging, or
+    /// permission checks within the replay engine.
     pub struct DataAccessMask: u8 {
     const Read          = bindings::root::TTD::Replay::DataAccessMask_Read;
     const Write         = bindings::root::TTD::Replay::DataAccessMask_Write;

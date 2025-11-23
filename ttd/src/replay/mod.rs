@@ -584,7 +584,7 @@ mod test {
     use ttd_sys::bindings::root::TTD::Replay::PositionWatchpointData;
 
     use crate::prelude::*;
-    use crate::replay::{DataAccessMask, events.EventType, MemoryWatchpointData, ReplayCursor, ReplayEngine, ReplayPosition};
+    use crate::replay::{DataAccessMask, events::EventType, MemoryWatchpointData, ReplayCursor, ReplayEngine, ReplayPosition};
 
     fn get_test_trace() -> std::path::PathBuf {
         let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
