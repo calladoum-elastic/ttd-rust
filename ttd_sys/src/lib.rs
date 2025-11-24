@@ -1,3 +1,5 @@
+//! Transition layer to invoke the C++ API for Time Travel Debugging
+
 pub mod bindings;
 pub mod constants;
 pub mod error;

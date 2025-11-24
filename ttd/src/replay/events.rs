@@ -50,7 +50,7 @@ impl From<u8> for EventType {
 impl TryFrom<u8> for EventType {
     fn try_from(value: u8) -> Result<EventType>{
         let obj = EventType::from(value);
-        if obj.value == EventType::Invalid {
+        if obj == EventType::Invalid {
             return Err(Error::ConversionError);
         }
 

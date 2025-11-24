@@ -70,6 +70,8 @@ impl EngineInfo {
 }
 // endregion: EngineInfo
 
+// region: ReplayEngine
+
 pub struct ReplayEngine {
     inner: ffi::TTD_FFI::Replay::ReplayEngine,
 }
@@ -230,6 +232,10 @@ impl ReplayEngine {
         }
     }
 }
+
+// endregion: ReplayEngine
+
+// region: ReplayCursor
 
 pub struct ReplayCursor<'a> {
     inner: ffi::TTD_FFI::Replay::ReplayCursor,
@@ -401,6 +407,10 @@ impl<'a> ReplayCursor<'a> {
     }
 }
 
+// endregion: ReplayCursor
+
+// region: Cursor callbacks
+
 pub type RegisterChangedCallbackUnsafe = unsafe extern "C" fn(
     context: usize,
     reg_id: u8,
@@ -411,6 +421,10 @@ pub type RegisterChangedCallbackUnsafe = unsafe extern "C" fn(
 );
 
 pub type ReplayProgressCallbackUnsafe = unsafe extern "C" fn(ctx: usize, pos: *const ffi::TTD::Replay::Position);
+
+// endregion: Cursor callbacks
+
+// region: ReplayFlags
 
 #[repr(u32)]
 #[derive(Default, Display)]
@@ -438,6 +452,9 @@ impl From<u32> for ReplayFlags {
         }
     }
 }
+// endregion: ReplayFlags
+
+// region: RegisterContext / RegisterExtendedContext
 
 #[allow(clippy::large_enum_variant)]
 pub enum RegisterContext<'a> {
@@ -534,6 +551,17 @@ x28={:016x}   fp={:016x}   lr={:016x}   sp={:016x}
     }
 }
 
+pub enum ExtendedRegisterContext {
+    ARM64(ffi::ARM64_NEON128),
+    X64(ffi::AVX_EXTENDED_CONTEXT),
+    X86(ffi::AVX_EXTENDED_CONTEXT),
+}
+
+// endregion: RegisterContext / RegisterExtendedContext
+
+
+// region: ProcessorArchitecture
+
 #[repr(u16)]
 pub enum ProcessorArchitecture {
     X64 = 9,
@@ -553,11 +581,8 @@ impl TryFrom<u16> for ProcessorArchitecture {
     }
 }
 
-pub enum ExtendedRegisterContext {
-    ARM64(ffi::ARM64_NEON128),
-    X64(ffi::AVX_EXTENDED_CONTEXT),
-    X86(ffi::AVX_EXTENDED_CONTEXT),
-}
+// endregion: ProcessorArchitecture
+
 
 #[cfg(test)]
 mod test {
