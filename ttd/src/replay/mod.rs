@@ -584,7 +584,8 @@ mod test {
     use ttd_sys::bindings::root::TTD::Replay::PositionWatchpointData;
 
     use crate::prelude::*;
-    use crate::replay::{DataAccessMask, events::EventType, MemoryWatchpointData, ReplayCursor, ReplayEngine, ReplayPosition};
+    use crate::replay::{MemoryWatchpointData, ReplayCursor, ReplayEngine, ReplayPosition};
+    use crate::replay::events::{DataAccessMask, EventType};
 
     fn get_test_trace() -> std::path::PathBuf {
         let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
@@ -620,12 +621,12 @@ mod test {
             assert_eq!(*cursor.get_position().unwrap().0, engine.get_lifetime().Min);
 
             let res = cursor.replay_forward(None).unwrap();
-            assert_eq!(res.stop_reason, events::EventType::Process);
+            assert_eq!(res.stop_reason, EventType::Process);
             assert_ne!(res.instructions_executed, 0);
             assert_eq!(*cursor.get_previous_position().unwrap().0, engine.get_lifetime().Max);
 
             let res = cursor.replay_backward(None).unwrap();
-            assert_eq!(res.stop_reason, events::EventType::Process);
+            assert_eq!(res.stop_reason, EventType::Process);
             assert_ne!(res.instructions_executed, 0);
         }
     }

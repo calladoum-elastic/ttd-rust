@@ -141,10 +141,30 @@ impl ReplayEngine {
         Ok(ReplayCursor { inner: cursor, engine: self })
     }
 
+    /// Description:
+    /// Return a reference to the replay's recorded lifetime range as an FFI
+    /// [`TTD::Replay::PositionRange`], representing the earliest and latest valid
+    /// replay positions captured in the trace.
+    ///
+    /// Returns:
+    /// - &ffi::TTD::Replay::PositionRange: Reference to the recorded position range.
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetLifetime()`.
     pub fn get_lifetime(&self) -> &ffi::TTD::Replay::PositionRange {
         unsafe { std::mem::transmute(self.inner.GetLifetime()) }
     }
 
+    /// Description:
+    /// Return a reference to the trace's captured system information (CPU, OS,
+    /// address width, endianness, and related environment details) as an FFI
+    /// [`TTD::SystemInfo`].
+    ///
+    /// Returns:
+    /// - &ffi::TTD::SystemInfo: Reference to the engine-owned SystemInfo for the loaded trace.
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetSystemInfo()`.
     pub fn system_info(&self) -> &ffi::TTD::SystemInfo {
         unsafe { std::mem::transmute(self.inner.GetSystemInfo()) }
     }
@@ -157,6 +177,15 @@ impl ReplayEngine {
         unsafe { self.inner.GetModuleCount() }
     }
 
+    /// Description:
+    /// Return the list of modules observed in the loaded TTD trace as a Vec of FFI [`TTD::Replay::Module`],
+    /// each containing metadata like base address, size, path, and timestamps.
+    ///
+    /// Returns:
+    /// - Vec<ffi::TTD::Replay::Module>: Module list extracted from the loaded trace.
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetModuleList()`.
     pub fn get_module_list(&self) -> Vec<ffi::TTD::Replay::Module> {
         unsafe {
             let cnt = self.get_module_count();
@@ -175,6 +204,18 @@ impl ReplayEngine {
         unsafe { self.inner.GetModuleInstanceCount() }
     }
 
+    /// Description:
+    /// Return the list of module instances observed in the loaded TTD trace as a
+    /// Vec of FFI [`TTD::Replay::ModuleInstance`], each representing a specific
+    /// in-process instantiation of a module with load base, relocation offset,
+    /// and lifetime information.
+    ///
+    /// Returns:
+    /// - [`Vec<ffi::TTD::Replay::ModuleInstance>`]: Module instance list extracted
+    /// from the loaded trace.
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetModuleInstanceList()`.
     pub fn get_module_instance_list(&self) -> Vec<ffi::TTD::Replay::ModuleInstance> {
         unsafe {
             let cnt = self.get_module_instance_count();
@@ -193,6 +234,14 @@ impl ReplayEngine {
         unsafe { self.inner.GetThreadCount() }
     }
 
+    /// Description:
+    /// Return the list of threads observed in the loaded TTD trace as a Vec of FFI [`TTD::Replay::ThreadInfo`], each describing a recorded thread's identifier, creation/termination positions, and basic execution metadata.
+    ///
+    /// Returns:
+    /// - Vec<ffi::TTD::Replay::ThreadInfo>: Thread list extracted from the loaded trace.
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetThreadList()`.
     pub fn get_thread_list(&self) -> Vec<ffi::TTD::Replay::ThreadInfo> {
         unsafe {
             let cnt = self.get_thread_count();
@@ -211,6 +260,16 @@ impl ReplayEngine {
         unsafe { self.inner.GetModuleLoadedEventCount() }
     }
 
+    /// Description:
+    /// Return the list of module-loaded events recorded in the loaded TTD trace as
+    /// a Vec of FFI [`TTD::Replay::ModuleLoadedEvent`], each containing the replay
+    /// position and associated module metadata.
+    ///
+    /// Returns:
+    /// - Vec<ffi::TTD::Replay::ModuleLoadedEvent>: Module-loaded event list extracted from the loaded trace.
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetModuleLoadedEventList()`.
     pub fn get_module_loaded_event_list(&self) -> Vec<ffi::TTD::Replay::ModuleLoadedEvent> {
         unsafe {
             let cnt = self.get_module_loaded_event_count();
@@ -229,6 +288,14 @@ impl ReplayEngine {
         unsafe { self.inner.GetModuleUnloadedEventCount() }
     }
 
+    /// Description:
+    /// Return the list of module-unloaded events recorded in the loaded TTD trace as a Vec of FFI [`TTD::Replay::ModuleUnloadedEvent`], each containing the replay position and associated module metadata.
+    ///
+    /// Returns:
+    /// - [`Vec<ffi::TTD::Replay::ModuleUnloadedEvent>`]: Module-unloaded event list extracted from the loaded trace.
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetModuleUnloadedEventList()`.
     pub fn get_module_unloaded_event_list(&self) -> Vec<ffi::TTD::Replay::ModuleUnloadedEvent> {
         unsafe {
             let cnt = self.get_module_unloaded_event_count();
@@ -247,6 +314,14 @@ impl ReplayEngine {
         unsafe { self.inner.GetExceptionEventCount() }
     }
 
+    /// Description:
+    /// Return the list of exception events recorded in the loaded TTD trace as a Vec of FFI [`TTD::Replay::ExceptionEvent`], each containing the replay position, thread id, exception code/type, and captured context.
+    ///
+    /// Returns:
+    /// - [`Vec<ffi::TTD::Replay::ExceptionEvent>`]: Exception event list extracted from the loaded trace.
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetExceptionEventList()`.
     pub fn get_exception_event_list(&self) -> Vec<ffi::TTD::Replay::ExceptionEvent> {
         unsafe {
             let cnt = self.get_exception_event_count();
