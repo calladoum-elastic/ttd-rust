@@ -637,7 +637,7 @@ impl ReplayEngine {
 
 #[cfg(test)]
 mod test {
-    use ttd_sys::ttd_sys::bindings::root::TTD::Replay::PositionWatchpointData;
+    use ttd_sys::bindings::root::TTD::Replay::PositionWatchpointData;
 
     use crate::prelude::*;
     use crate::replay::events::{DataAccessMask, EventType};
