@@ -2,6 +2,15 @@
 
 A Rust library for handling Microsoft Time Travel Debugging traces.
 
+The purpose is to provide safe, ergonomic Rust bindings and higher-level helpers for the Microsoft TTD SDK so you can load traces, inspect recorded state (memory, threads, modules, registers), navigate forward/backward through execution, and register watchpoints or event observers. This crate interacts with tThe lower level crate `ttd_sys` which handles the FFI bindings and expose them to Rust as more friendly types (`ReplayEngine`, `ReplayCursor`, `ReplayPosition`, `ReplayModule`, `SystemInfo`, etc.) which Rust  manages ownership, lifetimes on.
+
+Key features already implemented are:
+ * Load and open TTD traces from disk and query trace metadata (system info, process id, modules, threads).
+ * Create borrowed cursors to navigate recorded execution forward and backward, seek to positions, and read memory/register state as captured.
+ * Register memory-based and position-based watchpoints to observe when particular addresses or positions are reached during replay.
+ * Enumerate recorded events (module load/unload, exceptions, and other SDK event types) with both high-level Rust types and raw FFI event records.
+* Rely on Rust lifetime management to ensure no corruption happens at the lower level.
+
 ## Usage
 
 ### Replay
