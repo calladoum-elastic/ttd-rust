@@ -64,7 +64,7 @@ impl<'a> SystemInfo<'a> {
     /// Return the recorded process identifier (PID) captured in the trace's system information.
     ///
     /// ## Returns
-    /// - Result<u32>: Ok with the captured PID on success; Err on failure (e.g., FFI error).
+    /// - `Result<u32>`
     pub fn pid(&self) -> Result<u32> {
         Ok(self.0.ProcessId)
     }
