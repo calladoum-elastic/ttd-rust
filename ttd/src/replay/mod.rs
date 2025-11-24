@@ -34,17 +34,40 @@ pub type MemoryWatchpointData = bindings::root::TTD::Replay::MemoryWatchpointDat
 pub type ReplayProgressCallback = fn(ctx: usize, pos: &ReplayPosition);
 pub type RegisterChangedCallback = fn(context: usize, reg_id: u8, old_data: &[u8; 8], new_data: &[u8; 8], ddata_size_in_bytes: usize, thread: &ThreadView);
 
+/// ## Description
+/// Borrowed wrapper around the FFI [`bindings::root::TTD::SystemInfo`], exposing system environment
+/// details captured in a trace (CPU architecture, OS version, address width,
+/// endianness, and other platform metadata).
+///
+/// ## Parameters
+/// - 'a: Lifetime of the borrowed `bindings::root::TTD::SystemInfo`, ensuring the wrapper
+///   does not outlive the referenced FFI data.
 pub struct SystemInfo<'a>(&'a bindings::root::TTD::SystemInfo);
 
 impl<'a> SystemInfo<'a> {
+    /// ## Description
+    /// Return the user name captured in the trace's system information as an owned String.
+    ///
+    /// ## Returns
+    /// - `Result<String>`
     pub fn user_name(&self) -> Result<String> {
         Ok(String::from_utf16(&self.0.UserName)?)
     }
 
+    /// ## Description
+    /// Return the system (host) name captured in the trace's system information as an owned String.
+    ///
+    /// ## Returns
+    /// - `Result<String>`
     pub fn system_name(&self) -> Result<String> {
         Ok(String::from_utf16(&self.0.SystemName)?)
     }
 
+    /// ## Description
+    /// Return the recorded process identifier (PID) captured in the trace's system information.
+    ///
+    /// ## Returns
+    /// - Result<u32>: Ok with the captured PID on success; Err on failure (e.g., FFI error).
     pub fn pid(&self) -> Result<u32> {
         Ok(self.0.ProcessId)
     }
