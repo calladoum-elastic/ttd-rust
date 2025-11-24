@@ -3,9 +3,6 @@
 //
 use derive_more::Display;
 
-use ttd_sys as sys;
-use ttd_sys::bindings;
-
 use crate::prelude::*;
 
 use std::ffi::CString;
@@ -13,33 +10,33 @@ use std::str::FromStr;
 
 pub mod events;
 
-pub type ThreadInfo = bindings::root::TTD::Replay::ThreadInfo;
-pub type ReplayPositionRange = bindings::root::TTD::Replay::PositionRange;
-pub type ThreadView = bindings::root::TTD::Replay::IThreadView;
-pub type Amd64Context = bindings::root::AMD64_CONTEXT;
-pub type Amd64ExtendedContext = bindings::root::AVX_EXTENDED_CONTEXT;
+pub type ThreadInfo = ttd_sys::bindings::root::TTD::Replay::ThreadInfo;
+pub type ReplayPositionRange = ttd_sys::bindings::root::TTD::Replay::PositionRange;
+pub type ThreadView = ttd_sys::bindings::root::TTD::Replay::IThreadView;
+pub type Amd64Context = ttd_sys::bindings::root::AMD64_CONTEXT;
+pub type Amd64ExtendedContext = ttd_sys::bindings::root::AVX_EXTENDED_CONTEXT;
 
 pub type ReplayModule = ttd_sys::replay::ReplayModule;
 pub type ReplayFlags = ttd_sys::replay::ReplayFlags;
 pub type RegisterContext<'a> = ttd_sys::replay::RegisterContext<'a>;
 pub type ExtendedRegisterContext = ttd_sys::replay::ExtendedRegisterContext;
 
-pub type SequenceId = bindings::root::TTD::SequenceId;
-pub type PositionWatchpointData = bindings::root::TTD::Replay::PositionWatchpointData;
-pub type MemoryWatchpointData = bindings::root::TTD::Replay::MemoryWatchpointData;
+pub type SequenceId = ttd_sys::bindings::root::TTD::SequenceId;
+pub type PositionWatchpointData = ttd_sys::bindings::root::TTD::Replay::PositionWatchpointData;
+pub type MemoryWatchpointData = ttd_sys::bindings::root::TTD::Replay::MemoryWatchpointData;
 
 pub type ReplayProgressCallback = fn(ctx: usize, pos: &ReplayPosition);
 pub type RegisterChangedCallback = fn(context: usize, reg_id: u8, old_data: &[u8; 8], new_data: &[u8; 8], ddata_size_in_bytes: usize, thread: &ThreadView);
 
 /// ## Description
-/// Borrowed wrapper around the FFI [`bindings::root::TTD::SystemInfo`], exposing system environment
+/// Borrowed wrapper around the FFI [`ttd_sys::bindings::root::TTD::SystemInfo`], exposing system environment
 /// details captured in a trace (CPU architecture, OS version, address width,
 /// endianness, and other platform metadata).
 ///
 /// ## Parameters
-/// - 'a: Lifetime of the borrowed `bindings::root::TTD::SystemInfo`, ensuring the wrapper
+/// - 'a: Lifetime of the borrowed `ttd_sys::bindings::root::TTD::SystemInfo`, ensuring the wrapper
 ///   does not outlive the referenced FFI data.
-pub struct SystemInfo<'a>(&'a bindings::root::TTD::SystemInfo);
+pub struct SystemInfo<'a>(&'a ttd_sys::bindings::root::TTD::SystemInfo);
 
 impl<'a> SystemInfo<'a> {
     /// ## Description
@@ -93,14 +90,14 @@ impl<'a> std::fmt::Display for SystemInfo<'a> {
     }
 }
 
-impl<'a> From<SystemInfo<'a>> for &'a bindings::root::TTD::SystemInfo {
+impl<'a> From<SystemInfo<'a>> for &'a ttd_sys::bindings::root::TTD::SystemInfo {
     fn from(val: SystemInfo<'a>) -> Self {
         val.0
     }
 }
 
-impl<'a> From<&'a bindings::root::TTD::SystemInfo> for SystemInfo<'a> {
-    fn from(value: &'a bindings::root::TTD::SystemInfo) -> Self {
+impl<'a> From<&'a ttd_sys::bindings::root::TTD::SystemInfo> for SystemInfo<'a> {
+    fn from(value: &'a ttd_sys::bindings::root::TTD::SystemInfo) -> Self {
         Self(value)
     }
 }
@@ -108,23 +105,23 @@ impl<'a> From<&'a bindings::root::TTD::SystemInfo> for SystemInfo<'a> {
 /// Wrapper around the raw TTD SDK Replay::Position reference that provides a
 /// borrowed, ergonomic handle to a Time-Travel Debugging replay position
 /// without taking ownership. The lifetime 'a ties the wrapper to the
-/// referenced bindings::root::TTD::Replay::Position, preventing the wrapper
+/// referenced ttd_sys::bindings::root::TTD::Replay::Position, preventing the wrapper
 /// from outliving the underlying SDK object.
 ///
 /// Parameters:
-/// - 'a: Lifetime of the borrowed bindings::root::TTD::Replay::Position,
+/// - 'a: Lifetime of the borrowed ttd_sys::bindings::root::TTD::Replay::Position,
 ///   ensuring the wrapper does not outlive the referenced SDK value.
 #[derive(Display, Debug, PartialEq)]
-pub struct ReplayPosition<'a>(&'a bindings::root::TTD::Replay::Position);
+pub struct ReplayPosition<'a>(&'a ttd_sys::bindings::root::TTD::Replay::Position);
 
-impl<'a> From<ReplayPosition<'a>> for &'a bindings::root::TTD::Replay::Position {
+impl<'a> From<ReplayPosition<'a>> for &'a ttd_sys::bindings::root::TTD::Replay::Position {
     fn from(val: ReplayPosition<'a>) -> Self {
         val.0
     }
 }
 
-impl<'a> From<&'a bindings::root::TTD::Replay::Position> for ReplayPosition<'a> {
-    fn from(value: &'a bindings::root::TTD::Replay::Position) -> Self {
+impl<'a> From<&'a ttd_sys::bindings::root::TTD::Replay::Position> for ReplayPosition<'a> {
+    fn from(value: &'a ttd_sys::bindings::root::TTD::Replay::Position) -> Self {
         Self(value)
     }
 }
@@ -149,8 +146,8 @@ pub struct ModuleInstance {
 #[derive(Debug)]
 pub struct ActiveThreadInfo {
     pub thread: ThreadInfo,
-    pub current_position: bindings::root::TTD::Replay::Position,
-    pub last_valid_position: bindings::root::TTD::Replay::Position,
+    pub current_position: ttd_sys::bindings::root::TTD::Replay::Position,
+    pub last_valid_position: ttd_sys::bindings::root::TTD::Replay::Position,
 }
 
 /// Holds the outcome of a replay step or operation in ttd-rust, describing why
@@ -167,8 +164,8 @@ pub struct ReplayResult {
     pub instructions_executed: u64,
 }
 
-impl From<bindings::root::TTD::Replay::ICursorView_ReplayResult> for ReplayResult {
-    fn from(value: bindings::root::TTD::Replay::ICursorView_ReplayResult) -> Self {
+impl From<ttd_sys::bindings::root::TTD::Replay::ICursorView_ReplayResult> for ReplayResult {
+    fn from(value: ttd_sys::bindings::root::TTD::Replay::ICursorView_ReplayResult) -> Self {
         Self {
             stop_reason: value.StopReason.into(),
             steps_executed: value.StepsExecuted,
@@ -185,7 +182,7 @@ impl From<bindings::root::TTD::Replay::ICursorView_ReplayResult> for ReplayResul
 /// for referenced SDK state. Use this type to iterate or seek through recorded
 /// execution without taking ownership of the underlying replay session.
 pub struct ReplayCursor<'a> {
-    inner: crate::replay::sys::replay::ReplayCursor<'a>,
+    inner: ttd_sys::replay::ReplayCursor<'a>,
 }
 
 impl<'a> ReplayCursor<'a> {
@@ -640,7 +637,7 @@ impl ReplayEngine {
 
 #[cfg(test)]
 mod test {
-    use ttd_sys::bindings::root::TTD::Replay::PositionWatchpointData;
+    use ttd_sys::ttd_sys::bindings::root::TTD::Replay::PositionWatchpointData;
 
     use crate::prelude::*;
     use crate::replay::events::{DataAccessMask, EventType};
