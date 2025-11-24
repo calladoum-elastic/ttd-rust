@@ -88,10 +88,10 @@ impl ReplayEngine {
     /// Create and initialize a new [`ReplayEngine`], allocating the Replay Engine through
     /// FFI (equivalent to calling C++ `TTD::Replay::MakeReplayEngine()`)
     ///
-    /// Returns:
-    /// - Result<Self>: Ok with a constructed ReplayEngine on success; Err on failure (allocation or SDK error).
+    /// ## Returns
+    /// - `Result<ReplayEngine>`: Ok with a constructed ReplayEngine on success; Err on failure (allocation or SDK error).
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD::Replay::IEngine::MakeReplayEngine()`
     pub fn new() -> Result<Self> {
         Ok(Self {
@@ -99,30 +99,30 @@ impl ReplayEngine {
         })
     }
 
-    /// Description:
+    /// ## Description
     /// Load a TTD trace (UTF-16 path buffer) into the replay engine, initializing
     /// internal state from the specified trace path.
     ///
     /// Parameters:
-    /// - trace: UTF-16 encoded path (slice of u16) pointing to the trace file or directory.
+    /// - `trace`: UTF-16 encoded path (slice of u16) pointing to the trace file or directory.
     ///
-    /// Returns:
-    /// - i32: Raw SDK/FFI status code (0 for success in typical conventions; consult SDK docs for exact codes).
+    /// ## Returns
+    /// - `i32`: Raw SDK/FFI status code (0 for success in typical conventions; consult SDK docs for exact codes).
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD::Replay::IEngine::Load()`
     pub fn load(&self, trace: &[u16]) -> i32 {
         unsafe { self.inner.Load(trace.as_ptr()) }
     }
 
-    /// Description:
+    /// ## Description
     /// Create a new ReplayCursor borrowed from the engine, allowing navigation and
     /// inspection of the loaded trace.
     ///
-    /// Returns:
-    /// - Result<ReplayCursor<'_>>: Ok with a borrowed ReplayCursor on success; Err on failure.
+    /// ## Returns
+    /// - `Result<ReplayCursor<'_>>`: Ok with a borrowed ReplayCursor on success; Err on failure.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::Load()`.
     pub fn cursor(&'_ self) -> Result<ReplayCursor<'_>> {
         let cursor = unsafe {
@@ -141,29 +141,29 @@ impl ReplayEngine {
         Ok(ReplayCursor { inner: cursor, engine: self })
     }
 
-    /// Description:
+    /// ## Description
     /// Return a reference to the replay's recorded lifetime range as an FFI
-    /// [`TTD::Replay::PositionRange`], representing the earliest and latest valid
+    /// [`ffi::TTD::Replay::PositionRange`], representing the earliest and latest valid
     /// replay positions captured in the trace.
     ///
-    /// Returns:
-    /// - &ffi::TTD::Replay::PositionRange: Reference to the recorded position range.
+    /// ## Returns
+    /// - `&ffi::TTD::Replay::PositionRange`: Reference to the recorded position range.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetLifetime()`.
     pub fn get_lifetime(&self) -> &ffi::TTD::Replay::PositionRange {
         unsafe { &*self.inner.GetLifetime() }
     }
 
-    /// Description:
+    /// ## Description
     /// Return a reference to the trace's captured system information (CPU, OS,
     /// address width, endianness, and related environment details) as an FFI
-    /// [`TTD::SystemInfo`].
+    /// [`ffi::TTD::SystemInfo`].
     ///
-    /// Returns:
-    /// - &ffi::TTD::SystemInfo: Reference to the engine-owned SystemInfo for the loaded trace.
+    /// ## Returns
+    /// - `&ffi::TTD::SystemInfo`: Reference to the engine-owned SystemInfo for the loaded trace.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetSystemInfo()`.
     pub fn system_info(&self) -> &ffi::TTD::SystemInfo {
         unsafe { &*self.inner.GetSystemInfo() }
@@ -177,14 +177,14 @@ impl ReplayEngine {
         unsafe { self.inner.GetModuleCount() }
     }
 
-    /// Description:
-    /// Return the list of modules observed in the loaded TTD trace as a Vec of FFI [`TTD::Replay::Module`],
+    /// ## Description
+    /// Return the list of modules observed in the loaded TTD trace as a Vec of FFI [`ffi::TTD::Replay::Module`],
     /// each containing metadata like base address, size, path, and timestamps.
     ///
-    /// Returns:
-    /// - Vec<ffi::TTD::Replay::Module>: Module list extracted from the loaded trace.
+    /// ## Returns
+    /// - `Vec<ffi::TTD::Replay::Module>`: Module list extracted from the loaded trace.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetModuleList()`.
     pub fn get_module_list(&self) -> Vec<ffi::TTD::Replay::Module> {
         unsafe {
@@ -204,17 +204,17 @@ impl ReplayEngine {
         unsafe { self.inner.GetModuleInstanceCount() }
     }
 
-    /// Description:
+    /// ## Description
     /// Return the list of module instances observed in the loaded TTD trace as a
-    /// Vec of FFI [`TTD::Replay::ModuleInstance`], each representing a specific
+    /// Vec of FFI [`ffi::TTD::Replay::ModuleInstance`], each representing a specific
     /// in-process instantiation of a module with load base, relocation offset,
     /// and lifetime information.
     ///
-    /// Returns:
-    /// - [`Vec<ffi::TTD::Replay::ModuleInstance>`]: Module instance list extracted
+    /// ## Returns
+    /// - `Vec<ffi::TTD::Replay::ModuleInstance>`: Module instance list extracted
     ///   from the loaded trace.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetModuleInstanceList()`.
     pub fn get_module_instance_list(&self) -> Vec<ffi::TTD::Replay::ModuleInstance> {
         unsafe {
@@ -234,13 +234,14 @@ impl ReplayEngine {
         unsafe { self.inner.GetThreadCount() }
     }
 
-    /// Description:
-    /// Return the list of threads observed in the loaded TTD trace as a Vec of FFI [`TTD::Replay::ThreadInfo`], each describing a recorded thread's identifier, creation/termination positions, and basic execution metadata.
+    /// ## Description
+    /// Return the list of threads observed in the loaded TTD trace as a Vec of FFI [`ffi::TTD::Replay::ThreadInfo`],
+    /// each describing a recorded thread's identifier, creation/termination positions, and basic execution metadata.
     ///
-    /// Returns:
-    /// - Vec<ffi::TTD::Replay::ThreadInfo>: Thread list extracted from the loaded trace.
+    /// ## Returns
+    /// - `Vec<ffi::TTD::Replay::ThreadInfo>`: Thread list extracted from the loaded trace.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetThreadList()`.
     pub fn get_thread_list(&self) -> Vec<ffi::TTD::Replay::ThreadInfo> {
         unsafe {
@@ -260,15 +261,15 @@ impl ReplayEngine {
         unsafe { self.inner.GetModuleLoadedEventCount() }
     }
 
-    /// Description:
+    /// ## Description
     /// Return the list of module-loaded events recorded in the loaded TTD trace as
-    /// a Vec of FFI [`TTD::Replay::ModuleLoadedEvent`], each containing the replay
+    /// a Vec of FFI [`ffi::TTD::Replay::ModuleLoadedEvent`], each containing the replay
     /// position and associated module metadata.
     ///
-    /// Returns:
-    /// - Vec<ffi::TTD::Replay::ModuleLoadedEvent>: Module-loaded event list extracted from the loaded trace.
+    /// ## Returns
+    /// - `Vec<ffi::TTD::Replay::ModuleLoadedEvent>`: Module-loaded event list extracted from the loaded trace.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetModuleLoadedEventList()`.
     pub fn get_module_loaded_event_list(&self) -> Vec<ffi::TTD::Replay::ModuleLoadedEvent> {
         unsafe {
@@ -288,13 +289,14 @@ impl ReplayEngine {
         unsafe { self.inner.GetModuleUnloadedEventCount() }
     }
 
-    /// Description:
-    /// Return the list of module-unloaded events recorded in the loaded TTD trace as a Vec of FFI [`TTD::Replay::ModuleUnloadedEvent`], each containing the replay position and associated module metadata.
+    /// ## Description
+    /// Return the list of module-unloaded events recorded in the loaded TTD trace as a Vec of FFI
+    /// [`ffi::TTD::Replay::ModuleUnloadedEvent`], each containing the replay position and associated module metadata.
     ///
-    /// Returns:
-    /// - [`Vec<ffi::TTD::Replay::ModuleUnloadedEvent>`]: Module-unloaded event list extracted from the loaded trace.
+    /// ## Returns
+    /// - `Vec<ffi::TTD::Replay::ModuleUnloadedEvent>`: Module-unloaded event list extracted from the loaded trace.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetModuleUnloadedEventList()`.
     pub fn get_module_unloaded_event_list(&self) -> Vec<ffi::TTD::Replay::ModuleUnloadedEvent> {
         unsafe {
@@ -314,13 +316,14 @@ impl ReplayEngine {
         unsafe { self.inner.GetExceptionEventCount() }
     }
 
-    /// Description:
-    /// Return the list of exception events recorded in the loaded TTD trace as a Vec of FFI [`TTD::Replay::ExceptionEvent`], each containing the replay position, thread id, exception code/type, and captured context.
+    /// ## Description
+    /// Return the list of exception events recorded in the loaded TTD trace as a Vec of FFI [`ffi::TTD::Replay::ExceptionEvent`],
+    /// each containing the replay position, thread id, exception code/type, and captured context.
     ///
-    /// Returns:
-    /// - [`Vec<ffi::TTD::Replay::ExceptionEvent>`]: Exception event list extracted from the loaded trace.
+    /// ## Returns
+    /// - `Vec<ffi::TTD::Replay::ExceptionEvent>`: Exception event list extracted from the loaded trace.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetExceptionEventList()`.
     pub fn get_exception_event_list(&self) -> Vec<ffi::TTD::Replay::ExceptionEvent> {
         unsafe {
@@ -361,12 +364,12 @@ impl<'a> ReplayCursor<'a> {
     /// the raw FFI replay result containing stop reason and execution metrics.
     ///
     /// Parameters:
-    /// - until: Optional FFI TTD::Replay::Position target to stop at.
+    /// - until: Optional [`ffi::TTD::Replay::Position`] target to stop at.
     ///
-    /// Returns:
+    /// ## Returns
     /// - Result<ffi::TTD::Replay::ICursorView_ReplayResult>
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into unsafe FFI; ensure the replay session and referenced resources remain valid.
     pub fn replay_forward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> Result<ffi::TTD::Replay::ICursorView_ReplayResult> {
         unsafe {
@@ -393,10 +396,10 @@ impl<'a> ReplayCursor<'a> {
     /// Parameters:
     /// - until: Optional FFI `TTD::Replay::Position` target to stop at.
     ///
-    /// Returns:
+    /// ## Returns
     /// - Result<ffi::TTD::Replay::ICursorView_ReplayResult>
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into unsafe FFI; ensure the replay session and referenced resources remain valid.
     pub fn replay_backward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> Result<ffi::TTD::Replay::ICursorView_ReplayResult> {
         unsafe {
@@ -435,18 +438,18 @@ impl<'a> ReplayCursor<'a> {
     /// Parameters:
     /// - pos: Reference to the target FFI `TTD::Replay::Position` to set.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Caller must ensure `pos` is valid for the current replay session; passing an invalid position may cause undefined behavior.
     pub fn set_position(&mut self, pos: &ffi::TTD::Replay::Position) {
         unsafe { self.inner.SetPosition(pos) };
     }
 
-    /// Return a reference to the cursor's current FFI `TTD::Replay::Position`.
+    /// Return a reference to the cursor's current FFI `ffi::TTD::Replay::Position`.
     ///
-    /// Returns:
+    /// ## Returns
     /// - &ffi::TTD::Replay::Position: Reference to the current replay position.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Returned reference aliases FFI-owned data; ensure the parent replay session outlives its use.
     pub fn get_position(&self) -> &ffi::TTD::Replay::Position {
         unsafe { &*self.inner.GetPosition() }
@@ -456,14 +459,15 @@ impl<'a> ReplayCursor<'a> {
         unsafe { &*self.inner.GetPreviousPosition() }
     }
 
-    /// Return a reference to the current FFI `TTD::Replay::ThreadInfo` for the
+    /// Return a reference to the current FFI `ffi::TTD::Replay::ThreadInfo` for the
     /// cursor's thread context.
     ///
-    /// Returns:
+    /// ## Returns
     /// - &ffi::TTD::Replay::ThreadInfo: Reference to the thread info for the current replay position.
     ///
-    /// Safety:
-    /// - Returned reference aliases FFI-owned data; ensure the parent replay session and cursor remain valid while the reference is used.
+    /// ## Safety
+    /// - Returned reference aliases FFI-owned data; ensure the parent replay session and cursor
+    ///   remain valid while the reference is used.
     pub fn get_thread_info(&self) -> &ffi::TTD::Replay::ThreadInfo {
         unsafe { &*self.inner.GetThreadInfo() }
     }
@@ -488,10 +492,10 @@ impl<'a> ReplayCursor<'a> {
     /// current replay position, returning a borrowed RegisterContext that exposes
     /// register values and architecture-specific state.
     ///
-    /// Returns:
-    /// - Result<RegisterContext<'_>>
+    /// ## Returns
+    /// - [`Result<RegisterContext<'_>>`]
     ///
-    /// Safety:
+    /// ## Safety
     /// - May borrow FFI-owned register data; ensure the replay session and cursor outlive the returned context.
     pub fn get_thread_context(&self) -> Result<RegisterContext<'_>> {
         unsafe {
@@ -521,10 +525,10 @@ impl<'a> ReplayCursor<'a> {
     /// its current replay position. Returns an owned ExtendedRegisterContext or an
     /// error if retrieval fails.
     ///
-    /// Returns:
-    /// - Result<ExtendedRegisterContext>
+    /// ## Returns
+    /// - [`Result<ExtendedRegisterContext>`]
     ///
-    /// Safety:
+    /// ## Safety
     /// - May copy or borrow FFI-owned extended state; ensure the replay session and cursor remain valid during retrieval.
     pub fn get_thread_extended_context(&self) -> Result<ExtendedRegisterContext> {
         unsafe {
@@ -538,18 +542,19 @@ impl<'a> ReplayCursor<'a> {
     }
 
     /// Read `size` bytes from the replay's current memory view at `address` and
-    /// return them as a Vec<u8>, reflecting memory as observed at the cursor's
+    /// return them as a `Vec<u8>`, reflecting memory as observed at the cursor's
     /// current position.
     ///
     /// Parameters:
-    /// - address: Starting virtual address to read from.
-    /// - size: Number of bytes to read.
+    /// - `address`: Starting virtual address to read from.
+    /// - `size`: Number of bytes to read.
     ///
-    /// Returns:
-    /// - Result<Vec<u8>>
+    /// ## Returns
+    /// - `Result<Vec<u8>>`
     ///
-    /// Safety:
-    /// - Calls into unsafe FFI; ensure the replay session and cursor remain valid and the requested address range is within the trace's captured memory.
+    /// ## Safety
+    /// - Calls into unsafe FFI; ensure the replay session and cursor remain valid
+    ///   and the requested address range is within the trace's captured memory.
     pub fn read_current_memory(&self, address: u64, size: usize) -> Result<Vec<u8>> {
         let mut buffer = vec![0; size];
         let res = unsafe { self.inner.QueryMemoryBuffer(address, buffer.as_mut_ptr(), buffer.len() as u64) };
@@ -563,7 +568,7 @@ impl<'a> ReplayCursor<'a> {
     /// Return the current replay configuration flags controlling behavior (e.g.,
     /// logging, determinism, performance options) as a ReplayFlags value.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into unsafe FFI `TTD::Replay::ICursor::GetReplayFlags()`
     pub fn get_replay_flags(&self) -> ReplayFlags {
         unsafe { self.inner.GetReplayFlags().into() }
@@ -576,7 +581,7 @@ impl<'a> ReplayCursor<'a> {
     /// Parameters:
     /// - flags: ReplayFlags value specifying the new replay configuration.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into unsafe FFI `TTD::Replay::ICursor::SetReplayFlags()`
     pub fn set_replay_flags(&mut self, flags: ReplayFlags) {
         unsafe { self.inner.SetReplayFlags(flags.into()) }
@@ -587,48 +592,49 @@ impl<'a> ReplayCursor<'a> {
     /// active, false if ignored or already present.
     ///
     /// Parameters:
-    /// - watch_point: Reference to FFI `TTD::Replay::MemoryWatchpointData` describing address, size, and access type.
+    /// - `watch_point`: Reference to FFI [`ffi::TTD::Replay::MemoryWatchpointData`]
+    ///   describing address, size, and access type.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD::Replay::ICursor::AddMemoryWatchpoint()`
     pub fn add_memory_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::MemoryWatchpointData) -> bool {
         unsafe { self.inner.AddMemoryWatchpoint(watch_point) }
     }
 
     /// Remove a previously registered memory watchpoint matching the provided FFI
-    /// `TTD::Replay::MemoryWatchpointData`. Returns true if a watchpoint was found
+    /// [`ffi::TTD::Replay::MemoryWatchpointData`]. Returns true if a watchpoint was found
     /// and removed, false if none matched.
     ///
     /// Parameters:
-    /// - watch_point: Reference to FFI `TTD::Replay::MemoryWatchpointData` identifying the watchpoint to remove.
+    /// - `watch_point`: Reference to FFI [`ffi::TTD::Replay::MemoryWatchpointData`] identifying the watchpoint to remove.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD::Replay::ICursor::RemoveMemoryWatchpoint()`
     pub fn remove_memory_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::MemoryWatchpointData) -> bool {
         unsafe { self.inner.RemoveMemoryWatchpoint(watch_point) }
     }
 
     /// Register a position-based watchpoint that triggers when the replay reaches
-    /// the specified FFI `TTD::Replay::PositionWatchpointData`. Returns true if
+    /// the specified FFI [`ffi::TTD::Replay::PositionWatchpointData`]. Returns true if
     /// the watchpoint was registered, false if ignored or already present.
     ///
     /// Parameters:
-    /// - watch_point: Reference to FFI `TTD::Replay::PositionWatchpointData` specifying the target position and trigger criteria.
+    /// - `watch_point`: Reference to FFI [`ffi::TTD::Replay::PositionWatchpointData`] specifying the target position and trigger criteria.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD::Replay::ICursor::AddPositionWatchpoint()`
     pub fn add_position_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::PositionWatchpointData) -> bool {
         unsafe { self.inner.AddPositionWatchpoint(watch_point) }
     }
 
     /// Remove a previously registered position-based watchpoint matching the
-    /// provided FFI `TTD::Replay::PositionWatchpointData`. Returns true if a
+    /// provided FFI [`ffi::TTD::Replay::PositionWatchpointData`]. Returns true if a
     /// matching watchpoint was found and removed, false otherwise.
     ///
     /// Parameters:
-    /// - watch_point: Reference to FFI `TTD::Replay::PositionWatchpointData` identifying the watchpoint to remove.
+    /// - watch_point: Reference to FFI [`ffi::TTD::Replay::PositionWatchpointData`] identifying the watchpoint to remove.
     ///
-    /// Safety:
+    /// ## Safety
     /// - Calls into FFI `TTD::Replay::ICursor::RemovePositionWatchpoint()`
     pub fn remove_position_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::PositionWatchpointData) -> bool {
         unsafe { self.inner.RemovePositionWatchpoint(watch_point) }

@@ -159,7 +159,7 @@ impl<'a> ReplayCursor<'a> {
     /// Parameters:
     /// - `until`: Optional target [`ReplayPosition`] to stop at.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<ReplayResult>`]
     pub fn replay_forward(&mut self, until: Option<ReplayPosition>) -> Result<ReplayResult> {
         Ok(match until {
@@ -174,7 +174,7 @@ impl<'a> ReplayCursor<'a> {
     /// Parameters:
     /// - `until`: Optional target [`ReplayPosition`] to stop at.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result`]
     pub fn replay_backward(&mut self, until: Option<ReplayPosition>) -> Result<ReplayResult> {
         Ok(match until {
@@ -189,7 +189,7 @@ impl<'a> ReplayCursor<'a> {
     /// Parameters:
     /// - `step`: The number of steps to move forward.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<ReplayResult>`]
     pub fn replay_forward_steps(&mut self, steps: u64) -> Result<ReplayResult> {
         let until = *self.inner.get_position() + steps;
@@ -201,7 +201,7 @@ impl<'a> ReplayCursor<'a> {
     /// Parameters:
     /// - `step`: The number of steps to move backward.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<ReplayResult>`]
     pub fn replay_backward_steps(&mut self, steps: u64) -> Result<ReplayResult> {
         let until = *self.inner.get_position() + steps;
@@ -220,7 +220,7 @@ impl<'a> ReplayCursor<'a> {
 
     /// Get the current position of the cursor.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<ReplayPosition>`]
     pub fn get_position(&self) -> Result<ReplayPosition<'_>> {
         Ok(ReplayPosition(self.inner.get_position()))
@@ -228,7 +228,7 @@ impl<'a> ReplayCursor<'a> {
 
     /// Get the previous position of the cursor.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<ReplayPosition>`]
     pub fn get_previous_position(&mut self) -> Result<ReplayPosition<'_>> {
         Ok(ReplayPosition(self.inner.get_previous_position()))
@@ -237,7 +237,7 @@ impl<'a> ReplayCursor<'a> {
     /// Get the thread information at the current point of replay as a
     /// reference to [`ThreadInfo`].
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<&ThreadInfo>`]
     pub fn get_thread_info(&self) -> Result<&ThreadInfo> {
         Ok(self.inner.get_thread_info())
@@ -246,34 +246,34 @@ impl<'a> ReplayCursor<'a> {
     /// Get the [TEB](https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/api/pebteb/teb/index.htm)
     /// address of the current active thread.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<u64>`]
     pub fn get_teb_address(&self) -> Result<u64> {
         Ok(self.inner.get_teb_address())
     }
 
     /// Get the current PC value. Equivalent to getting the PC value
-    /// from [`get_thread_context()`]
+    /// from [`ReplayCursor::get_thread_context()`]
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<u64>`]
     pub fn get_program_counter(&self) -> Result<u64> {
         Ok(self.inner.get_program_counter())
     }
 
     /// Get the current SP value. Equivalent to getting the SP value
-    /// from [`get_thread_context()`]
+    /// from [`ReplayCursor::get_thread_context()`]
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<u64>`]
     pub fn get_stack_pointer(&self) -> Result<u64> {
         Ok(self.inner.get_stack_pointer())
     }
 
     /// Get the current FP value. Equivalent to getting the FP value
-    /// from [`get_thread_context()`]
+    /// from [`ReplayCursor::get_thread_context()`]
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<u64>`]
     pub fn get_frame_pointer(&self) -> Result<u64> {
         Ok(self.inner.get_frame_pointer())
@@ -282,7 +282,7 @@ impl<'a> ReplayCursor<'a> {
     /// Get the current [`RegisterContext`] with the state of all registers at
     /// the current point of execution.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<RegisterContext>`]
     pub fn get_thread_context(&self) -> Result<RegisterContext<'_>> {
         Ok(self.inner.get_thread_context()?)
@@ -290,7 +290,7 @@ impl<'a> ReplayCursor<'a> {
 
     /// Get the size of pointer for the current architecture.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<usize>`]
     pub fn pointer_size(&self) -> Result<usize> {
         match self.get_thread_context()? {
@@ -303,22 +303,22 @@ impl<'a> ReplayCursor<'a> {
     /// Get the current [`ExtendedRegisterContext`] with the state of all
     /// extended registers at the current point of execution.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<ExtendedRegisterContext>`]
     pub fn get_thread_extended_context(&self) {
         unimplemented!()
     }
 
-    /// Read size bytes from the replay's current memory state at address and
+    /// Read `size` bytes from the replay's current memory state at address and
     /// return them as a byte vector. This observes the memory view at the cursor's
     /// current position.
     ///
     /// Parameters:
-    /// - address: Starting virtual address to read from.
-    /// - size: Number of bytes to read.
+    /// - `address`: Starting virtual address to read from.
+    /// - `size`: Number of bytes to read.
     ///
-    /// Returns:
-    /// - Result<Vec>
+    /// ## Returns
+    /// - `Result<Vec>`
     pub fn read_current_memory(&self, address: u64, size: usize) -> Result<Vec<u8>> {
         Ok(self.inner.read_current_memory(address, size)?)
     }
@@ -336,9 +336,9 @@ impl<'a> ReplayCursor<'a> {
     /// it was ignored or already present.
     ///
     /// Parameters:
-    /// - watch_point: Reference to [`MemoryWatchpointData`] describing address, size, and access type.
+    /// - `watch_point`: Reference to [`MemoryWatchpointData`] describing address, size, and access type.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<bool>`]
     pub fn add_memory_watchpoint(&mut self, watch_point: &MemoryWatchpointData) -> Result<bool> {
         Ok(self.inner.add_memory_watchpoint(watch_point))
@@ -349,9 +349,9 @@ impl<'a> ReplayCursor<'a> {
     /// it was ignored or already present.
     ///
     /// Parameters:
-    /// - watch_point: Reference to [`MemoryWatchpointData`] describing address, size, and access type.
+    /// - `watch_point`: Reference to [`MemoryWatchpointData`] describing address, size, and access type.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<bool>`]
     pub fn remove_memory_watchpoint(&mut self, watch_point: &MemoryWatchpointData) -> Result<bool> {
         Ok(self.inner.remove_memory_watchpoint(watch_point))
@@ -362,9 +362,9 @@ impl<'a> ReplayCursor<'a> {
     /// watchpoint was registered, false if ignored or duplicated.
     ///
     /// Parameters:
-    /// - watch_point: Reference to [`PositionWatchpointData`] specifying the target position and trigger criteria.
+    /// - `watch_point`: Reference to [`PositionWatchpointData`] specifying the target position and trigger criteria.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<bool>`]
     pub fn add_position_watchpoint(&mut self, watch_point: &PositionWatchpointData) -> Result<bool> {
         Ok(self.inner.add_position_watchpoint(watch_point))
@@ -375,9 +375,9 @@ impl<'a> ReplayCursor<'a> {
     /// watchpoint was registered, false if ignored or duplicated.
     ///
     /// Parameters:
-    /// - watch_point: Reference to [`PositionWatchpointData`] specifying the target position and trigger criteria.
+    /// - `watch_point`: Reference to [`PositionWatchpointData`] specifying the target position and trigger criteria.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<bool>`]
     pub fn remove_position_watchpoint(&mut self, watch_point: &PositionWatchpointData) -> Result<bool> {
         Ok(self.inner.remove_position_watchpoint(watch_point))
@@ -416,9 +416,9 @@ impl ReplayEngine {
     /// initializes internal state from the specified trace file or directory.
     ///
     /// Parameters:
-    /// - trace_path: Filesystem path to the TTD trace file or trace directory.
+    /// - `trace_path`: Filesystem path to the TTD trace file or trace directory.
     ///
-    /// Returns:
+    /// ## Returns
     /// - `Result`
     pub fn load(&self, trace_path: &std::path::Path) -> Result<()> {
         if !trace_path.exists() {
@@ -434,6 +434,9 @@ impl ReplayEngine {
     }
 
     /// The proper way to get a new cursor for the replay engine.
+    ///
+    /// ## Returns
+    /// - `Result<ReplayCursor<'_>>` A [`ReplayCursor`] object bound to the [`ReplayEngine`] lifetime
     pub fn cursor(&'_ self) -> Result<ReplayCursor<'_>> {
         Ok(ReplayCursor { inner: self.inner.cursor()? })
     }
@@ -452,7 +455,7 @@ impl ReplayEngine {
     /// Retrieve system information captured by the loaded TTD trace (CPU, OS
     /// version, address width, endianness, and other environment details) part of the [`SystemInfo`] structure.
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<&SystemInfo>`]
     pub fn system_info(&self) -> Result<&SystemInfo> {
         Ok(self.inner.system_info())
@@ -460,7 +463,7 @@ impl ReplayEngine {
 
     /// A convenience function leveraging `system_info()` to return the process id
     ///
-    /// Returns:
+    /// ## Returns
     /// - [`Result<u32>`]
     pub fn process_id(&self) -> Result<u32> {
         Ok(self.system_info()?.ProcessId)
@@ -474,7 +477,7 @@ impl ReplayEngine {
     /// ReplayModule entries. Each element contains metadata (base address, size,
     /// path, version/timestamp) for a module recorded during execution.
     ///
-    /// Returns:
+    /// ## Returns
     /// - `Result<Vec<ReplayModule>>`
     pub fn get_module_list(&self) -> Result<Vec<ReplayModule>> {
         let mut res = Vec::<ReplayModule>::with_capacity(self.get_module_count()?);
@@ -493,8 +496,8 @@ impl ReplayEngine {
     /// creation/termination positions, and basic execution metadata useful for
     /// correlating events and per-thread state during replay.
     ///
-    /// Returns:
-    /// - Result<Vec<ThreadInfo>>
+    /// ## Returns
+    /// - `Result<Vec<ThreadInfo>>`
     pub fn get_thread_list(&self) -> Result<Vec<ThreadInfo>> {
         Ok(self.inner.get_thread_list())
     }
@@ -507,7 +510,7 @@ impl ReplayEngine {
     /// of [`events::ModuleLoaded`]. Each entry represents a module load occurrence
     /// with associated replay position and module metadata.
     ///
-    /// Returns:
+    /// ## Returns
     /// - `Result<Vec<events::ModuleLoaded>>`
     pub fn get_module_loaded_event_list(&self) -> Result<Vec<events::ModuleLoaded>> {
         let mut res = Vec::<events::ModuleLoaded>::with_capacity(self.get_module_loaded_event_count()?);
@@ -525,7 +528,7 @@ impl ReplayEngine {
     /// vector of events::ModuleUnloaded. Each entry represents a module unload
     /// occurrence with its replay position and associated module metadata.
     ///
-    /// Returns:
+    /// ## Returns
     /// - `Result<Vec<events::ModuleUnloaded>>`
     pub fn get_module_unloaded_event_list(&self) -> Result<Vec<events::ModuleUnloaded>> {
         let mut res = Vec::<events::ModuleUnloaded>::with_capacity(self.get_module_unloaded_event_count()?);
@@ -544,7 +547,7 @@ impl ReplayEngine {
     /// exception code/type, and any associated context captured when the exception
     /// occurred.
     ///
-    /// Returns:
+    /// ## Returns
     /// - `Result<Vec<events::Exception>>`
     pub fn get_exception_event_list(&self) -> Result<Vec<events::Exception>> {
         let mut res = Vec::<events::Exception>::with_capacity(self.get_exception_event_count()?);
@@ -561,7 +564,7 @@ impl ReplayEngine {
     /// Parameters:
     /// - module_name: Name or filename of the module to query (case-sensitive or as recorded).
     ///
-    /// Returns:
+    /// ## Returns
     /// - `Result<u64>`
     pub fn get_module_base_address(&self, module_name: &str) -> Result<u64> {
         let mod_lower = module_name.to_lowercase();
