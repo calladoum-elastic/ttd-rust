@@ -48,9 +48,9 @@ pub type RegisterChangedCallback = fn(context: usize, reg_id: u8, old_data: &[u8
 #[derive(Display, Debug, PartialEq)]
 pub struct ReplayPosition<'a>(&'a bindings::root::TTD::Replay::Position);
 
-impl<'a> Into<&'a bindings::root::TTD::Replay::Position> for ReplayPosition<'a> {
-    fn into(self) -> &'a bindings::root::TTD::Replay::Position {
-        self.0
+impl<'a> From<ReplayPosition<'a>> for &'a bindings::root::TTD::Replay::Position {
+    fn from(val: ReplayPosition<'a>) -> Self {
+        val.0
     }
 }
 
@@ -151,7 +151,6 @@ pub struct ReplayCursor<'a> {
 }
 
 impl<'a> ReplayCursor<'a> {
-
     /// Advance the cursor forward toward an optional target position. If until is
     /// `Some`, replay proceeds until that `ReplayPosition` or a stopping event;
     // if `None`, it advances until another event raised. On success the function
@@ -413,14 +412,14 @@ impl ReplayEngine {
     }
 
     /// Load a TTD trace from the filesystem into the replay engine, preparing it
-/// for cursor creation and navigation. This does not start replaying; it
-/// initializes internal state from the specified trace file or directory.
-///
-/// Parameters:
-/// - trace_path: Filesystem path to the TTD trace file or trace directory.
-///
-/// Returns:
-/// - `Result`
+    /// for cursor creation and navigation. This does not start replaying; it
+    /// initializes internal state from the specified trace file or directory.
+    ///
+    /// Parameters:
+    /// - trace_path: Filesystem path to the TTD trace file or trace directory.
+    ///
+    /// Returns:
+    /// - `Result`
     pub fn load(&self, trace_path: &std::path::Path) -> Result<()> {
         if !trace_path.exists() {
             return Err(Error::NotFound);
@@ -505,11 +504,11 @@ impl ReplayEngine {
     }
 
     /// Return the list of module-loaded events recorded in the trace as a vector
-/// of [`events::ModuleLoaded`]. Each entry represents a module load occurrence
-/// with associated replay position and module metadata.
-///
-/// Returns:
-/// - `Result<Vec<events::ModuleLoaded>>`
+    /// of [`events::ModuleLoaded`]. Each entry represents a module load occurrence
+    /// with associated replay position and module metadata.
+    ///
+    /// Returns:
+    /// - `Result<Vec<events::ModuleLoaded>>`
     pub fn get_module_loaded_event_list(&self) -> Result<Vec<events::ModuleLoaded>> {
         let mut res = Vec::<events::ModuleLoaded>::with_capacity(self.get_module_loaded_event_count()?);
         for module in self.inner.get_module_loaded_event_list().iter() {
@@ -584,8 +583,8 @@ mod test {
     use ttd_sys::bindings::root::TTD::Replay::PositionWatchpointData;
 
     use crate::prelude::*;
-    use crate::replay::{MemoryWatchpointData, ReplayCursor, ReplayEngine, ReplayPosition};
     use crate::replay::events::{DataAccessMask, EventType};
+    use crate::replay::{MemoryWatchpointData, ReplayCursor, ReplayEngine, ReplayPosition};
 
     fn get_test_trace() -> std::path::PathBuf {
         let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());

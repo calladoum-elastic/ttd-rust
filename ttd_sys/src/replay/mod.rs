@@ -130,7 +130,7 @@ impl ReplayEngine {
             if raw_cur == 0 {
                 return Err(Error::ForeignFunctionError);
             }
-            let mut cursor = ffi::TTD_FFI::Replay::ReplayCursor::new(raw_cur as u64);
+            let mut cursor = ffi::TTD_FFI::Replay::ReplayCursor::new(raw_cur);
 
             // New cursors always should point to the start of the trace
             cursor.SetPosition(&self.get_lifetime().Min);
@@ -152,7 +152,7 @@ impl ReplayEngine {
     /// Safety:
     /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetLifetime()`.
     pub fn get_lifetime(&self) -> &ffi::TTD::Replay::PositionRange {
-        unsafe { std::mem::transmute(self.inner.GetLifetime()) }
+        unsafe { &*self.inner.GetLifetime() }
     }
 
     /// Description:
@@ -166,7 +166,7 @@ impl ReplayEngine {
     /// Safety:
     /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetSystemInfo()`.
     pub fn system_info(&self) -> &ffi::TTD::SystemInfo {
-        unsafe { std::mem::transmute(self.inner.GetSystemInfo()) }
+        unsafe { &*self.inner.GetSystemInfo() }
     }
 
     pub fn build_index(&self) -> u32 {
@@ -449,11 +449,11 @@ impl<'a> ReplayCursor<'a> {
     /// Safety:
     /// - Returned reference aliases FFI-owned data; ensure the parent replay session outlives its use.
     pub fn get_position(&self) -> &ffi::TTD::Replay::Position {
-        unsafe { std::mem::transmute(self.inner.GetPosition()) }
+        unsafe { &*self.inner.GetPosition() }
     }
 
     pub fn get_previous_position(&mut self) -> &ffi::TTD::Replay::Position {
-        unsafe { std::mem::transmute(self.inner.GetPreviousPosition()) }
+        unsafe { &*self.inner.GetPreviousPosition() }
     }
 
     /// Return a reference to the current FFI `TTD::Replay::ThreadInfo` for the
@@ -465,7 +465,7 @@ impl<'a> ReplayCursor<'a> {
     /// Safety:
     /// - Returned reference aliases FFI-owned data; ensure the parent replay session and cursor remain valid while the reference is used.
     pub fn get_thread_info(&self) -> &ffi::TTD::Replay::ThreadInfo {
-        unsafe { std::mem::transmute(self.inner.GetThreadInfo()) }
+        unsafe { &*self.inner.GetThreadInfo() }
     }
 
     pub fn get_teb_address(&self) -> u64 {
@@ -499,17 +499,17 @@ impl<'a> ReplayCursor<'a> {
             Ok(match arch {
                 ProcessorArchitecture::X64 => {
                     let _ptr: *mut ffi::AMD64_CONTEXT = self.inner.GetX64RegisterContext();
-                    let _ref: &ffi::AMD64_CONTEXT = std::mem::transmute(_ptr);
+                    let _ref: &ffi::AMD64_CONTEXT = &*_ptr;
                     RegisterContext::X64(_ref)
                 }
                 ProcessorArchitecture::X86 => {
                     let _ptr: *mut ffi::X86_NT5_CONTEXT = self.inner.GetX86RegisterContext();
-                    let _ref: &ffi::X86_NT5_CONTEXT = std::mem::transmute(_ptr);
+                    let _ref: &ffi::X86_NT5_CONTEXT = &*_ptr;
                     RegisterContext::X86(_ref)
                 }
                 ProcessorArchitecture::ARM64 => {
                     let _ptr: *mut ffi::ARM64_CONTEXT = self.inner.GetArm64RegisterContext();
-                    let _ref: &ffi::ARM64_CONTEXT = std::mem::transmute(_ptr);
+                    let _ref: &ffi::ARM64_CONTEXT = &*_ptr;
                     RegisterContext::ARM64(_ref)
                 }
             })
