@@ -17,7 +17,8 @@ fn main() -> Result<(), ttd::error::Error> {
   let mut engine = ReplayEngine::open(r"c:\path\to\my_trace.run")?;
 
   // Print some info
-  dbg!(engine.system_info);
+  let si = engine.system_info()?;
+  dbg!(&si);
 
   Ok(())
 }
@@ -34,12 +35,15 @@ fn main() -> Result<(), ttd::error::Error> {
   // Open a recording
   let mut engine = ReplayEngine::open(r"c:\path\to\my_trace.run")?;
 
+  // Open a cursor to navigate the trace
+  let mut cursor = engine.cursor()?;
+
   // Replay forward until the end of the trace
-  let replay_result = engine.replay_forward(None)?;
+  let replay_result = cursor.replay_forward(None)?;
   assert_eq!(res.stop_reason, EventType::Process);
 
   // Jump to a position
-  engine.set_position( ReplayPosition{...});
+  cursor.set_position( ReplayPosition{...});
 
   Ok(())
 }
@@ -56,8 +60,11 @@ fn main() -> Result<(), ttd::error::Error> {
   // Open a recording
   let mut engine = ReplayEngine::open(r"c:\path\to\my_trace.run")?;
 
+  // Open a cursor to navigate the trace
+  let cursor = engine.cursor()?;
+
   // Inspect memory state at a specific point
-  let memory_dump = session.memory_at(123456)?;
+  let memory_dump = cursor.memory_at(123456)?;
   println!("Memory snapshot: {:?}", memory_dump);
 
   Ok(())
