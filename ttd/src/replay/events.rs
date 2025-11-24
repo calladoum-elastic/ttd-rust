@@ -4,6 +4,9 @@ use crate::replay::{ReplayModule, ReplayPosition};
 use derive_more::Display;
 use ttd_sys::bindings;
 
+pub type ModuleLoaded = ttd_sys::replay::events::ModuleLoaded;
+pub type ModuleUnloaded = ttd_sys::replay::events::ModuleUnloaded;
+
 use bitflags::bitflags;
 
 // region: EventType
@@ -89,48 +92,6 @@ bitflags! {
 }
 
 // endregion: DataAccessType/DataAccessMask
-
-// region: Event ModuleLoaded
-
-#[derive(Debug)]
-pub struct ModuleLoaded {
-    pub position: ttd_sys::bindings::root::TTD::Replay::Position,
-    pub module: ReplayModule,
-}
-
-impl TryFrom<&ttd_sys::bindings::root::TTD::Replay::ModuleLoadedEvent> for ModuleLoaded {
-    fn try_from(value: &ttd_sys::bindings::root::TTD::Replay::ModuleLoadedEvent) -> Result<Self> {
-        let module = unsafe { (*value.pModule) };
-        Ok(Self {
-            position: value.Position,
-            module: ReplayModule::try_from(&module)?,
-        })
-    }
-    type Error = crate::error::Error;
-}
-
-// endregion: ModuleLoaded type
-
-// region: ModuleUnloaded type
-
-#[derive(Debug)]
-pub struct ModuleUnloaded {
-    pub position: ttd_sys::bindings::root::TTD::Replay::Position,
-    pub module: ReplayModule,
-}
-impl TryFrom<&ttd_sys::bindings::root::TTD::Replay::ModuleUnloadedEvent> for ModuleUnloaded {
-    fn try_from(value: &ttd_sys::bindings::root::TTD::Replay::ModuleUnloadedEvent) -> Result<Self> {
-        let module = unsafe { (*value.pModule) };
-        Ok(Self {
-            position: value.Position,
-            module: ReplayModule::try_from(&module)?,
-        })
-    }
-    type Error = crate::error::Error;
-}
-
-
-// endregion: ModuleUnloaded type
 
 // region: Exception type
 

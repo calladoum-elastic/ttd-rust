@@ -23,6 +23,7 @@ pub type ThreadView = bindings::root::TTD::Replay::IThreadView;
 pub type Amd64Context = bindings::root::AMD64_CONTEXT;
 pub type Amd64ExtendedContext = bindings::root::AVX_EXTENDED_CONTEXT;
 
+pub type ReplayModule = ttd_sys::replay::ReplayModule;
 pub type ReplayFlags = ttd_sys::replay::ReplayFlags;
 pub type RegisterContext<'a> = ttd_sys::replay::RegisterContext<'a>;
 pub type ExtendedRegisterContext = ttd_sys::replay::ExtendedRegisterContext;
@@ -130,37 +131,6 @@ impl<'a> From<&'a bindings::root::TTD::Replay::Position> for ReplayPosition<'a> 
     fn from(value: &'a bindings::root::TTD::Replay::Position) -> Self {
         Self(value)
     }
-}
-
-/// Represents a module (loaded binary or library) observed during a TTD record
-/// or replay session. Encapsulates metadata such as module base address,
-/// size, file path, timestamp/version info, and identifiers used by the TTD
-/// SDK to correlate module load/unload events. Use this struct to inspect
-/// which modules were present at specific replay positions, resolve symbols,
-/// or present module lists to users.
-#[derive(Debug)]
-pub struct ReplayModule {
-    pub name: String,
-    pub address: u64,
-    pub size: u64,
-    pub checksum: u32,
-    pub timestamp: u32,
-}
-
-impl TryFrom<&bindings::root::TTD::Replay::Module> for ReplayModule {
-    fn try_from(value: &bindings::root::TTD::Replay::Module) -> Result<Self> {
-        let name_slice = unsafe { std::slice::from_raw_parts(value.pName, value.NameLength) };
-
-        Ok(Self {
-            name: String::from_utf16(name_slice)?.to_string(),
-            address: value.Address,
-            size: value.Size,
-            checksum: value.Checksum,
-            timestamp: value.Timestamp,
-        })
-    }
-
-    type Error = crate::error::Error;
 }
 
 /// Represents a specific in-process instantiation of a module observed during a
@@ -457,12 +427,14 @@ impl<'a> ReplayCursor<'a> {
 
     pub fn set_replay_progress_callback(&mut self, cb: ReplayProgressCallback) {
         let ptr = cb as *mut ttd_sys::replay::ReplayProgressCallbackUnsafe;
-        self.inner.set_replay_progress_callback(unsafe { *ptr });
+        // self.inner.set_replay_progress_callback(unsafe { *ptr });
+        todo!()
     }
 
     pub fn set_register_changed_callback(&mut self, cb: RegisterChangedCallback) {
         let ptr = cb as *mut ttd_sys::replay::RegisterChangedCallbackUnsafe;
-        self.inner.set_register_changed_callback(unsafe { *ptr });
+        // self.inner.set_register_changed_callback(unsafe { *ptr });
+        todo!()
     }
 }
 // endregion: TTD Replay Cursor

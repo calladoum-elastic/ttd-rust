@@ -8,6 +8,9 @@ pub enum Error {
     Unknown,
     Generic(String),
 
+    #[from]
+    Utf16Error(std::string::FromUtf16Error),
+
     ForeignFunctionError,
     ConversionError,
 }

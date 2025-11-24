@@ -7,6 +7,8 @@ use std::ops::{Add, Sub};
 use crate::bindings::root as ffi;
 use crate::prelude::*;
 
+pub mod events;
+
 impl Add<u64> for ffi::TTD::Replay::Position {
     type Output = ffi::TTD::Replay::Position;
 
@@ -694,6 +696,41 @@ impl From<u32> for ReplayFlags {
     }
 }
 // endregion: ReplayFlags
+
+// region: ReplayModule
+
+/// Represents a module (loaded binary or library) observed during a TTD record
+/// or replay session. Encapsulates metadata such as module base address,
+/// size, file path, timestamp/version info, and identifiers used by the TTD
+/// SDK to correlate module load/unload events. Use this struct to inspect
+/// which modules were present at specific replay positions, resolve symbols,
+/// or present module lists to users.
+#[derive(Debug)]
+pub struct ReplayModule {
+    pub name: String,
+    pub address: u64,
+    pub size: u64,
+    pub checksum: u32,
+    pub timestamp: u32,
+}
+
+impl TryFrom<&crate::bindings::root::TTD::Replay::Module> for ReplayModule {
+    fn try_from(value: &crate::bindings::root::TTD::Replay::Module) -> Result<Self> {
+        let name_slice = unsafe { std::slice::from_raw_parts(value.pName, value.NameLength) };
+
+        Ok(Self {
+            name: String::from_utf16(name_slice)?.to_string(),
+            address: value.Address,
+            size: value.Size,
+            checksum: value.Checksum,
+            timestamp: value.Timestamp,
+        })
+    }
+
+    type Error = crate::error::Error;
+}
+
+// endregion: ReplayModule
 
 // region: RegisterContext / RegisterExtendedContext
 
