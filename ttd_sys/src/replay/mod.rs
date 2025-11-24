@@ -456,26 +456,76 @@ impl<'a> ReplayCursor<'a> {
         }
     }
 
+    /// Return the current replay configuration flags controlling behavior (e.g.,
+    /// logging, determinism, performance options) as a ReplayFlags value.
+    ///
+    /// Safety:
+    /// - Calls into unsafe FFI `TTD::Replay::ICursor::GetReplayFlags()`
     pub fn get_replay_flags(&self) -> ReplayFlags {
         unsafe { self.inner.GetReplayFlags().into() }
     }
 
+    /// Set the replay behavior flags to the provided ReplayFlags value, updating
+    /// runtime options that affect replay semantics (e.g., logging, determinism,
+    /// or performance-related toggles).
+    ///
+    /// Parameters:
+    /// - flags: ReplayFlags value specifying the new replay configuration.
+    ///
+    /// Safety:
+    /// - Calls into unsafe FFI `TTD::Replay::ICursor::SetReplayFlags()`
     pub fn set_replay_flags(&mut self, flags: ReplayFlags) {
         unsafe { self.inner.SetReplayFlags(flags.into()) }
     }
 
+    /// Add a memory watchpoint that triggers when the specified memory region is
+    /// accessed during replay. Returns true if the watchpoint was registered and
+    /// active, false if ignored or already present.
+    ///
+    /// Parameters:
+    /// - watch_point: Reference to FFI `TTD::Replay::MemoryWatchpointData` describing address, size, and access type.
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD::Replay::ICursor::AddMemoryWatchpoint()`
     pub fn add_memory_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::MemoryWatchpointData) -> bool {
         unsafe { self.inner.AddMemoryWatchpoint(watch_point) }
     }
 
+    /// Remove a previously registered memory watchpoint matching the provided FFI
+    /// `TTD::Replay::MemoryWatchpointData`. Returns true if a watchpoint was found
+    /// and removed, false if none matched.
+    ///
+    /// Parameters:
+    /// - watch_point: Reference to FFI `TTD::Replay::MemoryWatchpointData` identifying the watchpoint to remove.
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD::Replay::ICursor::RemoveMemoryWatchpoint()`
     pub fn remove_memory_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::MemoryWatchpointData) -> bool {
         unsafe { self.inner.RemoveMemoryWatchpoint(watch_point) }
     }
 
+    /// Register a position-based watchpoint that triggers when the replay reaches
+    /// the specified FFI `TTD::Replay::PositionWatchpointData`. Returns true if
+    /// the watchpoint was registered, false if ignored or already present.
+    ///
+    /// Parameters:
+    /// - watch_point: Reference to FFI `TTD::Replay::PositionWatchpointData` specifying the target position and trigger criteria.
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD::Replay::ICursor::AddPositionWatchpoint()`
     pub fn add_position_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::PositionWatchpointData) -> bool {
         unsafe { self.inner.AddPositionWatchpoint(watch_point) }
     }
 
+    /// Remove a previously registered position-based watchpoint matching the
+    /// provided FFI `TTD::Replay::PositionWatchpointData`. Returns true if a
+    /// matching watchpoint was found and removed, false otherwise.
+    ///
+    /// Parameters:
+    /// - watch_point: Reference to FFI `TTD::Replay::PositionWatchpointData` identifying the watchpoint to remove.
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD::Replay::ICursor::RemovePositionWatchpoint()`
     pub fn remove_position_watchpoint(&mut self, watch_point: &ffi::TTD::Replay::PositionWatchpointData) -> bool {
         unsafe { self.inner.RemovePositionWatchpoint(watch_point) }
     }
