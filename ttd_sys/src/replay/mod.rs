@@ -212,7 +212,7 @@ impl ReplayEngine {
     ///
     /// Returns:
     /// - [`Vec<ffi::TTD::Replay::ModuleInstance>`]: Module instance list extracted
-    /// from the loaded trace.
+    ///   from the loaded trace.
     ///
     /// Safety:
     /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::GetModuleInstanceList()`.
@@ -816,7 +816,6 @@ impl TryFrom<u16> for ProcessorArchitecture {
 }
 
 // endregion: ProcessorArchitecture
-
 
 #[cfg(test)]
 mod test {

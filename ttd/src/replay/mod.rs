@@ -209,7 +209,7 @@ impl<'a> ReplayCursor<'a> {
     }
 
     /// Set the cursor to the given replay position immediately. `set_position()`
-    ///  simply places the cursor at the intended `ReplayPosition`. As such it
+    /// simply places the cursor at the intended `ReplayPosition`. As such it
     /// will ignore any event occuring between the old and new position.
     ///
     /// Parameters:
