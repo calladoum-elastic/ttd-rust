@@ -744,10 +744,10 @@ mod test {
             let curpos = cursor.get_position().unwrap();
             let res = cursor.replay_forward_steps(step).unwrap();
             assert_eq!(step, res.steps_executed);
-            assert_eq!(res.stop_reason, events::EventType::Position);
+            assert_eq!(res.stop_reason, EventType::Position);
 
             let res = cursor.replay_backward_steps(step).unwrap();
-            assert_eq!(res.stop_reason, events::EventType::Position);
+            assert_eq!(res.stop_reason, EventType::Position);
             assert_eq!(0, res.steps_executed);
         }
     }
