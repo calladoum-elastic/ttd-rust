@@ -85,16 +85,45 @@ impl Drop for ReplayEngine {
 }
 
 impl ReplayEngine {
+    /// Create and initialize a new [`ReplayEngine`], allocating the Replay Engine through
+    /// FFI (equivalent to calling C++ `TTD::Replay::MakeReplayEngine()`)
+    ///
+    /// Returns:
+    /// - Result<Self>: Ok with a constructed ReplayEngine on success; Err on failure (allocation or SDK error).
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD::Replay::IEngine::MakeReplayEngine()`
     pub fn new() -> Result<Self> {
         Ok(Self {
             inner: unsafe { ffi::TTD_FFI::Replay::ReplayEngine::new() },
         })
     }
 
+    /// Description:
+    /// Load a TTD trace (UTF-16 path buffer) into the replay engine, initializing
+    /// internal state from the specified trace path.
+    ///
+    /// Parameters:
+    /// - trace: UTF-16 encoded path (slice of u16) pointing to the trace file or directory.
+    ///
+    /// Returns:
+    /// - i32: Raw SDK/FFI status code (0 for success in typical conventions; consult SDK docs for exact codes).
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD::Replay::IEngine::Load()`
     pub fn load(&self, trace: &[u16]) -> i32 {
         unsafe { self.inner.Load(trace.as_ptr()) }
     }
 
+    /// Description:
+    /// Create a new ReplayCursor borrowed from the engine, allowing navigation and
+    /// inspection of the loaded trace.
+    ///
+    /// Returns:
+    /// - Result<ReplayCursor<'_>>: Ok with a borrowed ReplayCursor on success; Err on failure.
+    ///
+    /// Safety:
+    /// - Calls into FFI `TTD_FFI::Replay::ReplayEngine::Load()`.
     pub fn cursor(&'_ self) -> Result<ReplayCursor<'_>> {
         let cursor = unsafe {
             let raw_cur = self.inner.NewCursor();
