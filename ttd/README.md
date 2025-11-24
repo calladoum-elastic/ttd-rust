@@ -49,10 +49,10 @@ fn main() -> Result<(), ttd::error::Error> {
 
   // Replay forward until the end of the trace
   let replay_result = cursor.replay_forward(None)?;
-  assert_eq!(res.stop_reason, EventType::Process);
+  assert_eq!(replay_result.stop_reason, EventType::Process);
 
-  // Jump to a position
-  cursor.set_position( ReplayPosition{...});
+  // Or you can jump to a position directly
+  // cursor.set_position( ReplayPosition{...});
 
   Ok(())
 }
