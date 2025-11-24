@@ -23,4 +23,4 @@ record = []
 
 [lints.rust]
 unsafe_code = "forbid"
-unused = { level = "allow", priority = -1 } # TODO (calladoum) for dev
+unused = { level = "warn", priority = -1 } # TODO (calladoum) for dev

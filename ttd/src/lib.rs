@@ -3,8 +3,6 @@
 pub mod error;
 pub mod prelude;
 
-pub use crate::prelude::*;
-
 #[cfg(feature = "replay")]
 pub mod replay;
 

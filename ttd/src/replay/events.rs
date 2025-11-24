@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use crate::replay::{ReplayModule, ReplayPosition};
 
 use derive_more::Display;
 use ttd_sys::bindings;
@@ -97,8 +96,9 @@ bitflags! {
 
 #[derive(Debug)]
 pub struct Exception {}
+
 impl TryFrom<&ttd_sys::bindings::root::TTD::Replay::ExceptionEvent> for Exception {
-    fn try_from(value: &ttd_sys::bindings::root::TTD::Replay::ExceptionEvent) -> Result<Self> {
+    fn try_from(_value: &ttd_sys::bindings::root::TTD::Replay::ExceptionEvent) -> Result<Self> {
         todo!()
     }
     type Error = crate::error::Error;

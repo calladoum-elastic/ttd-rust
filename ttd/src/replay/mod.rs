@@ -9,11 +9,7 @@ use ttd_sys::bindings;
 use crate::prelude::*;
 
 use std::ffi::CString;
-use std::ops::{Add, Sub};
-use std::os::windows::ffi::OsStringExt;
 use std::str::FromStr;
-
-use bitflags::bitflags;
 
 pub mod events;
 
@@ -425,16 +421,16 @@ impl<'a> ReplayCursor<'a> {
         Ok(self.inner.remove_position_watchpoint(watch_point))
     }
 
-    pub fn set_replay_progress_callback(&mut self, cb: ReplayProgressCallback) {
-        let ptr = cb as *mut ttd_sys::replay::ReplayProgressCallbackUnsafe;
-        // self.inner.set_replay_progress_callback(unsafe { *ptr });
+    pub fn set_replay_progress_callback(&mut self, _cb: ReplayProgressCallback) {
         todo!()
+        // let ptr = cb as *mut ttd_sys::replay::ReplayProgressCallbackUnsafe;
+        // self.inner.set_replay_progress_callback(unsafe { *ptr });
     }
 
-    pub fn set_register_changed_callback(&mut self, cb: RegisterChangedCallback) {
-        let ptr = cb as *mut ttd_sys::replay::RegisterChangedCallbackUnsafe;
-        // self.inner.set_register_changed_callback(unsafe { *ptr });
+    pub fn set_register_changed_callback(&mut self, _cb: RegisterChangedCallback) {
         todo!()
+        // let ptr = cb as *mut ttd_sys::replay::RegisterChangedCallbackUnsafe;
+        // self.inner.set_register_changed_callback(unsafe { *ptr });
     }
 }
 // endregion: TTD Replay Cursor
@@ -644,13 +640,11 @@ impl ReplayEngine {
 
 #[cfg(test)]
 mod test {
-    use std::ops::Add;
-
     use ttd_sys::bindings::root::TTD::Replay::PositionWatchpointData;
 
     use crate::prelude::*;
     use crate::replay::events::{DataAccessMask, EventType};
-    use crate::replay::{MemoryWatchpointData, ReplayCursor, ReplayEngine, ReplayPosition};
+    use crate::replay::{MemoryWatchpointData, ReplayEngine, ReplayPosition};
 
     fn get_test_trace() -> std::path::PathBuf {
         let mut trace_path = std::path::PathBuf::from(std::env::var("TEMP").expect("failed to get TEMP env var").as_str());
@@ -660,12 +654,12 @@ mod test {
 
     #[test]
     fn test_load_simple() {
-        let mut engine = ReplayEngine::new().expect("failed to create a new replayer");
+        let engine = ReplayEngine::new().expect("failed to create a new replayer");
 
         let trace_path = get_test_trace();
         assert!(engine.load(trace_path.as_path()).is_ok());
 
-        for i in 1..10 {
+        for _i in 1..10 {
             let mut cursor = engine.cursor().unwrap();
             let curpos = cursor.get_position().unwrap();
             assert_eq!(*curpos.0, engine.get_lifetime().Min);
@@ -681,7 +675,7 @@ mod test {
             assert_eq!(*curpos.0, engine.get_lifetime().Min);
         }
 
-        for i in 1..10 {
+        for _i in 1..10 {
             let mut cursor = engine.cursor().unwrap();
             assert_eq!(*cursor.get_position().unwrap().0, engine.get_lifetime().Min);
 
@@ -699,8 +693,6 @@ mod test {
     #[test]
     fn test_system_info() {
         let engine = ReplayEngine::new().expect("failed to create a new replayer");
-
-        let trace_path = get_test_trace();
 
         let info = engine.system_info().unwrap();
         assert_eq!(info.0.SystemName.len(), 64);
@@ -809,7 +801,7 @@ mod test {
         let mut cursor = engine.cursor().expect("failed to create a new cursor");
 
         for step in 1..10u64 {
-            let curpos = cursor.get_position().unwrap();
+            let _curpos = cursor.get_position().unwrap();
             let res = cursor.replay_forward_steps(step).unwrap();
             assert_eq!(step, res.steps_executed);
             assert_eq!(res.stop_reason, EventType::Position);
@@ -826,9 +818,8 @@ mod test {
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let mut cursor = engine.cursor().expect("failed to create a new cursor");
 
-        let mut flags: ttd_sys::replay::ReplayFlags = cursor.get_replay_flags().unwrap();
-        flags = ttd_sys::replay::ReplayFlags::ReplaySegmentsSequentially;
-        cursor.set_replay_flags(flags);
+        cursor.get_replay_flags().unwrap();
+        cursor.set_replay_flags(ttd_sys::replay::ReplayFlags::ReplaySegmentsSequentially);
     }
 
     #[test]
@@ -837,7 +828,6 @@ mod test {
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let mut cursor = engine.cursor().expect("failed to create a new cursor");
 
-        let pc = cursor.get_program_counter().unwrap();
         let next_pc = {
             let pos = cursor.get_position().unwrap().0.to_owned();
             cursor.set_position(&ReplayPosition(&(pos + 1)));
@@ -856,7 +846,7 @@ mod test {
             ..Default::default()
         };
         assert!(cursor.add_memory_watchpoint(&watch).unwrap());
-        let res = cursor.replay_forward(None).unwrap();
+        let _ = cursor.replay_forward(None).unwrap();
         assert_eq!(cursor.get_program_counter().unwrap(), next_pc);
 
         assert!(cursor.remove_memory_watchpoint(&watch).unwrap());
