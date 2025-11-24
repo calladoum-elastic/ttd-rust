@@ -10,7 +10,8 @@ use std::ops::Add;
 use anyhow::{Result, bail};
 use log::{debug, info, warn};
 
-use ttd::replay::{DataAccessMask, MemoryWatchpointData, RegisterContext, ReplayEngine, ReplayPosition};
+use ttd::replay::{MemoryWatchpointData, RegisterContext, ReplayEngine, ReplayPosition};
+use ttd::replay::events::{DataAccessMask, EventType};
 
 fn find_export(_replay: &ReplayEngine, _module_name: &str, _export_name: &str) -> Result<u64> {
     Ok(0x0104290)
@@ -69,7 +70,7 @@ fn main() -> Result<()> {
         // 3. Play the trace
         //
         let result = &cursor.replay_forward(None)?;
-        if result.stop_reason != ttd::replay::EventType::MemoryWatchpoint {
+        if result.stop_reason != EventType::MemoryWatchpoint {
             break;
         }
         debug!("fwdreplay reason: {}, executed {} insns", result.stop_reason, result.instructions_executed);

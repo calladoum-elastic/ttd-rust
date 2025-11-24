@@ -47,6 +47,21 @@ impl From<u8> for EventType {
     }
 }
 
+impl TryFrom<u8> for EventType {
+    fn try_from(value: u8) -> Result<Self>{
+        let obj = Self { value };
+        if obj.value == EventType::Invalid {
+            return Err(Error::ConversionError);
+        }
+        
+        Ok(obj)
+    }
+}
+
+// endregion: EventType
+
+// region: DataAccessType/DataAccessMask
+
 bitflags! {
     /// Small integer-backed enum representing specific data access kinds (e.g.,
     /// read, write, execute) used in access filtering and watchpoint configuration.
@@ -84,7 +99,7 @@ bitflags! {
 }
 }
 
-// endregion: EventType
+// endregion: DataAccessType/DataAccessMask
 
 // region: Event ModuleLoaded
 
