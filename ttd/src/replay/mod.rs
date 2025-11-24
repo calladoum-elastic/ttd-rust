@@ -17,9 +17,7 @@ use bitflags::bitflags;
 
 pub mod events;
 
-pub type SystemInfo = bindings::root::TTD::SystemInfo;
 pub type ThreadInfo = bindings::root::TTD::Replay::ThreadInfo;
-// pub type ReplayPosition = bindings::root::TTD::Replay::Position;
 pub type ReplayPositionRange = bindings::root::TTD::Replay::PositionRange;
 pub type ThreadView = bindings::root::TTD::Replay::IThreadView;
 pub type Amd64Context = bindings::root::AMD64_CONTEXT;
@@ -35,6 +33,57 @@ pub type MemoryWatchpointData = bindings::root::TTD::Replay::MemoryWatchpointDat
 
 pub type ReplayProgressCallback = fn(ctx: usize, pos: &ReplayPosition);
 pub type RegisterChangedCallback = fn(context: usize, reg_id: u8, old_data: &[u8; 8], new_data: &[u8; 8], ddata_size_in_bytes: usize, thread: &ThreadView);
+
+pub struct SystemInfo<'a>(&'a bindings::root::TTD::SystemInfo);
+
+impl<'a> SystemInfo<'a> {
+    pub fn user_name(&self) -> Result<String> {
+        Ok(String::from_utf16(&self.0.UserName)?)
+    }
+
+    pub fn system_name(&self) -> Result<String> {
+        Ok(String::from_utf16(&self.0.SystemName)?)
+    }
+
+    pub fn pid(&self) -> Result<u32> {
+        Ok(self.0.ProcessId)
+    }
+}
+
+impl<'a> std::fmt::Debug for SystemInfo<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SystemInfo")
+            .field("process_id", &self.pid())
+            .field("major", &self.0.MajorVersion)
+            .field("minor", &self.0.MinorVersion)
+            .field("build_number", &self.0.BuildNumber)
+            .field("user_name", &self.user_name().unwrap_or_default())
+            .field("system_name", &self.system_name().unwrap_or_default())
+            .finish_non_exhaustive()
+    }
+}
+
+impl<'a> std::fmt::Display for SystemInfo<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "SystemInfo(PID={}, version={}.{}.{})",
+            self.0.ProcessId, self.0.MajorVersion, self.0.MajorVersion, self.0.BuildNumber
+        )
+    }
+}
+
+impl<'a> From<SystemInfo<'a>> for &'a bindings::root::TTD::SystemInfo {
+    fn from(val: SystemInfo<'a>) -> Self {
+        val.0
+    }
+}
+
+impl<'a> From<&'a bindings::root::TTD::SystemInfo> for SystemInfo<'a> {
+    fn from(value: &'a bindings::root::TTD::SystemInfo) -> Self {
+        Self(value)
+    }
+}
 
 /// Wrapper around the raw TTD SDK Replay::Position reference that provides a
 /// borrowed, ergonomic handle to a Time-Travel Debugging replay position
@@ -319,8 +368,8 @@ impl<'a> ReplayCursor<'a> {
     ///
     /// ## Returns
     /// - `Result<Vec>`
-    pub fn read_current_memory(&self, address: u64, size: usize) -> Result<Vec<u8>> {
-        Ok(self.inner.read_current_memory(address, size)?)
+    pub fn read_memory(&self, address: u64, size: usize) -> Result<Vec<u8>> {
+        Ok(self.inner.read_memory(address, size)?)
     }
 
     pub fn get_replay_flags(&self) -> Result<ReplayFlags> {
@@ -405,6 +454,10 @@ pub struct ReplayEngine {
 }
 
 impl ReplayEngine {
+    /// Create a new blank [`ReplayEngine`], allowing a trace to be loaded later on.
+    ///
+    /// ## Returns
+    /// - `Result<ReplayEngine>`
     pub fn new() -> Result<Self> {
         Ok(Self {
             inner: ttd_sys::replay::ReplayEngine::new()?,
@@ -420,7 +473,8 @@ impl ReplayEngine {
     ///
     /// ## Returns
     /// - `Result`
-    pub fn load(&self, trace_path: &std::path::Path) -> Result<()> {
+    pub fn load<P: AsRef<std::path::Path>>(&self, trace_path: P) -> Result<()> {
+        let trace_path = trace_path.as_ref();
         if !trace_path.exists() {
             return Err(Error::NotFound);
         }
@@ -431,6 +485,20 @@ impl ReplayEngine {
             0 => Ok(()),
             _ => Err(Error::InitializationError),
         }
+    }
+
+    /// A convenience static function that returns an [`ReplayEngine`] loaded with a trace
+    /// i.e. `new()` followed by `load()`
+    ///
+    /// Parameters:
+    /// - `trace_path`: Filesystem path to the TTD trace file or trace directory.
+    ///
+    /// ## Returns
+    /// - `Result<ReplayEngine>`
+    pub fn open<P: AsRef<std::path::Path>>(trace_path: P) -> Result<Self> {
+        let engine = ReplayEngine::new()?;
+        engine.load(trace_path)?;
+        Ok(engine)
     }
 
     /// The proper way to get a new cursor for the replay engine.
@@ -457,8 +525,8 @@ impl ReplayEngine {
     ///
     /// ## Returns
     /// - [`Result<&SystemInfo>`]
-    pub fn system_info(&self) -> Result<&SystemInfo> {
-        Ok(self.inner.system_info())
+    pub fn system_info(&self) -> Result<SystemInfo<'_>> {
+        Ok(SystemInfo(self.inner.system_info()))
     }
 
     /// A convenience function leveraging `system_info()` to return the process id
@@ -466,7 +534,7 @@ impl ReplayEngine {
     /// ## Returns
     /// - [`Result<u32>`]
     pub fn process_id(&self) -> Result<u32> {
-        Ok(self.system_info()?.ProcessId)
+        self.system_info()?.pid()
     }
 
     pub fn get_module_count(&self) -> Result<usize> {
@@ -640,8 +708,11 @@ mod test {
         let trace_path = get_test_trace();
 
         let info = engine.system_info().unwrap();
-        assert_eq!(info.SystemName.len(), 64);
-        assert_eq!(info.UserName.len(), 64);
+        assert_eq!(info.0.SystemName.len(), 64);
+        assert_eq!(info.0.UserName.len(), 64);
+
+        assert!(!info.system_name().unwrap().is_empty());
+        assert!(!info.user_name().unwrap().is_empty());
     }
 
     #[test]

@@ -555,7 +555,7 @@ impl<'a> ReplayCursor<'a> {
     /// ## Safety
     /// - Calls into unsafe FFI; ensure the replay session and cursor remain valid
     ///   and the requested address range is within the trace's captured memory.
-    pub fn read_current_memory(&self, address: u64, size: usize) -> Result<Vec<u8>> {
+    pub fn read_memory(&self, address: u64, size: usize) -> Result<Vec<u8>> {
         let mut buffer = vec![0; size];
         let res = unsafe { self.inner.QueryMemoryBuffer(address, buffer.as_mut_ptr(), buffer.len() as u64) };
 

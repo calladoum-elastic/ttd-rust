@@ -62,8 +62,40 @@ ctest -C Debug -T test --test-dir .\ttd\ttd_ffi\build\tests
 cargo test
 ```
 
+## Documentation
+
+* `cargo doc`
+* [Microsoft TTD Documentation](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/time-travel-debugging)
+* [Microsoft TTD SDK Documentation](https://github.com/microsoft/WinDbg-Samples/blob/master/TTD/README.md)
+
+
 ## Examples
 
+### Usage
+
+```rust
+use ttd::replay::ReplayEngine;
+use ttd::replay::events::EventType;
+
+fn main() -> Result<(), ttd::error::Error> {
+  // Open a recording
+  let mut engine = ReplayEngine::open(r"c:\path\to\my_trace.run")?;
+
+  // Print some info
+  dbg!(engine.system_info);
+
+  // Replay forward until the end of the trace
+  let replay_result = engine.replay_forward(None)?;
+  assert_eq!(res.stop_reason, EventType::Process);
+
+  // Inspect memory state at a specific point
+  let memory_dump = session.memory_at(123456)?;
+  println!("Memory snapshot: {:?}", memory_dump);
+  Ok(())
+}
+```
+
+### Binaries
 Several examples were provided to illustrate how to use the Rust API:
  - `auto_unpack` - an automatic unpack that will extract encoded/encrypted payload injected using `VirtualAlloc(RWX)`/`VirtualProtect(RWX)`
 

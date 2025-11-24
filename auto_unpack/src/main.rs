@@ -10,8 +10,8 @@ use std::ops::Add;
 use anyhow::{Result, bail};
 use log::{debug, info, warn};
 
-use ttd::replay::{MemoryWatchpointData, RegisterContext, ReplayEngine, ReplayPosition};
 use ttd::replay::events::{DataAccessMask, EventType};
+use ttd::replay::{MemoryWatchpointData, RegisterContext, ReplayEngine, ReplayPosition};
 
 fn find_export(_replay: &ReplayEngine, _module_name: &str, _export_name: &str) -> Result<u64> {
     Ok(0x0104290)
@@ -58,7 +58,7 @@ fn main() -> Result<()> {
     let read_u64_at = |addr: u32, pos: &ReplayPosition| -> Result<u32> {
         let mut cursor = replay.cursor()?;
         cursor.set_position(pos);
-        let mem = cursor.read_current_memory(addr.into(), cursor.pointer_size()?)?;
+        let mem = cursor.read_memory(addr.into(), cursor.pointer_size()?)?;
         Ok(u32::from_le_bytes(mem.to_owned().try_into().unwrap()))
     };
 
@@ -117,7 +117,7 @@ fn main() -> Result<()> {
             RegisterContext::X86(ctx) => ctx,
             _ => unimplemented!(),
         };
-        let mem = cursor.read_current_memory(ctx.Eip.into(), arg1 as usize)?;
+        let mem = cursor.read_memory(ctx.Eip.into(), arg1 as usize)?;
 
         //
         // 6. When the watchpoint is hit, dump all the instructions
