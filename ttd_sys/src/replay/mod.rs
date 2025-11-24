@@ -251,6 +251,19 @@ impl<'a> Drop for ReplayCursor<'a> {
 }
 
 impl<'a> ReplayCursor<'a> {
+    /// Advance the cursor forward toward an optional target FFI position. If
+    /// until is Some, replay proceeds until that FFI position or a stopping
+    /// event; if None, it advances a default step or to the next event. Returns
+    /// the raw FFI replay result containing stop reason and execution metrics.
+    ///
+    /// Parameters:
+    /// - until: Optional FFI TTD::Replay::Position target to stop at.
+    ///
+    /// Returns:
+    /// - Result<ffi::TTD::Replay::ICursorView_ReplayResult>
+    ///
+    /// Safety:
+    /// - Calls into unsafe FFI; ensure the replay session and referenced resources remain valid.
     pub fn replay_forward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> Result<ffi::TTD::Replay::ICursorView_ReplayResult> {
         unsafe {
             let max_pos = ReplayCursor::max();
@@ -268,6 +281,19 @@ impl<'a> ReplayCursor<'a> {
         }
     }
 
+    /// Move the cursor backward toward an optional target FFI position. If `until`
+    /// is Some, replay rewinds until that FFI position or a stopping event; if
+    /// None, it rewinds a default step or to the previous event. Returns the raw
+    /// FFI replay result with stop reason and execution metrics.
+    ///
+    /// Parameters:
+    /// - until: Optional FFI `TTD::Replay::Position` target to stop at.
+    ///
+    /// Returns:
+    /// - Result<ffi::TTD::Replay::ICursorView_ReplayResult>
+    ///
+    /// Safety:
+    /// - Calls into unsafe FFI; ensure the replay session and referenced resources remain valid.
     pub fn replay_backward(&mut self, until: Option<ffi::TTD::Replay::Position>) -> Result<ffi::TTD::Replay::ICursorView_ReplayResult> {
         unsafe {
             let min_pos = ReplayCursor::min();
@@ -299,10 +325,25 @@ impl<'a> ReplayCursor<'a> {
         }
     }
 
+    /// Set the cursor immediately to the given FFI replay position; subsequent
+    /// operations begin from `pos`.
+    ///
+    /// Parameters:
+    /// - pos: Reference to the target FFI `TTD::Replay::Position` to set.
+    ///
+    /// Safety:
+    /// - Caller must ensure `pos` is valid for the current replay session; passing an invalid position may cause undefined behavior.
     pub fn set_position(&mut self, pos: &ffi::TTD::Replay::Position) {
         unsafe { self.inner.SetPosition(pos) };
     }
 
+    /// Return a reference to the cursor's current FFI `TTD::Replay::Position`.
+    ///
+    /// Returns:
+    /// - &ffi::TTD::Replay::Position: Reference to the current replay position.
+    ///
+    /// Safety:
+    /// - Returned reference aliases FFI-owned data; ensure the parent replay session outlives its use.
     pub fn get_position(&self) -> &ffi::TTD::Replay::Position {
         unsafe { std::mem::transmute(self.inner.GetPosition()) }
     }
@@ -311,6 +352,14 @@ impl<'a> ReplayCursor<'a> {
         unsafe { std::mem::transmute(self.inner.GetPreviousPosition()) }
     }
 
+    /// Return a reference to the current FFI `TTD::Replay::ThreadInfo` for the
+    /// cursor's thread context.
+    ///
+    /// Returns:
+    /// - &ffi::TTD::Replay::ThreadInfo: Reference to the thread info for the current replay position.
+    ///
+    /// Safety:
+    /// - Returned reference aliases FFI-owned data; ensure the parent replay session and cursor remain valid while the reference is used.
     pub fn get_thread_info(&self) -> &ffi::TTD::Replay::ThreadInfo {
         unsafe { std::mem::transmute(self.inner.GetThreadInfo()) }
     }
@@ -331,6 +380,15 @@ impl<'a> ReplayCursor<'a> {
         unsafe { self.inner.GetFramePointer() }
     }
 
+    /// Retrieve the register context for the cursor's current thread at its
+    /// current replay position, returning a borrowed RegisterContext that exposes
+    /// register values and architecture-specific state.
+    ///
+    /// Returns:
+    /// - Result<RegisterContext<'_>>
+    ///
+    /// Safety:
+    /// - May borrow FFI-owned register data; ensure the replay session and cursor outlive the returned context.
     pub fn get_thread_context(&self) -> Result<RegisterContext<'_>> {
         unsafe {
             let arch: ProcessorArchitecture = self.engine.system_info().System.ProcessorArchitecture.try_into()?;
@@ -354,6 +412,16 @@ impl<'a> ReplayCursor<'a> {
         }
     }
 
+    /// Retrieve the extended register context (including SIMD/vector and other
+    /// architecture-specific extended state) for the cursor's current thread at
+    /// its current replay position. Returns an owned ExtendedRegisterContext or an
+    /// error if retrieval fails.
+    ///
+    /// Returns:
+    /// - Result<ExtendedRegisterContext>
+    ///
+    /// Safety:
+    /// - May copy or borrow FFI-owned extended state; ensure the replay session and cursor remain valid during retrieval.
     pub fn get_thread_extended_context(&self) -> Result<ExtendedRegisterContext> {
         unsafe {
             let arch: ProcessorArchitecture = self.engine.system_info().System.ProcessorArchitecture.try_into()?;
@@ -365,6 +433,19 @@ impl<'a> ReplayCursor<'a> {
         }
     }
 
+    /// Read `size` bytes from the replay's current memory view at `address` and
+    /// return them as a Vec<u8>, reflecting memory as observed at the cursor's
+    /// current position.
+    ///
+    /// Parameters:
+    /// - address: Starting virtual address to read from.
+    /// - size: Number of bytes to read.
+    ///
+    /// Returns:
+    /// - Result<Vec<u8>>
+    ///
+    /// Safety:
+    /// - Calls into unsafe FFI; ensure the replay session and cursor remain valid and the requested address range is within the trace's captured memory.
     pub fn read_current_memory(&self, address: u64, size: usize) -> Result<Vec<u8>> {
         let mut buffer = vec![0; size];
         let res = unsafe { self.inner.QueryMemoryBuffer(address, buffer.as_mut_ptr(), buffer.len() as u64) };
@@ -558,7 +639,6 @@ pub enum ExtendedRegisterContext {
 }
 
 // endregion: RegisterContext / RegisterExtendedContext
-
 
 // region: ProcessorArchitecture
 

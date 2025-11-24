@@ -47,17 +47,6 @@ impl From<u8> for EventType {
     }
 }
 
-impl TryFrom<u8> for EventType {
-    fn try_from(value: u8) -> Result<EventType>{
-        let obj = EventType::from(value);
-        if obj == EventType::Invalid {
-            return Err(Error::ConversionError);
-        }
-
-        Ok(obj)
-    }
-}
-
 // endregion: EventType
 
 // region: DataAccessType/DataAccessMask
@@ -68,8 +57,8 @@ bitflags! {
     /// The underlying u8 stores the bit or value for each access type for compact
     /// FFI-friendly representation.
     pub struct DataAccessType: u8 {
-        const Read          = bindings::root::TTD::Replay::DataAccessType_Read;
-        const Write         =      bindings::root::TTD::Replay::DataAccessType_Write;
+        const Read          =     bindings::root::TTD::Replay::DataAccessType_Read;
+        const Write         =     bindings::root::TTD::Replay::DataAccessType_Write;
         const Execute       =     bindings::root::TTD::Replay::DataAccessType_Execute;
         const CodeFetch     =     bindings::root::TTD::Replay::DataAccessType_CodeFetch;
         const Overwrite     =     bindings::root::TTD::Replay::DataAccessType_Overwrite;
