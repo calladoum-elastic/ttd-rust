@@ -83,7 +83,7 @@ private:
 #define ok(fmt, ...)
 #define err(fmt, ...)
 #define Timer()
-#define ScopeedTimer(x)
+#define ScopedTimer(x)
 #endif // _DEBUG
 
 
@@ -280,7 +280,7 @@ TTD_FFI::Replay::ReplayCursor::ReplayForward(
 
     TTD::Replay::ICursorView::ReplayResult const res = [&]()
     {
-        auto t = ScopedTimer("Timer::ReplayForward1");
+        ScopedTimer("Timer::ReplayForward1");
         return this->m_Cursor->ReplayForward(limit);
     }();
 
@@ -288,7 +288,7 @@ TTD_FFI::Replay::ReplayCursor::ReplayForward(
         return -1;
 
     {
-        auto t = ScopedTimer("Timer::ReplayForward2");
+        ScopedTimer("Timer::ReplayForward2");
         ::memcpy(out, &res, sizeof(res));
     }
 
@@ -313,7 +313,7 @@ TTD_FFI::Replay::ReplayCursor::ReplayBackward(
 
     TTD::Replay::ICursorView::ReplayResult const res = [&]()
     {
-        auto t = ScopedTimer("Timer::ReplayBackward");
+        ScopedTimer("Timer::ReplayBackward");
         return this->m_Cursor->ReplayBackward(limit);
     }();
 
@@ -321,7 +321,7 @@ TTD_FFI::Replay::ReplayCursor::ReplayBackward(
         return -1;
 
     {
-        auto t = ScopedTimer("Timer::ReplayForward2");
+        ScopedTimer("Timer::ReplayForward2");
         ::memcpy(out, &res, sizeof(res));
     }
 

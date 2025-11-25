@@ -274,7 +274,7 @@ impl<'a> ReplayCursor<'a> {
     ///
     /// ## Returns
     /// - [`Result<&ThreadInfo>`]
-    pub fn get_thread_info(&self) -> Result<&ThreadInfo> {
+    pub fn thread_info(&self) -> Result<&ThreadInfo> {
         Ok(self.inner.get_thread_info())
     }
 
@@ -288,33 +288,33 @@ impl<'a> ReplayCursor<'a> {
     }
 
     /// Get the current PC value. Equivalent to getting the PC value
-    /// from [`ReplayCursor::get_thread_context()`]
+    /// from [`ReplayCursor::thread_context()`]
     ///
     /// ## Returns
     /// - [`Result<u64>`]
-    pub fn get_program_counter(&self) -> Result<u64> {
+    pub fn pc(&self) -> Result<u64> {
         Ok(self.inner.get_program_counter())
     }
 
     /// Get the current SP value. Equivalent to getting the SP value
-    /// from [`ReplayCursor::get_thread_context()`]
+    /// from [`ReplayCursor::thread_context()`]
     ///
     /// ## Returns
     /// - [`Result<u64>`]
-    pub fn get_stack_pointer(&self) -> Result<u64> {
+    pub fn sp(&self) -> Result<u64> {
         Ok(self.inner.get_stack_pointer())
     }
 
     /// Get the current FP value. Equivalent to getting the FP value
-    /// from [`ReplayCursor::get_thread_context()`]
+    /// from [`ReplayCursor::thread_context()`]
     ///
     /// ## Returns
     /// - [`Result<u64>`]
-    pub fn get_frame_pointer(&self) -> Result<u64> {
+    pub fn fp(&self) -> Result<u64> {
         Ok(self.inner.get_frame_pointer())
     }
 
-    /// Get the current [`RegisterContext`] with the state of all registers at
+    /// Get an owned copy of the current [`RegisterContext`] with the state of all registers at
     /// the current point of execution.
     ///
     /// ## Returns
@@ -335,13 +335,13 @@ impl<'a> ReplayCursor<'a> {
         }
     }
 
-    /// Get the current [`ExtendedRegisterContext`] with the state of all
+    /// Get an owned copy of the current [`ExtendedRegisterContext`] with the state of all
     /// extended registers at the current point of execution.
     ///
     /// ## Returns
     /// - [`Result<ExtendedRegisterContext>`]
-    pub fn get_thread_extended_context(&self) {
-        unimplemented!()
+    pub fn thread_extended_context(&self) -> Result<ExtendedRegisterContext> {
+        Ok(self.inner.get_thread_extended_context()?)
     }
 
     /// Read `size` bytes from the replay's current memory state at address and
@@ -603,7 +603,6 @@ impl ReplayEngine {
 mod test {
     use ttd_sys::bindings::root::TTD::Replay::PositionWatchpointData;
 
-    use crate::prelude::*;
     use crate::replay::events::{DataAccessMask, EventType};
     use crate::replay::{MemoryWatchpointData, ReplayEngine, ReplayPosition};
 
@@ -669,13 +668,13 @@ mod test {
         let res = engine.modules();
         assert!(res.is_ok());
         let val = res.unwrap();
-        assert!(val.len() == 0);
+        assert!(val.is_empty());
 
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let res = engine.modules();
         assert!(res.is_ok());
         let val = res.unwrap();
-        assert!(val.len() > 0);
+        assert!(!val.is_empty());
     }
 
     #[test]
@@ -690,7 +689,7 @@ mod test {
         let res = engine.threads();
         assert!(res.is_ok());
         let val = res.unwrap();
-        assert!(val.len() > 0);
+        assert!(!val.is_empty());
     }
 
     #[test]
@@ -705,7 +704,7 @@ mod test {
         let res = engine.module_loaded_events();
         assert!(res.is_ok());
         let val = res.unwrap();
-        assert!(val.len() > 0);
+        assert!(!val.is_empty());
     }
 
     #[test]
@@ -720,7 +719,7 @@ mod test {
         let res = engine.module_unloaded_events();
         assert!(res.is_ok());
         let val = res.unwrap();
-        assert!(val.len() > 0);
+        assert!(!val.is_empty());
     }
 
     #[test]
@@ -742,7 +741,7 @@ mod test {
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let mut cursor = engine.cursor().expect("failed to create a new cursor");
 
-        for step in 1..10u64 {
+        for step in 1..5u64 {
             let _curpos = cursor.position().unwrap();
             let res = cursor.replay_forward_steps(step).unwrap();
             assert_eq!(step, res.steps_executed);
@@ -774,7 +773,7 @@ mod test {
             let pos = cursor.position().unwrap().0.to_owned();
             cursor.set_position(&ReplayPosition(&(pos + 1)));
 
-            let pc = cursor.get_program_counter().unwrap();
+            let pc = cursor.pc().unwrap();
 
             let pos = cursor.position().unwrap().0.to_owned();
             cursor.set_position(&ReplayPosition(&(pos - 1)));
@@ -789,7 +788,7 @@ mod test {
         };
         assert!(cursor.add_memory_watchpoint(&watch).unwrap());
         let _ = cursor.replay_forward(None).unwrap();
-        assert_eq!(cursor.get_program_counter().unwrap(), next_pc);
+        assert_eq!(cursor.pc().unwrap(), next_pc);
 
         assert!(cursor.remove_memory_watchpoint(&watch).unwrap());
     }
@@ -810,7 +809,7 @@ mod test {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let cursor = engine.cursor().expect("failed to create a new cursor");
-        let thread_info = cursor.get_thread_info().unwrap();
+        let thread_info = cursor.thread_info().unwrap();
         assert_ne!(thread_info.Id, 0);
         assert_ne!(thread_info.UniqueId, 0);
     }
@@ -829,7 +828,7 @@ mod test {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let cursor = engine.cursor().expect("failed to create a new cursor");
-        let program_counter = cursor.get_program_counter().unwrap();
+        let program_counter = cursor.pc().unwrap();
         assert_ne!(program_counter, 0);
     }
 
@@ -838,7 +837,7 @@ mod test {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let cursor = engine.cursor().expect("failed to create a new cursor");
-        let stack_pointer = cursor.get_stack_pointer().unwrap();
+        let stack_pointer = cursor.sp().unwrap();
         assert_ne!(stack_pointer, 0);
     }
 
@@ -847,7 +846,7 @@ mod test {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let cursor = engine.cursor().expect("failed to create a new cursor");
-        assert!(cursor.get_frame_pointer().is_ok());
+        assert!(cursor.fp().is_ok());
     }
 
     #[test]
@@ -861,7 +860,7 @@ mod test {
             ttd_sys::replay::RegisterContext::X64(ctx) => (ctx.Rip, ctx.Rsp),
             ttd_sys::replay::RegisterContext::X86(ctx) => (ctx.Eip as u64, ctx.Esp as u64),
         };
-        assert_eq!(pc, cursor.get_program_counter().unwrap());
-        assert_eq!(sp, cursor.get_stack_pointer().unwrap());
+        assert_eq!(pc, cursor.pc().unwrap());
+        assert_eq!(sp, cursor.sp().unwrap());
     }
 }

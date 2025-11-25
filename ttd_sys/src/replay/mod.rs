@@ -532,11 +532,20 @@ impl<'a> ReplayCursor<'a> {
     pub fn get_thread_extended_context(&self) -> Result<ExtendedRegisterContext> {
         unsafe {
             let arch: ProcessorArchitecture = self.engine.system_info().System.ProcessorArchitecture.try_into()?;
-            match arch {
-                ProcessorArchitecture::X64 => Ok(ExtendedRegisterContext::X64(*self.inner.GetX64ExtendedRegisterContext())),
-                ProcessorArchitecture::X86 => Ok(ExtendedRegisterContext::X86(*self.inner.GetX86ExtendedRegisterContext())),
-                ProcessorArchitecture::ARM64 => Ok(ExtendedRegisterContext::ARM64(*self.inner.GetArm64ExtendedRegisterContext())),
-            }
+            Ok(match arch {
+                ProcessorArchitecture::X64 => {
+                    let _ref: &ffi::AVX_EXTENDED_CONTEXT = &*self.inner.GetX64ExtendedRegisterContext();
+                    ExtendedRegisterContext::X64(_ref.to_owned())
+                }
+                ProcessorArchitecture::X86 => {
+                    let _ref: &ffi::AVX_EXTENDED_CONTEXT = &*self.inner.GetX86ExtendedRegisterContext();
+                    ExtendedRegisterContext::X86(_ref.to_owned())
+                }
+                ProcessorArchitecture::ARM64 => {
+                    let _ref: &ffi::ARM64_NEON128 = &*self.inner.GetArm64ExtendedRegisterContext();
+                    ExtendedRegisterContext::ARM64(_ref.to_owned())
+                }
+            })
         }
     }
 
