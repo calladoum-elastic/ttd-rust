@@ -13,7 +13,6 @@ bitflags = "2.10.0"
 chrono = "0.4.42"
 derive_more = { version = "2.0.1", features = ["from", "debug", "display"] }
 log = { version = "0.4.28", features = ["std"] }
-windows = { version = "0.62.2" }
 
 [features]
 default = ["replay"]
@@ -23,5 +22,5 @@ replay = ["ttd_sys/replay"]
 record = []
 
 [lints.rust]
-unsafe_code = "allow"
-unused = { level = "allow", priority = -1 } # TODO (calladoum) for dev
+unsafe_code = "forbid"
+unused = { level = "warn", priority = -1 } # TODO (calladoum) for dev

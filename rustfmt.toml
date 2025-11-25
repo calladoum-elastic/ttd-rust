@@ -1,5 +1,10 @@
 edition = "2024"
+hard_tabs = false
+group_imports = "StdExternalCrate"
 reorder_imports = true
 reorder_modules = true
+imports_granularity = "Module"
 use_field_init_shorthand = true
 max_width = 160
+trailing_comma = "Vertical"
+struct_field_align_threshold = 20

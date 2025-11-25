@@ -28,6 +28,7 @@ jobs:
           rustup update
           rustup component add rustfmt
           rustup show
+          cargo install cargo-audit cargo-deny cargo-tarpaulin cargo-chef
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -84,8 +85,8 @@ jobs:
           name: ttd_${{ matrix.build }}_${{ matrix.os }}_${{ github.sha }}
           if-no-files-found: warn
           path: |
-            ./ttd_ffi_tests/tests/*.exe
-            ./ttd_ffi_tests/tests/*.pdb
+            ./ttd_ffi/install/ttd_ffi_tests/tests/*.exe
+            ./ttd_ffi/install/ttd_ffi_tests/tests/*.pdb
             ./ttd_ffi/install/*.exe
             ./ttd_ffi/install/*.pdb
             ./TTD*.dll
