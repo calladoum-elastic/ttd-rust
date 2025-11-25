@@ -20,5 +20,3 @@ lto = true
 [profile.release-with-debuginfo]
 inherits = "release"
 debug = true
-
-[workspace.dependencies]

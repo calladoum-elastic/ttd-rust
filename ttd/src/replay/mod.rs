@@ -18,7 +18,7 @@ pub type Amd64ExtendedContext = ttd_sys::bindings::root::AVX_EXTENDED_CONTEXT;
 
 pub type ReplayModule = ttd_sys::replay::ReplayModule;
 pub type ReplayFlags = ttd_sys::replay::ReplayFlags;
-pub type RegisterContext<'a> = ttd_sys::replay::RegisterContext<'a>;
+pub type RegisterContext = ttd_sys::replay::RegisterContext;
 pub type ExtendedRegisterContext = ttd_sys::replay::ExtendedRegisterContext;
 
 pub type SequenceId = ttd_sys::bindings::root::TTD::SequenceId;
@@ -257,7 +257,7 @@ impl<'a> ReplayCursor<'a> {
     ///
     /// ## Returns
     /// - [`Result<ReplayPosition>`]
-    pub fn get_position(&self) -> Result<ReplayPosition<'_>> {
+    pub fn position(&self) -> Result<ReplayPosition<'_>> {
         Ok(ReplayPosition(self.inner.get_position()))
     }
 
@@ -265,7 +265,7 @@ impl<'a> ReplayCursor<'a> {
     ///
     /// ## Returns
     /// - [`Result<ReplayPosition>`]
-    pub fn get_previous_position(&mut self) -> Result<ReplayPosition<'_>> {
+    pub fn previous_position(&self) -> Result<ReplayPosition<'_>> {
         Ok(ReplayPosition(self.inner.get_previous_position()))
     }
 
@@ -319,7 +319,7 @@ impl<'a> ReplayCursor<'a> {
     ///
     /// ## Returns
     /// - [`Result<RegisterContext>`]
-    pub fn get_thread_context(&self) -> Result<RegisterContext<'_>> {
+    pub fn thread_context(&self) -> Result<RegisterContext> {
         Ok(self.inner.get_thread_context()?)
     }
 
@@ -328,7 +328,7 @@ impl<'a> ReplayCursor<'a> {
     /// ## Returns
     /// - [`Result<usize>`]
     pub fn pointer_size(&self) -> Result<usize> {
-        match self.get_thread_context()? {
+        match self.thread_context()? {
             ttd_sys::replay::RegisterContext::X64(_) => Ok(8),
             ttd_sys::replay::RegisterContext::X86(_) => Ok(4),
             ttd_sys::replay::RegisterContext::ARM64(_) => Ok(8),
@@ -525,26 +525,19 @@ impl ReplayEngine {
         self.system_info()?.pid()
     }
 
-    pub fn get_module_count(&self) -> Result<usize> {
-        Ok(self.inner.get_module_count())
-    }
-
     /// Return the list of modules observed in the loaded TTD trace as a vector of
     /// ReplayModule entries. Each element contains metadata (base address, size,
     /// path, version/timestamp) for a module recorded during execution.
     ///
     /// ## Returns
     /// - `Result<Vec<ReplayModule>>`
-    pub fn get_module_list(&self) -> Result<Vec<ReplayModule>> {
-        let mut res = Vec::<ReplayModule>::with_capacity(self.get_module_count()?);
+    pub fn modules(&self) -> Result<Vec<ReplayModule>> {
+        let cnt = self.inner.get_thread_count();
+        let mut res = Vec::<ReplayModule>::with_capacity(cnt);
         for module in self.inner.get_module_list().iter() {
             res.push(module.try_into()?);
         }
         Ok(res)
-    }
-
-    pub fn get_thread_count(&self) -> Result<usize> {
-        Ok(self.inner.get_thread_count())
     }
 
     /// Return the list of threads observed in the loaded TTD trace as a vector of
@@ -554,12 +547,8 @@ impl ReplayEngine {
     ///
     /// ## Returns
     /// - `Result<Vec<ThreadInfo>>`
-    pub fn get_thread_list(&self) -> Result<Vec<ThreadInfo>> {
+    pub fn threads(&self) -> Result<Vec<ThreadInfo>> {
         Ok(self.inner.get_thread_list())
-    }
-
-    pub fn get_module_loaded_event_count(&self) -> Result<usize> {
-        Ok(self.inner.get_module_loaded_event_count())
     }
 
     /// Return the list of module-loaded events recorded in the trace as a vector
@@ -568,34 +557,28 @@ impl ReplayEngine {
     ///
     /// ## Returns
     /// - `Result<Vec<events::ModuleLoaded>>`
-    pub fn get_module_loaded_event_list(&self) -> Result<Vec<events::ModuleLoaded>> {
-        let mut res = Vec::<events::ModuleLoaded>::with_capacity(self.get_module_loaded_event_count()?);
+    pub fn module_loaded_events(&self) -> Result<Vec<events::ModuleLoaded>> {
+        let cnt = self.inner.get_module_loaded_event_count();
+        let mut res = Vec::<events::ModuleLoaded>::with_capacity(cnt);
         for module in self.inner.get_module_loaded_event_list().iter() {
             res.push(module.try_into()?);
         }
         Ok(res)
     }
 
-    pub fn get_module_unloaded_event_count(&self) -> Result<usize> {
-        Ok(self.inner.get_module_unloaded_event_count())
-    }
-
     /// Return the list of module-unloaded events recorded in the trace as a
-    /// vector of events::ModuleUnloaded. Each entry represents a module unload
+    /// vector of [`events::ModuleUnloaded`]. Each entry represents a module unload
     /// occurrence with its replay position and associated module metadata.
     ///
     /// ## Returns
     /// - `Result<Vec<events::ModuleUnloaded>>`
-    pub fn get_module_unloaded_event_list(&self) -> Result<Vec<events::ModuleUnloaded>> {
-        let mut res = Vec::<events::ModuleUnloaded>::with_capacity(self.get_module_unloaded_event_count()?);
+    pub fn module_unloaded_events(&self) -> Result<Vec<events::ModuleUnloaded>> {
+        let cnt = self.inner.get_module_unloaded_event_count();
+        let mut res = Vec::<events::ModuleUnloaded>::with_capacity(cnt);
         for module in self.inner.get_module_unloaded_event_list().iter() {
             res.push(module.try_into()?);
         }
         Ok(res)
-    }
-
-    pub fn get_exception_event_count(&self) -> Result<usize> {
-        Ok(self.inner.get_exception_event_count())
     }
 
     /// Return the list of exception events recorded in the trace as a vector of
@@ -605,32 +588,13 @@ impl ReplayEngine {
     ///
     /// ## Returns
     /// - `Result<Vec<events::Exception>>`
-    pub fn get_exception_event_list(&self) -> Result<Vec<events::Exception>> {
-        let mut res = Vec::<events::Exception>::with_capacity(self.get_exception_event_count()?);
+    pub fn exception_events(&self) -> Result<Vec<events::Exception>> {
+        let cnt = self.inner.get_exception_event_count();
+        let mut res = Vec::<events::Exception>::with_capacity(cnt);
         for module in self.inner.get_exception_event_list().iter() {
             res.push(module.try_into()?);
         }
         Ok(res)
-    }
-
-    /// Lookup the base (load) virtual address for a module by name in the loaded
-    /// trace. Returns the module's base address if found; useful for resolving
-    /// symbols or converting module-relative offsets to absolute addresses.
-    ///
-    /// Parameters:
-    /// - module_name: Name or filename of the module to query (case-sensitive or as recorded).
-    ///
-    /// ## Returns
-    /// - `Result<u64>`
-    pub fn get_module_base_address(&self, module_name: &str) -> Result<u64> {
-        let mod_lower = module_name.to_lowercase();
-        let modules = self.get_module_loaded_event_list()?;
-        let matches: Vec<&events::ModuleLoaded> = modules.iter().filter(|e| e.module.name.to_lowercase().ends_with(&mod_lower)).collect();
-        if matches.len() > 1 {
-            return Err(Error::DataMismatch);
-        }
-
-        Ok(matches.first().ok_or(Error::NotFound)?.module.address)
     }
 }
 // endregion: TTD Replay Engine
@@ -658,28 +622,28 @@ mod test {
 
         for _i in 1..10 {
             let mut cursor = engine.cursor().unwrap();
-            let curpos = cursor.get_position().unwrap();
+            let curpos = cursor.position().unwrap();
             assert_eq!(*curpos.0, engine.get_lifetime().Min);
 
             let new_pos = ReplayPosition(&engine.get_lifetime().Max);
             cursor.set_position(&new_pos);
-            let curpos = cursor.get_position().unwrap();
+            let curpos = cursor.position().unwrap();
             assert_eq!(*curpos.0, engine.get_lifetime().Max);
 
             let new_pos = ReplayPosition(&engine.get_lifetime().Min);
             cursor.set_position(&new_pos);
-            let curpos = cursor.get_position().unwrap();
+            let curpos = cursor.position().unwrap();
             assert_eq!(*curpos.0, engine.get_lifetime().Min);
         }
 
         for _i in 1..10 {
             let mut cursor = engine.cursor().unwrap();
-            assert_eq!(*cursor.get_position().unwrap().0, engine.get_lifetime().Min);
+            assert_eq!(*cursor.position().unwrap().0, engine.get_lifetime().Min);
 
             let res = cursor.replay_forward(None).unwrap();
             assert_eq!(res.stop_reason, EventType::Process);
             assert_ne!(res.instructions_executed, 0);
-            assert_eq!(*cursor.get_previous_position().unwrap().0, engine.get_lifetime().Max);
+            assert_eq!(*cursor.previous_position().unwrap().0, engine.get_lifetime().Max);
 
             let res = cursor.replay_backward(None).unwrap();
             assert_eq!(res.stop_reason, EventType::Process);
@@ -700,34 +664,15 @@ mod test {
     }
 
     #[test]
-    fn test_get_module_base_address() {
-        let engine = ReplayEngine::new().expect("failed to create a new replayer");
-        assert!(engine.load(get_test_trace().as_path()).is_ok());
-
-        let testcases = ["ntdll.dll", "kernel32.dll", "kernelbase.dll"];
-
-        // valid
-        for tc in testcases {
-            let res = engine.get_module_base_address(tc);
-            assert!(res.is_ok_and(|v| v != 0));
-        }
-
-        // invalid
-        let res = engine.get_module_base_address("___fooobar__.dll");
-        assert!(res.is_err());
-        assert!(matches!(res.unwrap_err(), Error::NotFound));
-    }
-
-    #[test]
     fn test_get_module_list() {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
-        let res = engine.get_module_list();
+        let res = engine.modules();
         assert!(res.is_ok());
         let val = res.unwrap();
         assert!(val.len() == 0);
 
         assert!(engine.load(get_test_trace().as_path()).is_ok());
-        let res = engine.get_module_list();
+        let res = engine.modules();
         assert!(res.is_ok());
         let val = res.unwrap();
         assert!(val.len() > 0);
@@ -736,13 +681,13 @@ mod test {
     #[test]
     fn test_get_thread_list() {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
-        let res = engine.get_thread_list();
+        let res = engine.threads();
         assert!(res.is_ok());
         let val = res.unwrap();
         assert!(val.len() == 0);
 
         assert!(engine.load(get_test_trace().as_path()).is_ok());
-        let res = engine.get_thread_list();
+        let res = engine.threads();
         assert!(res.is_ok());
         let val = res.unwrap();
         assert!(val.len() > 0);
@@ -751,13 +696,13 @@ mod test {
     #[test]
     fn test_get_module_loaded_event_list() {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
-        let res = engine.get_module_loaded_event_list();
+        let res = engine.module_loaded_events();
         assert!(res.is_ok());
         let val = res.unwrap();
         assert!(val.len() == 0);
 
         assert!(engine.load(get_test_trace().as_path()).is_ok());
-        let res = engine.get_module_loaded_event_list();
+        let res = engine.module_loaded_events();
         assert!(res.is_ok());
         let val = res.unwrap();
         assert!(val.len() > 0);
@@ -766,13 +711,13 @@ mod test {
     #[test]
     fn test_get_module_unloaded_event_list() {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
-        let res = engine.get_module_unloaded_event_list();
+        let res = engine.module_unloaded_events();
         assert!(res.is_ok());
         let val = res.unwrap();
         assert!(val.len() == 0);
 
         assert!(engine.load(get_test_trace().as_path()).is_ok());
-        let res = engine.get_module_unloaded_event_list();
+        let res = engine.module_unloaded_events();
         assert!(res.is_ok());
         let val = res.unwrap();
         assert!(val.len() > 0);
@@ -781,13 +726,13 @@ mod test {
     #[test]
     fn test_get_exception_event_list() {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
-        let res = engine.get_exception_event_list();
+        let res = engine.exception_events();
         assert!(res.is_ok());
         let val = res.unwrap();
         assert!(val.len() == 0);
 
         assert!(engine.load(get_test_trace().as_path()).is_ok());
-        let res = engine.get_exception_event_list();
+        let res = engine.exception_events();
         assert!(res.is_ok());
     }
 
@@ -798,7 +743,7 @@ mod test {
         let mut cursor = engine.cursor().expect("failed to create a new cursor");
 
         for step in 1..10u64 {
-            let _curpos = cursor.get_position().unwrap();
+            let _curpos = cursor.position().unwrap();
             let res = cursor.replay_forward_steps(step).unwrap();
             assert_eq!(step, res.steps_executed);
             assert_eq!(res.stop_reason, EventType::Position);
@@ -826,12 +771,12 @@ mod test {
         let mut cursor = engine.cursor().expect("failed to create a new cursor");
 
         let next_pc = {
-            let pos = cursor.get_position().unwrap().0.to_owned();
+            let pos = cursor.position().unwrap().0.to_owned();
             cursor.set_position(&ReplayPosition(&(pos + 1)));
 
             let pc = cursor.get_program_counter().unwrap();
 
-            let pos = cursor.get_position().unwrap().0.to_owned();
+            let pos = cursor.position().unwrap().0.to_owned();
             cursor.set_position(&ReplayPosition(&(pos - 1)));
             pc
         };
@@ -910,7 +855,7 @@ mod test {
         let engine = ReplayEngine::new().expect("failed to create a new replay engine");
         assert!(engine.load(get_test_trace().as_path()).is_ok());
         let cursor = engine.cursor().expect("failed to create a new cursor");
-        let thread_context = cursor.get_thread_context().unwrap();
+        let thread_context = cursor.thread_context().unwrap();
         let (pc, sp) = match thread_context {
             ttd_sys::replay::RegisterContext::ARM64(ctx) => (ctx.Pc, ctx.Sp),
             ttd_sys::replay::RegisterContext::X64(ctx) => (ctx.Rip, ctx.Rsp),

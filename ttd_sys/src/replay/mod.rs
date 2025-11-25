@@ -457,7 +457,7 @@ impl<'a> ReplayCursor<'a> {
         unsafe { &*self.inner.GetPosition() }
     }
 
-    pub fn get_previous_position(&mut self) -> &ffi::TTD::Replay::Position {
+    pub fn get_previous_position(&self) -> &ffi::TTD::Replay::Position {
         unsafe { &*self.inner.GetPreviousPosition() }
     }
 
@@ -499,24 +499,21 @@ impl<'a> ReplayCursor<'a> {
     ///
     /// ## Safety
     /// - May borrow FFI-owned register data; ensure the replay session and cursor outlive the returned context.
-    pub fn get_thread_context(&self) -> Result<RegisterContext<'_>> {
+    pub fn get_thread_context(&self) -> Result<RegisterContext> {
         unsafe {
             let arch: ProcessorArchitecture = self.engine.system_info().System.ProcessorArchitecture.try_into()?;
             Ok(match arch {
                 ProcessorArchitecture::X64 => {
-                    let _ptr: *mut ffi::AMD64_CONTEXT = self.inner.GetX64RegisterContext();
-                    let _ref: &ffi::AMD64_CONTEXT = &*_ptr;
-                    RegisterContext::X64(_ref)
+                    let _ref: &ffi::AMD64_CONTEXT = &*self.inner.GetX64RegisterContext();
+                    RegisterContext::X64(_ref.to_owned())
                 }
                 ProcessorArchitecture::X86 => {
-                    let _ptr: *mut ffi::X86_NT5_CONTEXT = self.inner.GetX86RegisterContext();
-                    let _ref: &ffi::X86_NT5_CONTEXT = &*_ptr;
-                    RegisterContext::X86(_ref)
+                    let _ref: &ffi::X86_NT5_CONTEXT = &*self.inner.GetX86RegisterContext();
+                    RegisterContext::X86(_ref.to_owned())
                 }
                 ProcessorArchitecture::ARM64 => {
-                    let _ptr: *mut ffi::ARM64_CONTEXT = self.inner.GetArm64RegisterContext();
-                    let _ref: &ffi::ARM64_CONTEXT = &*_ptr;
-                    RegisterContext::ARM64(_ref)
+                    let _ref: &ffi::ARM64_CONTEXT = &*self.inner.GetArm64RegisterContext();
+                    RegisterContext::ARM64(_ref.to_owned())
                 }
             })
         }
@@ -735,13 +732,13 @@ impl TryFrom<&crate::bindings::root::TTD::Replay::Module> for ReplayModule {
 // region: RegisterContext / RegisterExtendedContext
 
 #[allow(clippy::large_enum_variant)]
-pub enum RegisterContext<'a> {
-    ARM64(&'a ffi::ARM64_CONTEXT),
-    X64(&'a ffi::AMD64_CONTEXT),
-    X86(&'a ffi::X86_NT5_CONTEXT),
+pub enum RegisterContext {
+    ARM64(ffi::ARM64_CONTEXT),
+    X64(ffi::AMD64_CONTEXT),
+    X86(ffi::X86_NT5_CONTEXT),
 }
 
-impl<'a> std::fmt::Display for RegisterContext<'a> {
+impl std::fmt::Display for RegisterContext {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             RegisterContext::X64(ctx) => {

@@ -156,22 +156,22 @@ public:
     u64
     GetFramePointer() const;
 
-    X86_NT5_CONTEXT*
+    const X86_NT5_CONTEXT*
     GetX86RegisterContext() const;
 
-    AVX_EXTENDED_CONTEXT*
+    const AVX_EXTENDED_CONTEXT*
     GetX86ExtendedRegisterContext() const;
 
-    AMD64_CONTEXT*
+    const AMD64_CONTEXT*
     GetX64RegisterContext() const;
 
-    AVX_EXTENDED_CONTEXT*
+    const AVX_EXTENDED_CONTEXT*
     GetX64ExtendedRegisterContext() const;
 
-    ARM64_CONTEXT*
+    const ARM64_CONTEXT*
     GetArm64RegisterContext() const;
 
-    ARM64_NEON128*
+    const ARM64_NEON128*
     GetArm64ExtendedRegisterContext() const;
 
     void

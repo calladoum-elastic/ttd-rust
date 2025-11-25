@@ -5,20 +5,14 @@
 // is being executed, and we print the disassembled payload.
 //
 
-use std::ops::Add;
-
-use anyhow::{Result, bail};
+use anyhow::{Ok, Result, bail};
+use extfmt::{AsHexdump, hexdump};
 use log::{debug, info, warn};
 
 use ttd::replay::events::{DataAccessMask, EventType};
 use ttd::replay::{MemoryWatchpointData, RegisterContext, ReplayEngine, ReplayPosition};
 
-fn find_export(_replay: &ReplayEngine, _module_name: &str, _export_name: &str) -> Result<u64> {
-    Ok(0x0104290)
-}
-
 fn main() -> Result<()> {
-    // region: Preamble boiler plate
     env_logger::Builder::new().filter_level(log::LevelFilter::max()).init();
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
@@ -26,7 +20,6 @@ fn main() -> Result<()> {
     }
 
     let now = std::time::Instant::now();
-    // endregion: Preamble boiler plate
 
     let replay = ReplayEngine::new()?;
     let trace_path = std::path::Path::new(args[1].as_str());
@@ -36,9 +29,36 @@ fn main() -> Result<()> {
     //
     // 1. Locate kernel32!VirtualProtect
     //
-    let kernelbase_base_address = replay.get_module_base_address("kernelbase.dll")?;
-    let virtualprotect_address = kernelbase_base_address.add(find_export(&replay, "kernelbase", "VirtualProtect")?);
-    debug!("Watching calls to kernelbase!VirtualProtect(RWX) (at {:#x})", virtualprotect_address);
+    let find_load_event_for_module = |mod_lower: &str| {
+        Ok(replay
+            .module_loaded_events()?
+            .into_iter()
+            .find(|e| e.module.name.to_lowercase().ends_with(&mod_lower))
+            .ok_or(ttd::error::Error::NotFound)?)
+    };
+
+    let find_export = |module: &[u8], export_name: &str| {
+        let pe = pelite::PeView::from_bytes(module)?;
+        match pe.get_export_by_name(export_name)? {
+            pelite::pe::exports::Export::Symbol(value) => Ok(*value),
+            pelite::pe::exports::Export::Forward(_) => todo!(),
+        }
+    };
+
+    debug!("looking for kernelbase!VirtualProtect()");
+    let virtualprotect_address = {
+        let event = find_load_event_for_module("kernelbase.dll")?;
+        let mut cur = replay.cursor()?;
+        cur.set_position(&(ReplayPosition::from(&event.position)));
+        let data = cur.read_memory(event.module.address, event.module.size as usize)?;
+        debug!("data@{:#x}\n{}", event.module.address, hexdump!(&data[..64]));
+        let rva = find_export(&data, "VirtualProtect")? as u64;
+        debug!("rva={:#x}", rva);
+        event.module.address + rva
+    };
+
+    assert_eq!(virtualprotect_address, 0x77124290);
+    info!("Watching calls to kernelbase!VirtualProtect(RWX) (at {:#x})", virtualprotect_address);
 
     //
     // 2. Set a (execute) memory breakpoint to kernelbase!virtualprotect
@@ -53,13 +73,13 @@ fn main() -> Result<()> {
     if !cursor.add_memory_watchpoint(&watch_point)? {
         bail!("Failed to set watchpoint at {:#x}", virtualprotect_address);
     }
-    info!("Watchpoint for execution at {:#x} set", virtualprotect_address);
+    info!("Watching for execution at {:#x} set", virtualprotect_address);
 
     let read_u64_at = |addr: u32, pos: &ReplayPosition| -> Result<u32> {
-        let mut cursor = replay.cursor()?;
-        cursor.set_position(pos);
-        let mem = cursor.read_memory(addr.into(), cursor.pointer_size()?)?;
-        Ok(u32::from_le_bytes(mem.to_owned().try_into().unwrap()))
+        let mut _cur = replay.cursor()?;
+        _cur.set_position(pos);
+        let data = _cur.read_memory(addr.into(), _cur.pointer_size()?)?;
+        Ok(u32::from_le_bytes(data.to_owned().try_into().unwrap()))
     };
 
     let fmt = zydis::Formatter::intel();
@@ -74,30 +94,32 @@ fn main() -> Result<()> {
             break;
         }
         debug!("fwdreplay reason: {}, executed {} insns", result.stop_reason, result.instructions_executed);
-        debug!("context at {}:\n{}", &cursor.get_position()?, &cursor.get_thread_context()?);
+
+        let ctx = cursor.thread_context()?;
+        let curpos = cursor.position()?;
+        debug!("context at {}:\n{}", &curpos, &ctx);
 
         //
         // 4. Inspect the `flNewProtect` argument, looking PAGE_EXECUTE_READWRITE
         //
         const PAGE_EXECUTE_READWRITE: u32 = 0x40;
 
-        let (arg0, arg1, arg2, arg3) = match cursor.get_thread_context()? {
-            RegisterContext::X86(ctx) => {
-                let curpos = cursor.get_position()?;
-                (
-                    read_u64_at(ctx.Esp + 0x04, &curpos)?,
-                    read_u64_at(ctx.Esp + 0x08, &curpos)?,
-                    read_u64_at(ctx.Esp + 0x0c, &curpos)?,
-                    read_u64_at(ctx.Esp + 0x10, &curpos)?,
-                )
-            }
+        let (arg0, arg1, arg2, arg3) = match ctx {
+            RegisterContext::X86(x86_ctx) => (
+                read_u64_at(x86_ctx.Esp + 0x04, &curpos)?,
+                read_u64_at(x86_ctx.Esp + 0x08, &curpos)?,
+                read_u64_at(x86_ctx.Esp + 0x0c, &curpos)?,
+                read_u64_at(x86_ctx.Esp + 0x10, &curpos)?,
+            ),
             _ => unimplemented!(),
         };
 
         if arg2 != PAGE_EXECUTE_READWRITE {
+            debug!("kernelbase!VirtualProtect({arg0:x}, {arg1:x}, {arg2:x}, {arg3:x}) not RWX, skipping...");
             continue;
         }
-        debug!("kernelbase!VirtualProtect({arg0:x}, {arg1:x}, {arg2:x}, {arg3:x}) found, setting watch point");
+
+        info!("kernelbase!VirtualProtect({arg0:x}, {arg1:x}, {arg2:x}, {arg3:x}) found, setting watch point");
 
         //
         // 5. Set an execution watchpoint on execution to that address
@@ -113,7 +135,7 @@ fn main() -> Result<()> {
 
         cursor.replay_forward(None)?;
 
-        let ctx = match cursor.get_thread_context()? {
+        let ctx = match cursor.thread_context()? {
             RegisterContext::X86(ctx) => ctx,
             _ => unimplemented!(),
         };
@@ -139,7 +161,7 @@ fn main() -> Result<()> {
         break;
     }
 
-    debug!("end position {}", &cursor.get_position()?);
+    debug!("end position {}", &cursor.position()?);
     debug!("done in {:.4?}", now.elapsed());
     Ok(())
 }
