@@ -1,0 +1,50 @@
+name: Bug Report
+description: File a bug report.
+title: "[Bug] "
+labels: ["bug", "triage"]
+body:
+- type: markdown
+  id: md_welcome
+  attributes:
+    value: |
+      Complete this form is for reporting bugs.
+- type: input
+  id: os_info
+  attributes:
+    label: Operating System
+    description: What OS are you using? Copy/paste the output of `lsb_release -a` or equivalent/
+    placeholder: "e.g., Arch Linux, FreeBSD"
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Describe your issue in details
+    value: |
+      Provide a step-by-step to reproduce your issue. What went wrong? What was expected?
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Minimalist test case
+    value: |
+      Use this field for a minimal code to compile and spot the issue:
+      ```
+      // compile with gcc -fPIE -pic -o my_issue.out my_issue.c
+      int main(){ return 0; }
+      ```
+      You can also provide a Dockerfile if you prefer
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Additional context?
+    description: |
+      Any additional information that can be used for reproducing the bug?
+      You can copy/paste those information in the field.
+    value: |
+      - Screenshots
+      - Callstack
+      - Coredumps
+      - If possible and useful, please upload the binary
+  validations:
+    required: false
