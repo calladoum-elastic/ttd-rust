@@ -17,9 +17,8 @@ Key features already implemented are:
 
 #### Get trace info
 
-```rust
+```rust no_run
 use ttd::replay::ReplayEngine;
-use ttd::replay::events::EventType;
 
 fn main() -> Result<(), ttd::error::Error> {
   // Open a recording
@@ -36,7 +35,7 @@ fn main() -> Result<(), ttd::error::Error> {
 
 #### Navigate in a trace
 
-```rust
+```rust no_run
 use ttd::replay::ReplayEngine;
 use ttd::replay::events::EventType;
 
@@ -61,9 +60,8 @@ fn main() -> Result<(), ttd::error::Error> {
 
 #### Accessing memory
 
-```rust
+```rust no_run
 use ttd::replay::ReplayEngine;
-use ttd::replay::events::EventType;
 
 fn main() -> Result<(), ttd::error::Error> {
   // Open a recording
@@ -73,7 +71,7 @@ fn main() -> Result<(), ttd::error::Error> {
   let cursor = engine.cursor()?;
 
   // Inspect memory state at a specific point
-  let memory_dump = cursor.memory_at(123456)?;
+  let memory_dump = cursor.read_memory(0x12345678, 16)?;
   println!("Memory snapshot: {:?}", memory_dump);
 
   Ok(())

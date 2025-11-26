@@ -19,13 +19,71 @@
 // clang-format on
 
 #ifdef _DEBUG
-#define ok(fmt, ...) ::wprintf("[+] " fmt L"\n", __VA_ARGS__)
-#define err(fmt, ...) ::wprintf("[-] " fmt L"\n", __VA_ARGS__)
-#define dbg(fmt, ...) ::wprintf("[*] %S " fmt L"\n", __FUNCTION__, __VA_ARGS__)
+#define ok(fmt, ...) ::wprintf(L"[+] " fmt L"\n", __VA_ARGS__)
+#define err(fmt, ...) ::wprintf(L"[-] " fmt L"\n", __VA_ARGS__)
+#define dbg(fmt, ...) ::wprintf(L"[*] %S " fmt L"\n", __FUNCTION__, __VA_ARGS__)
+
+#include <chrono>
+#include <print>
+#include <string>
+#include <string_view>
+
+class Timer
+{
+public:
+    Timer()
+    {
+        Reset();
+    }
+    void
+    Reset()
+    {
+        m_Start = std::chrono::high_resolution_clock::now();
+    }
+    float
+    Elapsed() const
+    {
+        return std::chrono::duration_cast<std::chrono::microseconds>(
+                   std::chrono::high_resolution_clock::now() - m_Start)
+                   .count() *
+               0.001f * 0.001f;
+    }
+    float
+    ElapsedMillis() const
+    {
+        return std::chrono::duration_cast<std::chrono::microseconds>(
+                   std::chrono::high_resolution_clock::now() - m_Start)
+                   .count() *
+               0.001f;
+    }
+
+private:
+    std::chrono::time_point<std::chrono::high_resolution_clock> m_Start;
+};
+
+class ScopedTimer
+{
+public:
+    ScopedTimer(std::string_view name) : m_Name {name}, m_Timer {}
+    {
+    }
+
+    ~ScopedTimer()
+    {
+        dbg(L"%S - %.8fms", m_Name.c_str(), m_Timer.ElapsedMillis());
+    }
+
+private:
+    Timer m_Timer;
+    std::string m_Name;
+};
+
 #else
 #define dbg(fmt, ...)
 #define ok(fmt, ...)
 #define err(fmt, ...)
+#define Timer()
+#define ScopedTimer(x)
 #endif // _DEBUG
 
 
@@ -219,11 +277,21 @@ TTD_FFI::Replay::ReplayCursor::ReplayForward(
     dbg(L"Forward replaying from %s to %s", from.data(), to.data());
 #endif // _DEBUG
 
-    TTD::Replay::ICursorView::ReplayResult const res = this->m_Cursor->ReplayForward(limit);
+
+    TTD::Replay::ICursorView::ReplayResult const res = [&]()
+    {
+        ScopedTimer("Timer::ReplayForward1");
+        return this->m_Cursor->ReplayForward(limit);
+    }();
+
     if ( res.StopReason == TTD::Replay::EventType::Invalid )
         return -1;
 
-    ::memcpy(out, &res, sizeof(res));
+    {
+        ScopedTimer("Timer::ReplayForward2");
+        ::memcpy(out, &res, sizeof(res));
+    }
+
     return 0;
 }
 
@@ -243,11 +311,20 @@ TTD_FFI::Replay::ReplayCursor::ReplayBackward(
     dbg(L"Backward replaying from %s to %s", from.data(), to.data());
 #endif // _DEBUG
 
-    TTD::Replay::ICursorView::ReplayResult const res = this->m_Cursor->ReplayBackward(limit);
+    TTD::Replay::ICursorView::ReplayResult const res = [&]()
+    {
+        ScopedTimer("Timer::ReplayBackward");
+        return this->m_Cursor->ReplayBackward(limit);
+    }();
+
     if ( res.StopReason == TTD::Replay::EventType::Invalid )
         return -1;
 
-    ::memcpy(out, &res, sizeof(res));
+    {
+        ScopedTimer("Timer::ReplayForward2");
+        ::memcpy(out, &res, sizeof(res));
+    }
+
     return 0;
 }
 
@@ -320,40 +397,40 @@ TTD_FFI::Replay::ReplayCursor::GetFramePointer() const
     return (u64)this->m_Cursor->GetFramePointer();
 }
 
-X86_NT5_CONTEXT*
+const X86_NT5_CONTEXT*
 TTD_FFI::Replay::ReplayCursor::GetX86RegisterContext() const
 {
     return reinterpret_cast<X86_NT5_CONTEXT*>(this->m_Cursor->GetCrossPlatformContext().Data);
 }
 
-AVX_EXTENDED_CONTEXT*
+const AVX_EXTENDED_CONTEXT*
 TTD_FFI::Replay::ReplayCursor::GetX86ExtendedRegisterContext() const
 {
-    return reinterpret_cast<AVX_EXTENDED_CONTEXT*>(this->m_Cursor->GetCrossPlatformContext().Data);
+    return reinterpret_cast<AVX_EXTENDED_CONTEXT*>(this->m_Cursor->GetAvxExtendedContext().Data);
 }
 
-AMD64_CONTEXT*
+const AMD64_CONTEXT*
 TTD_FFI::Replay::ReplayCursor::GetX64RegisterContext() const
 {
     return reinterpret_cast<AMD64_CONTEXT*>(this->m_Cursor->GetCrossPlatformContext().Data);
 }
 
-AVX_EXTENDED_CONTEXT*
+const AVX_EXTENDED_CONTEXT*
 TTD_FFI::Replay::ReplayCursor::GetX64ExtendedRegisterContext() const
 {
-    return reinterpret_cast<AVX_EXTENDED_CONTEXT*>(this->m_Cursor->GetCrossPlatformContext().Data);
+    return reinterpret_cast<AVX_EXTENDED_CONTEXT*>(this->m_Cursor->GetAvxExtendedContext().Data);
 }
 
-ARM64_CONTEXT*
+const ARM64_CONTEXT*
 TTD_FFI::Replay::ReplayCursor::GetArm64RegisterContext() const
 {
     return reinterpret_cast<ARM64_CONTEXT*>(this->m_Cursor->GetCrossPlatformContext().Data);
 }
 
-ARM64_NEON128*
+const ARM64_NEON128*
 TTD_FFI::Replay::ReplayCursor::GetArm64ExtendedRegisterContext() const
 {
-    return reinterpret_cast<ARM64_NEON128*>(this->m_Cursor->GetCrossPlatformContext().Data);
+    return reinterpret_cast<ARM64_NEON128*>(this->m_Cursor->GetAvxExtendedContext().Data);
 }
 
 

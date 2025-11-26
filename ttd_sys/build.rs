@@ -41,7 +41,11 @@ const TTD_DLLS: [&str; 7] = [
     "TTDReplayCPU.dll",
 ];
 
-const NB_CPU: usize = 4;
+const NB_CPU: usize = 2;
+
+fn get_nb_cpu() -> String {
+    std::env::var("NUMBER_OF_PROCESSORS").unwrap_or(NB_CPU.to_string())
+}
 
 fn get_nuget_pkg_path() -> std::path::PathBuf {
     let mut nuget_path = std::path::PathBuf::from(std::env::var("USERPROFILE").unwrap().as_str());
@@ -97,7 +101,7 @@ fn cmake_build_ffi() {
         assert!(
             std::process::Command::new("cmake")
                 .args(["--build", TTD_FFI_BUILD_DIR])
-                .args(["--parallel", NB_CPU.to_string().as_str()])
+                .args(["--parallel", &get_nb_cpu()])
                 .args(["--config", BUILD_TYPE])
                 // .args(["--", "-D_LIBTTD_VERBOSE_OUTPUT"]) // Uncomment for verbose output from ttd_ffi
                 .spawn()
