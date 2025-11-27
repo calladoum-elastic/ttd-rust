@@ -4,6 +4,10 @@ Rust bindings for the [**Microsoft Time Travel Debugging (TTD) SDK**](https://gi
 
 This crate provides a safe and ergonomic Rust interface to the TTD SDK, enabling developers to record, replay, and analyze program execution using Microsoft's time-travel debugging technology.
 
+> [!WARNING]
+> TTD-Rust is currently a work in progress, the API (especially in the `ttd` crate) may change between commits.
+> If you start using the library, prefer locking it to a specific commit
+
 ## Overview
 
 [Microsoft Time Travel Debugging](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/time-travel-debugging-overview) (TTD) is a powerful debugging tool that allows you to step forward and backward through program execution.
