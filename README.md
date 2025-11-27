@@ -84,13 +84,21 @@ fn main() -> Result<(), ttd::error::Error> {
   // Print some info
   dbg!(engine.system_info);
 
+  // Navigation through the trace can be done using cursors
+  let mut cursor = engine.cursor()?;
+
   // Replay forward until the end of the trace
-  let replay_result = engine.replay_forward(None)?;
+  let replay_result = cursor.replay_forward(None)?;
   assert_eq!(res.stop_reason, EventType::Process);
 
   // Inspect memory state at a specific point
-  let memory_dump = session.memory_at(123456)?;
-  println!("Memory snapshot: {:?}", memory_dump);
+  let memory_dump = cursor.read_memory(0x12345678)?;
+  println!("Memory dump: {:?}", memory_dump);
+
+  // You can also retrieve the register context at current point
+  let ctx = cursor.thread_context()?;
+  println!("Regsisters\n{}", ctx);
+
   Ok(())
 }
 ```

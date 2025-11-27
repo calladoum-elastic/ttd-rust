@@ -14,8 +14,8 @@
 #include <mutex>
 #include <ranges>
 
-#include <TTD/IReplayEngineStl.h>
-#include <TTD/TTDLiveRecorder.h>
+// #include <TTD/IReplayEngineStl.h>
+
 // clang-format on
 
 #ifdef _DEBUG
@@ -95,7 +95,7 @@ TTD_FFI::Replay::ReplayEngine::ReplayEngine()
     auto [eng, res] = TTD::Replay::MakeReplayEngine();
     if ( res != 0 || !eng )
     {
-        throw "CRITICAL - Cannot create replay engine";
+        throw std::runtime_error("CRITICAL - Cannot create replay engine");
     }
 
     this->m_Engine = std::move(eng);
@@ -487,3 +487,61 @@ TTD_FFI::Replay::ReplayCursor::SetRegisterChangedCallback(
 }
 
 #pragma endregion TTD_FFI::Replay::ReplayCursor
+
+#pragma region TTD_FFI::Record
+
+// {6DA58208-3BF5-4B80-A711-781098BC4445}
+static constexpr GUID ClientGuid = {0x6da58208, 0x3bf5, 0x4b80, {0xa7, 0x11, 0x78, 0x10, 0x98, 0xbc, 0x44, 0x45}};
+
+
+TTD_FFI::Record::RecorderEngine::RecorderEngine(u8 const* name) : m_Engine {nullptr}
+{
+    Microsoft::WRL::ComPtr<TTD::ILiveRecorder> const pRecorder {TTD::MakeLiveRecorder(ClientGuid, (char*)name)};
+    if ( !pRecorder )
+    {
+        throw std::runtime_error("CRITICAL - Cannot create a LiveRecorder");
+    }
+
+    this->m_Engine = std::move(pRecorder);
+}
+
+bool
+TTD_FFI::Record::RecorderEngine::Save(u16 const* pathbuf, usize pathbuflen) const
+{
+    if ( !pathbuf || !pathbuflen )
+    {
+        return 0;
+    }
+
+    return 0 != this->m_Engine->GetFileName((wchar_t*)pathbuf, pathbuflen);
+}
+
+const TTD_FFI::Record::ScopedRecorder
+TTD_FFI::Record::RecorderEngine::Recorder() const
+{
+    return TTD_FFI::Record::ScopedRecorder(this->m_Engine);
+}
+
+TTD_FFI::Record::ScopedRecorder::ScopedRecorder(Microsoft::WRL::ComPtr<TTD::ILiveRecorder> const& pRecorder) :
+    m_pRecorder {pRecorder}
+{
+}
+
+void
+TTD_FFI::Record::ScopedRecorder::Start() const
+{
+    this->m_pRecorder->StartRecordingCurrentThread(TTD::ActivityId::Min, TTD::InstructionCount::Invalid);
+}
+
+void
+TTD_FFI::Record::ScopedRecorder::Stop() const
+{
+    this->m_pRecorder->StopRecordingCurrentThread();
+}
+
+TTD_FFI::Record::ScopedRecorder::~ScopedRecorder()
+{
+    this->Stop();
+}
+
+#pragma endregion TTD_FFI::Record
