@@ -9,7 +9,7 @@ license.workspace = true
 
 
 [features]
-default = ["record"]
+default = ["replay"]
 full = ["replay", "record"]
 
 replay = []
