@@ -44,16 +44,16 @@ impl<'a> Recorder<'a> {
     }
 }
 
-pub struct RecorderEngine {
-    name: String,
-    inner: ffi::TTD_FFI::Record::RecorderEngine,
-}
-
 /// ## Description
 /// Owned engine managing a TTD recording session and its resources. Responsible
 /// for starting, stopping, and configuring recordings, allocating recorder
 /// state, and producing Recorder handles or persisted trace output.
 ///
+pub struct RecorderEngine {
+    name: String,
+    inner: ffi::TTD_FFI::Record::RecorderEngine,
+}
+
 impl RecorderEngine {
     /// ## Description
     /// Initialize a new [`RecorderEngine`]
