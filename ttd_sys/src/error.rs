@@ -9,6 +9,9 @@ pub enum Error {
     Generic(String),
 
     #[from]
+    Utf8Error(std::str::Utf8Error),
+
+    #[from]
     Utf16Error(std::string::FromUtf16Error),
 
     ForeignFunctionError,

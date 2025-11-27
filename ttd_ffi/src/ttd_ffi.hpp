@@ -17,11 +17,14 @@ using isize = i64;
 using usize = u64;
 using uptr  = usize;
 
+#include <wrl.h>
+
 #include <vector>
 
 #include "TTD/IReplayEngine.h"
 #include "TTD/IReplayEngineRegisters.h"
 #include "TTD/IReplayEngineStl.h"
+#include "TTD/TTDLiveRecorder.h"
 
 
 #define LIBTTD_INVALID_VALUE ((i32) - 1)
@@ -30,8 +33,9 @@ using uptr  = usize;
 #define LIBTTD_ERROR_INITIALIZATION ((i32) - 3)
 #define LIBTTD_ERROR_INVALID_INDEX ((i32) - 4)
 
-
-namespace TTD_FFI::Replay
+namespace TTD_FFI
+{
+namespace Replay
 {
 
 const static size_t MAX_ENGINE = 256;
@@ -206,5 +210,57 @@ public:
 };
 
 
-} // namespace TTD_FFI::Replay
+} // namespace Replay
+
+
+namespace Record
+{
+
+const static size_t MAX_RECORDER = 256;
+
+class ScopedRecorder
+{
+private:
+    const Microsoft::WRL::ComPtr<TTD::ILiveRecorder> m_pRecorder;
+
+public:
+    ScopedRecorder(Microsoft::WRL::ComPtr<TTD::ILiveRecorder> const&);
+
+    ~ScopedRecorder();
+
+    ScopedRecorder(const ScopedRecorder&) = delete;
+
+    ScopedRecorder(ScopedRecorder&&) = delete;
+
+    ScopedRecorder&
+    operator=(const ScopedRecorder&) = delete;
+
+    ScopedRecorder&
+    operator=(ScopedRecorder&&) = delete;
+
+    void
+    Start() const;
+
+    void
+    Stop() const;
+};
+
+class RecorderEngine
+{
+private:
+    Microsoft::WRL::ComPtr<TTD::ILiveRecorder> m_Engine;
+
+public:
+    RecorderEngine(u8 const* name);
+
+    const ScopedRecorder
+    Recorder() const;
+
+    bool
+    Save(u16 const*, usize) const;
+};
+
+} // namespace Record
+
+} // namespace TTD_FFI
 #endif // !__HAS_TTD_FFI

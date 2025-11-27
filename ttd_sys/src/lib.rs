@@ -7,3 +7,6 @@ pub mod prelude;
 
 #[cfg(feature = "replay")]
 pub mod replay;
+
+#[cfg(feature = "record")]
+pub mod record;
