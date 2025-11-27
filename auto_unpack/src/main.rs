@@ -85,10 +85,7 @@ fn main() -> Result<()> {
     let read_u64_at = |addr: u64, pos: &ReplayPosition| -> Result<u32> {
         let mut _cur = replay.cursor()?;
         _cur.set_position(pos);
-        let data: [u8; 4] = _cur
-            .read_memory(addr.into(), _cur.pointer_size()?)?
-            .try_into()
-            .expect("Slice with incorrect length");
+        let data: [u8; 4] = _cur.read_memory(addr, _cur.pointer_size()?)?.try_into().expect("Slice with incorrect length");
         Ok(u32::from_le_bytes(data))
     };
 
@@ -172,8 +169,8 @@ fn main() -> Result<()> {
 
         let pc = match cursor.thread_context()? {
             RegisterContext::X86(ctx) => ctx.Eip as u64,
-            RegisterContext::X64(ctx) => ctx.Rip as u64,
-            RegisterContext::ARM64(ctx) => ctx.Pc as u64,
+            RegisterContext::X64(ctx) => ctx.Rip,
+            RegisterContext::ARM64(ctx) => ctx.Pc,
         };
         let mem = cursor.read_memory(pc, arg1 as usize)?;
 
