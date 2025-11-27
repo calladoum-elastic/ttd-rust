@@ -1,4 +1,4 @@
-#![allow(unused)]
+//! Module that directly handles the unsafe interaction with the C++ API
 
 use crate::prelude::*;
 
@@ -15,6 +15,7 @@ pub struct Recorder<'a> {
     inner: ffi::TTD_FFI::Record::ScopedRecorder,
 
     /// The associated [`RecorderEngine`]
+    #[allow(dead_code)]
     engine: &'a RecorderEngine,
 }
 
@@ -110,7 +111,7 @@ impl std::fmt::Debug for RecorderEngine {
 
 #[cfg(test)]
 mod test {
-    use crate::record::{Recorder, RecorderEngine};
+    use crate::record::{RecorderEngine};
 
     #[test]
     #[ignore = "Record API seems buggy for now"]
