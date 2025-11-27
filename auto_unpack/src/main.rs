@@ -77,9 +77,8 @@ fn main() -> Result<()> {
         AccessMask: DataAccessMask::Execute.bits(),
         ..Default::default()
     };
-    if !cursor.add_memory_watchpoint(&watch_point)? {
-        bail!("Failed to set watchpoint at {:#x}", virtualprotect_address);
-    }
+
+    cursor.add_memory_watchpoint(&watch_point)?;
     info!("Watching for execution at {:#x} set", virtualprotect_address);
 
     let read_u64_at = |addr: u64, pos: &ReplayPosition| -> Result<u32> {
@@ -99,9 +98,13 @@ fn main() -> Result<()> {
     };
 
     let mut yara_compiler = yara_x::Compiler::new();
-    let mut source: Vec<u8> = vec![];
-    std::fs::File::open(r"C:\git\ttd\auto_unpack\rules\redline.yar")?.read_to_end(&mut source)?;
-    yara_compiler.add_source(&*source)?;
+
+    if let std::result::Result::Ok(mut fd) = std::fs::File::open(r"C:\git\ttd\auto_unpack\rules\redline.yar") {
+        let mut source: Vec<u8> = vec![];
+        fd.read_to_end(&mut source)?;
+        yara_compiler.add_source(&*source)?;
+    }
+
     let yara_rules = yara_compiler.build();
     let mut yara_scanner = yara_x::Scanner::new(&yara_rules);
 
