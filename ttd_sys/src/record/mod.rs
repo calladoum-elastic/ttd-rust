@@ -4,22 +4,39 @@ use crate::prelude::*;
 
 use crate::bindings::root as ffi;
 
+/// ## Description
+/// High-level handle representing a recording session or view of a captured
+/// TTD trace. Provides APIs to control or inspect recording-related data such
+/// as live recording metadata, active recording lifetime, and helpers to
+/// produce ReplayEngine/ReplayCursor instances from a recorded trace.
+///
 pub struct Recorder<'a> {
+    /// The associated FFI object
     inner: ffi::TTD_FFI::Record::ScopedRecorder,
+
+    /// The associated [`RecorderEngine`]
     engine: &'a RecorderEngine,
 }
 
 impl<'a> Recorder<'a> {
+
     /// ## Description
-    /// Start recording
+    /// Begin or attach to a recording session context represented by this Recorder.
+    /// Transitions the recorder into an active state where recording metadata is
+    /// available and replay/inspection helpers can be created.
+    ///
     pub fn start(&'a self) {
         unsafe {
             self.inner.Start();
         }
     }
 
+
     /// ## Description
-    /// Stop recording
+    /// Stop or detach from the active recording session associated with this
+    /// Recorder, finalizing any in-progress metadata and making the recorded trace
+    /// ready for replay or inspection.
+    ///
     pub fn stop(&'a self) {
         unsafe {
             self.inner.Stop();
@@ -32,10 +49,20 @@ pub struct RecorderEngine {
     inner: ffi::TTD_FFI::Record::RecorderEngine,
 }
 
+/// ## Description
+/// Owned engine managing a TTD recording session and its resources. Responsible
+/// for starting, stopping, and configuring recordings, allocating recorder
+/// state, and producing Recorder handles or persisted trace output.
+///
 impl RecorderEngine {
     /// ## Description
     /// Initialize a new [`RecorderEngine`]
     ///
+    /// ## Returns
+    /// - A [`Result`] of [`RecorderEngine`]
+    ///
+    /// ## Safety
+    /// Calls into `TTD_FFI::Record::RecorderEngine`
     pub fn new(name: &[u8]) -> Result<Self> {
         Ok(Self {
             inner: unsafe { ffi::TTD_FFI::Record::RecorderEngine::new(name.as_ptr()) },
