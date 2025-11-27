@@ -23,16 +23,14 @@ This crate provides a safe and ergonomic Rust interface to the TTD SDK, enabling
 - Query events, memory state, and call stacks at any point in time.
 - Integration with existing Rust debugging workflows.
 
-## Requirements
+## Build Requirements
 
-- **Microsoft TTD SDK** installed on your system.
-- `winget install --exact Microsoft.TimeTravelDebugging --source winget`
 - Rust 1.90+
 - Windows 10 or later (TTD is Windows-only).
   - `winget` must be present
 - C++ build tools (for compiling native bindings) including
   - `cmake`
-  - VisualStudio 2019/2022
+  - VisualStudio 2019 or later
 
 ## Installation
 
