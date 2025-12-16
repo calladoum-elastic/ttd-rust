@@ -8,7 +8,7 @@ license.workspace = true
 crate-type = ["rlib"]
 
 [dependencies]
-ttd_sys = { path = "../ttd_sys", default-features = false }
+ttd_sys = { path = "../ttd_sys", version = "*", default-features = false }
 bitflags = "2.10.0"
 chrono = "0.4.42"
 derive_more = { version = "2.0.1", features = ["from", "debug", "display"] }
