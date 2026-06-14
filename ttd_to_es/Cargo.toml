@@ -1,5 +1,5 @@
 [package]
-name = "ttd-win32-to-es"
+name = "ttd-to-es"
 version = "0.1.0"
 edition = "2024"
 description = "Replay a TTD trace and ship every Win32 API call to Elasticsearch"
