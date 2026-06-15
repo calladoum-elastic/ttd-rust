@@ -5,19 +5,13 @@ use std::time::Instant;
 
 use anyhow::{Context, Result, bail};
 use chrono::Utc;
-use elasticsearch::{
-    BulkParts, Elasticsearch,
-    http::request::JsonBody,
-    http::transport::Transport,
-};
+use elasticsearch::{BulkParts, Elasticsearch, http::request::JsonBody, http::transport::Transport};
 use lief::generic::Symbol as _;
 use log::{debug, info, warn};
 use serde_json::{Value, json};
 
 use ttd::replay::events::{DataAccessMask, EventType};
-use ttd::replay::{
-    MemoryWatchpointData, RegisterContext, ReplayCursor, ReplayEngine, ReplayPosition,
-};
+use ttd::replay::{MemoryWatchpointData, RegisterContext, ReplayCursor, ReplayEngine, ReplayPosition};
 
 const TRACKED_MODULES: &[&str] = &[
     "kernel32.dll",
@@ -41,9 +35,7 @@ struct ApiSymbol {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<()> {
-    env_logger::Builder::new()
-        .filter_level(log::LevelFilter::Info)
-        .init();
+    env_logger::Builder::new().filter_level(log::LevelFilter::Info).init();
 
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 3 {
@@ -137,7 +129,7 @@ async fn main() -> Result<()> {
         };
 
         let position = cursor.position()?.to_string();
-        let tid = cursor.thread_info()?.ThreadId;
+        let tid = cursor.thread_info()?.Id;
         let args = read_first_four_args(&cursor)?;
 
         let doc = json!({

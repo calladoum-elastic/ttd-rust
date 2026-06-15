@@ -8,6 +8,7 @@ use std::io::{Read, Write};
 
 use anyhow::{Ok, Result, bail};
 use extfmt::{AsHexdump, hexdump};
+use iced_x86::{Decoder, DecoderOptions, Formatter, NasmFormatter};
 use log::{debug, info};
 
 use ttd::replay::events::{DataAccessMask, EventType};
@@ -88,14 +89,7 @@ fn main() -> Result<()> {
         Ok(u32::from_le_bytes(data))
     };
 
-    let fmt = zydis::Formatter::intel();
-    let dec = {
-        match cursor.thread_context()? {
-            RegisterContext::X86(_) => zydis::Decoder::new32(),
-            RegisterContext::X64(_) => zydis::Decoder::new64(),
-            RegisterContext::ARM64(_) => todo!("use bad64"),
-        }
-    };
+    let mut fmt = NasmFormatter::new();
 
     let mut yara_compiler = yara_x::Compiler::new();
 
@@ -194,18 +188,26 @@ fn main() -> Result<()> {
         // 6.1. Disassemble the instructions
         //
         {
+            let mut dec = {
+                match cursor.thread_context()? {
+                    RegisterContext::X86(_) => Decoder::with_ip(32, mem.as_slice(), pc, DecoderOptions::NONE),
+                    RegisterContext::X64(_) => Decoder::with_ip(64, mem.as_slice(), pc, DecoderOptions::NONE),
+                    RegisterContext::ARM64(_) => todo!("use bad64"),
+                }
+            };
+
+            let mut output = String::new();
             info!("Dumping shellcode at IP={:x} (sz={}) executed at {}", pc, arg1, cursor.position()?);
-            let decoder_iter = dec.decode_all::<zydis::VisibleOperands>(&mem, pc);
+            let decoder_iter = dec.iter();
             for (idx, insn_info) in decoder_iter.enumerate() {
                 if idx == NUMBER_OF_INSTRUCTIONS_TO_PRINT {
                     println!("...");
                     break;
                 }
 
-                let insn_info = insn_info?;
-                let ip = insn_info.0;
-                let insn = &insn_info.2;
-                println!("{:#08x} {}", ip, fmt.format(Some(ip), insn)?);
+                fmt.format(&insn_info, &mut output);
+                println!("{}", output);
+                output.clear();
             }
         }
 
