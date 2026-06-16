@@ -5,7 +5,7 @@ edition = "2024"
 description = "Replay a TTD trace and ship every Win32 API call to Elasticsearch"
 
 [dependencies]
-ttd          = { path = "../ttd", features = ["replay"] }
+ttd = { version = "0.1.0", path = "../ttd", features = ["replay"] }
 anyhow       = "1"
 chrono       = "0.4"
 elasticsearch = "8.5.0-alpha.1"

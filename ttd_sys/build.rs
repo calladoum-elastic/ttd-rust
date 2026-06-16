@@ -46,14 +46,21 @@ fn get_winget_ttd_install_path() -> String {
 
 fn get_package_root() -> PathBuf {
     PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap_or_default())
+        .parent()
+        .unwrap()
+        .to_path_buf()
 }
 
-fn get_base_dir() -> PathBuf {
+fn get_ttd_base_dir() -> PathBuf {
     get_package_root().join("ttd")
 }
 
 fn get_ttd_ffi_base_dir() -> PathBuf {
     get_package_root().join("ttd_ffi")
+}
+
+fn get_ttd_sys_base_dir() -> PathBuf {
+    get_package_root().join("ttd_sys")
 }
 
 fn get_ttd_ffi_build_dir() -> String {
@@ -211,7 +218,7 @@ fn generate_ttd_bindings() {
 
     // Create the binding files
     {
-        let base_dir = get_base_dir();
+        let base_dir = get_ttd_sys_base_dir();
         let inc = get_ttd_ffi_install_include_dir();
         println!("cargo:rustc-link-search={}/{}", base_dir.to_str().unwrap(), ttd_ffi_install_dir);
         let src = std::path::PathBuf::from(format!("{}/{}", &inc, "ttd_ffi.hpp"));
