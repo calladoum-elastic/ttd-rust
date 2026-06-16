@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 #[cfg(not(target_os = "windows"))]
 const _: () = assert!(false, "TTD bindings only work on Windows");
 
@@ -26,7 +28,7 @@ fn get_nuget_ttd_download_link() -> String {
 
 const WINGET_TTD_PACKAGE_NAME: &str = "Microsoft.TimeTravelDebugging";
 const WINGET_TTD_PACKAGE_ID: &str = "8wekyb3d8bbwe";
-const WINGET_TTD_PACKAGE_VERSION: &str = "1.11.553.0";
+const WINGET_TTD_PACKAGE_VERSION: &str = "1.11.584.0";
 
 fn get_winget_ttd_package_version() -> String {
     std::env::var("WINGET_TTD_PACKAGE_VERSION").unwrap_or(WINGET_TTD_PACKAGE_VERSION.to_string())
@@ -42,15 +44,26 @@ fn get_winget_ttd_install_path() -> String {
     )
 }
 
-const BASE_DIR: &str = "./ttd";
-const TTD_FFI_BASE_DIR: &str = "../ttd_ffi";
+fn get_package_root() -> PathBuf {
+    PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap_or_default())
+}
+
+fn get_base_dir() -> PathBuf {
+    get_package_root().join("ttd")
+}
+
+fn get_ttd_ffi_base_dir() -> PathBuf {
+    get_package_root().join("ttd_ffi")
+}
 
 fn get_ttd_ffi_build_dir() -> String {
-    format!("{TTD_FFI_BASE_DIR}/build")
+    let base = get_ttd_ffi_base_dir();
+    format!("{}/build", base.to_str().unwrap())
 }
 
 fn get_ttd_ffi_install_dir() -> String {
-    format!("{TTD_FFI_BASE_DIR}/install")
+    let base = get_ttd_ffi_base_dir();
+    format!("{}/install", base.to_str().unwrap())
 }
 
 fn get_ttd_ffi_install_include_dir() -> String {
@@ -113,12 +126,17 @@ fn download_nuget_package(package_name: &str, version: &str) -> std::path::PathB
 }
 
 fn cmake_build_ffi() {
+    let ttd_rs_ffi_base_dir = get_ttd_ffi_base_dir();
+    let ttd_rs_ffi_build_dir = get_ttd_ffi_build_dir();
+    let ttd_rs_ffi_install_library_dir = get_ttd_ffi_install_library_dir();
+    let ttd_rs_ffi_include_dir = get_ttd_ffi_install_include_dir();
+
     // CMake configure
     {
         assert!(
             std::process::Command::new("cmake")
-                .args(["-S", TTD_FFI_BASE_DIR])
-                .args(["-B", get_ttd_ffi_build_dir().as_str()])
+                .args(["-S", ttd_rs_ffi_base_dir.to_str().unwrap()])
+                .args(["-B", ttd_rs_ffi_build_dir.as_str()])
                 .spawn()
                 .unwrap()
                 .wait()
@@ -131,7 +149,7 @@ fn cmake_build_ffi() {
     {
         assert!(
             std::process::Command::new("cmake")
-                .args(["--build", get_ttd_ffi_build_dir().as_str()])
+                .args(["--build", ttd_rs_ffi_build_dir.as_str()])
                 .args(["--parallel", &get_nb_cpu()])
                 .args(["--config", BUILD_TYPE])
                 // .args(["--", "-D_LIBTTD_VERBOSE_OUTPUT"]) // Uncomment for verbose output from ttd_ffi
@@ -147,9 +165,9 @@ fn cmake_build_ffi() {
     {
         assert!(
             std::process::Command::new("cmake")
-                .args(["--install", get_ttd_ffi_build_dir().as_str()])
+                .args(["--install", ttd_rs_ffi_build_dir.as_str()])
                 .args(["--config", BUILD_TYPE])
-                .args(["--prefix", get_ttd_ffi_install_library_dir().as_str()])
+                .args(["--prefix", ttd_rs_ffi_install_library_dir.as_str()])
                 .spawn()
                 .unwrap()
                 .wait()
@@ -158,18 +176,16 @@ fn cmake_build_ffi() {
         );
     }
 
-    {
-        for hdr in ["ttd_ffi.cpp", "ttd_ffi.hpp", "constants.hpp.in"] {
-            let header_path = format!("{}/{}", get_ttd_ffi_install_library_dir().as_str(), hdr);
-            println!("cargo:rerun-if-changed={}", header_path.as_str());
-        }
+    for hdr in ["ttd_ffi.cpp", "ttd_ffi.hpp", "constants.hpp.in"] {
+        let header_path = format!("{}/{}", ttd_rs_ffi_include_dir.as_str(), hdr);
+        // assert!(std::path::Path::new(header_path.as_str()).exists(), "{header_path} should exist but doesn't");
+        println!("cargo:rerun-if-changed={}", header_path.as_str());
     }
 }
 
 fn generate_ttd_bindings() {
     let ttd_sdk_path = get_ttd_sdk_path();
     let ttd_ffi_install_dir = get_ttd_ffi_install_library_dir();
-    // let ttd_install_dir = get_winget_ttd_install_path();
 
     if BUILD_TYPE == "Debug" {
         println!("cargo:rustc-link-lib=dylib=ucrtd");
@@ -195,8 +211,9 @@ fn generate_ttd_bindings() {
 
     // Create the binding files
     {
+        let base_dir = get_base_dir();
         let inc = get_ttd_ffi_install_include_dir();
-        println!("cargo:rustc-link-search={}/{}", BASE_DIR, ttd_ffi_install_dir);
+        println!("cargo:rustc-link-search={}/{}", base_dir.to_str().unwrap(), ttd_ffi_install_dir);
         let src = std::path::PathBuf::from(format!("{}/{}", &inc, "ttd_ffi.hpp"));
         let dst = std::path::PathBuf::from("./src/bindings.rs");
         let bindings = bindgen::Builder::default()
@@ -247,7 +264,7 @@ fn generate_ttd_bindings() {
 }
 
 fn install_winget_ttd() {
-    let install_dir = get_ttd_ffi_install_dir();
+    let install_dir = get_winget_ttd_install_path();
     std::process::Command::new("winget")
         .args([
             "install",
