@@ -25,6 +25,8 @@ jobs:
       - uses: actions/checkout@v5
 
       - run: |
+          rustup upgrade
+          rustup self update
           rustup update
           rustup component add rustfmt
           rustup show
