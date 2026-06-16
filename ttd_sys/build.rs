@@ -197,7 +197,7 @@ fn cmake_build_ffi() {
 
 fn generate_ttd_bindings() {
     let ttd_sdk_path = get_ttd_sdk_path();
-    let ttd_ffi_install_dir = get_ttd_ffi_install_library_dir();
+    let ttd_ffi_install_lib_dir = get_ttd_ffi_install_library_dir();
 
     if BUILD_TYPE == "Debug" {
         println!("cargo:rustc-link-lib=dylib=ucrtd");
@@ -206,11 +206,11 @@ fn generate_ttd_bindings() {
     // include libs
     {
         assert!(
-            std::path::Path::new(ttd_ffi_install_dir.to_str().unwrap()).exists(),
+            ttd_ffi_install_lib_dir.exists(),
             "{} should exist but doesn't",
-            ttd_ffi_install_dir.to_str().unwrap()
+            ttd_ffi_install_lib_dir.to_string_lossy()
         );
-        println!("cargo:rustc-link-search={}", ttd_ffi_install_dir.to_str().unwrap());
+        println!("cargo:rustc-link-search={}", ttd_ffi_install_lib_dir.to_str().unwrap());
         println!("cargo:rustc-link-lib=ttd_ffi");
 
         let mut lib_path = ttd_sdk_path.clone();
@@ -226,13 +226,14 @@ fn generate_ttd_bindings() {
     {
         let base_dir = get_ttd_sys_base_dir();
         let inc = get_ttd_ffi_install_include_dir();
+        let ttd_sys_dir = get_ttd_sys_base_dir();
         println!(
             "cargo:rustc-link-search={}/{}",
             base_dir.to_str().unwrap(),
-            ttd_ffi_install_dir.to_str().unwrap()
+            ttd_ffi_install_lib_dir.to_str().unwrap()
         );
-        let src = std::path::PathBuf::from(format!("{}/{}", inc.to_str().unwrap(), "ttd_ffi.hpp"));
-        let dst = std::path::PathBuf::from("./src/bindings.rs");
+        let src = inc.join("ttd_ffi.hpp");
+        let dst = ttd_sys_dir.join("src/bindings.rs");
         let bindings = bindgen::Builder::default()
             .generate_comments(true)
             .header(src.as_path().to_string_lossy())
