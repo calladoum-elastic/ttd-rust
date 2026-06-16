@@ -7,6 +7,7 @@ on:
         branches: ["main"]
 
 jobs:
+<<<<<<< HEAD
     build:
         permissions:
             contents: read
@@ -18,6 +19,19 @@ jobs:
                     - windows-2025
                     # - windows-11-arm # not available for private repos
                 build: [debug, release]
+=======
+  build:
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          # - windows-2022 # missing `winget`
+          - windows-2025
+          # - windows-11-arm # not available for private repos
+        build: [debug, release]
+>>>>>>> c36ea43d1691c69634262c914466e77cf352d31a
 
         name: ${{ matrix.os }}/${{ matrix.build }}
         runs-on: ${{ matrix.os }}
