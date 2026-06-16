@@ -35,14 +35,17 @@ fn get_winget_ttd_package_version() -> String {
     std::env::var("WINGET_TTD_PACKAGE_VERSION").unwrap_or(WINGET_TTD_PACKAGE_VERSION.to_string())
 }
 
-fn get_winget_ttd_install_path() -> String {
-    format!(
-        "C:\\Program Files\\WindowsApps\\{}_{}_{}__{}",
+fn get_winget_ttd_install_path() -> PathBuf {
+    let mut path = PathBuf::from(r"\Program Files\WindowsApps");
+    let fname = format!(
+        "{}_{}_{}__{}",
         WINGET_TTD_PACKAGE_NAME,
         get_winget_ttd_package_version(),
         ARCH,
         WINGET_TTD_PACKAGE_ID
-    )
+    );
+    path.push(fname.as_str());
+    path
 }
 
 fn get_package_root() -> PathBuf {
@@ -300,12 +303,12 @@ fn install_winget_ttd() {
         .wait()
         .expect("failed to install ttd");
 
-    assert!(std::fs::exists(install_dir.as_str()).unwrap(), "{install_dir} doesn't exist but should");
+    assert!(install_dir.exists(), "{} doesn't exist but should", install_dir.to_string_lossy());
 }
 
 fn copy_ttd_dlls() {
     let install_dir = get_winget_ttd_install_path();
-    let ttd_dll_glob = format!("{install_dir}/*.dll");
+    let ttd_dll_glob = format!("{}/*.dll", install_dir.to_string_lossy());
     for entry in glob::glob(&ttd_dll_glob).unwrap() {
         let Ok(entry) = entry else {
             continue;
@@ -321,7 +324,7 @@ fn copy_ttd_dlls() {
 
 fn generate_constant_file() {
     std::fs::write(
-        "./src/constants.rs",
+        get_ttd_sys_base_dir().join("src/constants.rs"),
         format!(
             "//! Auto-generated constants
 #![allow(unused)]
@@ -341,16 +344,16 @@ const TTD_PACKAGE_VERSION: &str = \"{}\";
 }
 
 fn main() {
-    if !std::fs::exists(get_ttd_sdk_path()).unwrap() {
+    if !get_ttd_sdk_path().exists() {
         download_nuget_package(TTD_SDK_PACKAGE_NAME, get_ttd_sdk_version().as_str());
     }
 
     for dll in TTD_DLLS {
-        let path = std::path::PathBuf::from(format!("../{dll}"));
-        if !std::fs::exists(&path).unwrap() {
+        let path = get_package_root().join(dll);
+        if !path.exists() {
             install_winget_ttd();
             copy_ttd_dlls();
-            assert!(std::fs::exists(&path).unwrap(), "{} doesn't exist but should", &path.to_string_lossy());
+            assert!(path.exists(), "{} doesn't exist but should", path.to_string_lossy());
         }
     }
 
