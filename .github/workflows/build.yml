@@ -11,7 +11,7 @@ jobs:
     permissions:
       contents: read
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os:
           # - windows-2022 # missing `winget`
