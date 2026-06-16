@@ -64,22 +64,20 @@ fn get_ttd_sys_base_dir() -> PathBuf {
     get_package_root().join("ttd_sys")
 }
 
-fn get_ttd_ffi_build_dir() -> String {
-    let base = get_ttd_ffi_base_dir();
-    format!("{}/build", base.to_str().unwrap())
+fn get_ttd_ffi_build_dir() -> PathBuf {
+    get_ttd_ffi_base_dir().join("build")
 }
 
-fn get_ttd_ffi_install_dir() -> String {
-    let base = get_ttd_ffi_base_dir();
-    format!("{}/install", base.to_str().unwrap())
+fn get_ttd_ffi_install_dir() -> PathBuf {
+    get_ttd_ffi_base_dir().join("install")
 }
 
-fn get_ttd_ffi_install_include_dir() -> String {
-    format!("{}/ttd_ffi/Include", get_ttd_ffi_install_dir())
+fn get_ttd_ffi_install_include_dir() -> PathBuf {
+    get_ttd_ffi_install_dir().join("ttd_ffi/Include")
 }
 
-fn get_ttd_ffi_install_library_dir() -> String {
-    format!("{}/ttd_ffi/Library", get_ttd_ffi_install_dir())
+fn get_ttd_ffi_install_library_dir() -> PathBuf {
+    get_ttd_ffi_install_dir().join("ttd_ffi/Library")
 }
 
 const TTD_DLLS: [&str; 7] = [
@@ -144,7 +142,7 @@ fn cmake_build_ffi() {
         assert!(
             std::process::Command::new("cmake")
                 .args(["-S", ttd_rs_ffi_base_dir.to_str().unwrap()])
-                .args(["-B", ttd_rs_ffi_build_dir.as_str()])
+                .args(["-B", ttd_rs_ffi_build_dir.to_str().unwrap()])
                 .spawn()
                 .unwrap()
                 .wait()
@@ -157,7 +155,7 @@ fn cmake_build_ffi() {
     {
         assert!(
             std::process::Command::new("cmake")
-                .args(["--build", ttd_rs_ffi_build_dir.as_str()])
+                .args(["--build", ttd_rs_ffi_build_dir.to_str().unwrap()])
                 .args(["--parallel", &get_nb_cpu()])
                 .args(["--config", BUILD_TYPE])
                 // .args(["--", "-D_LIBTTD_VERBOSE_OUTPUT"]) // Uncomment for verbose output from ttd_ffi
@@ -173,9 +171,9 @@ fn cmake_build_ffi() {
     {
         assert!(
             std::process::Command::new("cmake")
-                .args(["--install", ttd_rs_ffi_build_dir.as_str()])
+                .args(["--install", ttd_rs_ffi_build_dir.to_str().unwrap()])
                 .args(["--config", BUILD_TYPE])
-                .args(["--prefix", ttd_rs_ffi_install_library_dir.as_str()])
+                .args(["--prefix", ttd_rs_ffi_install_library_dir.to_str().unwrap()])
                 .spawn()
                 .unwrap()
                 .wait()
@@ -184,10 +182,16 @@ fn cmake_build_ffi() {
         );
     }
 
-    for hdr in ["ttd_ffi.cpp", "ttd_ffi.hpp", "constants.hpp.in"] {
-        let header_path = format!("{}/{}", ttd_rs_ffi_include_dir.as_str(), hdr);
-        // assert!(std::path::Path::new(header_path.as_str()).exists(), "{header_path} should exist but doesn't");
-        println!("cargo:rerun-if-changed={}", header_path.as_str());
+    // We need to watch changes on those specific files for recompilation
+    let watched_files = [
+        ttd_rs_ffi_base_dir.join("src/ttd_ffi.cpp"),
+        ttd_rs_ffi_base_dir.join("src/constants.hpp.in"),
+        ttd_rs_ffi_include_dir.join("ttd_ffi.hpp"),
+    ];
+
+    for f in watched_files.as_ref() {
+        assert!(f.exists(), "{} should exist but doesn't", f.to_string_lossy());
+        println!("cargo:rerun-if-changed={}", f.to_string_lossy());
     }
 }
 
@@ -202,10 +206,11 @@ fn generate_ttd_bindings() {
     // include libs
     {
         assert!(
-            std::path::Path::new(ttd_ffi_install_dir.as_str()).exists(),
-            "{ttd_ffi_install_dir} should exist but doesn't"
+            std::path::Path::new(ttd_ffi_install_dir.to_str().unwrap()).exists(),
+            "{} should exist but doesn't",
+            ttd_ffi_install_dir.to_str().unwrap()
         );
-        println!("cargo:rustc-link-search={}", ttd_ffi_install_dir.as_str());
+        println!("cargo:rustc-link-search={}", ttd_ffi_install_dir.to_str().unwrap());
         println!("cargo:rustc-link-lib=ttd_ffi");
 
         let mut lib_path = ttd_sdk_path.clone();
@@ -221,14 +226,18 @@ fn generate_ttd_bindings() {
     {
         let base_dir = get_ttd_sys_base_dir();
         let inc = get_ttd_ffi_install_include_dir();
-        println!("cargo:rustc-link-search={}/{}", base_dir.to_str().unwrap(), ttd_ffi_install_dir);
-        let src = std::path::PathBuf::from(format!("{}/{}", &inc, "ttd_ffi.hpp"));
+        println!(
+            "cargo:rustc-link-search={}/{}",
+            base_dir.to_str().unwrap(),
+            ttd_ffi_install_dir.to_str().unwrap()
+        );
+        let src = std::path::PathBuf::from(format!("{}/{}", inc.to_str().unwrap(), "ttd_ffi.hpp"));
         let dst = std::path::PathBuf::from("./src/bindings.rs");
         let bindings = bindgen::Builder::default()
             .generate_comments(true)
             .header(src.as_path().to_string_lossy())
             .clang_args(["-x", "c++", "-std=c++23"])
-            .clang_arg(format!("-I{}", inc.as_str()))
+            .clang_arg(format!("-I{}", inc.to_str().unwrap()))
             .opaque_type("std::.*")
             .use_core()
             .opaque_type("TTD::TBufferView.*")
