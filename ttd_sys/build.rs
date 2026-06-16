@@ -213,7 +213,7 @@ fn generate_ttd_bindings() {
             "{} should exist but doesn't",
             ttd_ffi_install_lib_dir.to_string_lossy()
         );
-        println!("cargo:rustc-link-search={}", ttd_ffi_install_lib_dir.to_str().unwrap());
+        println!("cargo:rustc-link-search={}", ttd_ffi_install_lib_dir.to_string_lossy());
         println!("cargo:rustc-link-lib=ttd_ffi");
 
         let mut lib_path = ttd_sdk_path.clone();

@@ -6,8 +6,8 @@ use std::time::Instant;
 use anyhow::{Context, Result, bail};
 use chrono::Utc;
 use elasticsearch::{BulkParts, Elasticsearch, http::request::JsonBody, http::transport::Transport};
-use lief::generic::Symbol as _;
 use log::{debug, info, warn};
+use pelite::pe64::{Pe, PeView};
 use serde_json::{Value, json};
 
 use ttd::replay::events::{DataAccessMask, EventType};
@@ -69,34 +69,32 @@ async fn main() -> Result<()> {
         let mut cur = replay.cursor()?;
         cur.set_position(&ReplayPosition::from(&event.position));
         let image = cur.read_memory(event.module.address, event.module.size as usize)?;
-        let mut reader = std::io::Cursor::new(image.as_slice());
-        let pe = match lief::Binary::from(&mut reader) {
-            Some(lief::Binary::PE(pe)) => pe,
-            _ => {
-                warn!("skipping {basename}: LIEF did not recognize a PE");
-                continue;
-            }
-        };
-        let Some(exports) = pe.export() else { continue };
+        // let mut reader = std::io::Cursor::new(image.as_slice());
+        let pe = PeView::from_bytes(&image)?;
+        let exports = pe.exports()?;
 
         let mut count = 0usize;
-        for entry in exports.entries() {
-            if entry.is_forwarded() {
-                continue; // forwarders skipped for brevity
+
+        for result in exports.by()?.iter_names() {
+            if let (Ok(name), Ok(entry)) = result {
+                if entry.forward().is_some() {
+                    continue; // skip forwarders
+                }
+                if name.is_empty() {
+                    continue;
+                }
+
+                if let Some(rva) = entry.symbol() {
+                    api_map.insert(
+                        event.module.address + rva as u64,
+                        ApiSymbol {
+                            module: basename.clone(),
+                            function: name.to_string(),
+                        },
+                    );
+                    count += 1;
+                }
             }
-            let name = entry.name();
-            if name.is_empty() {
-                continue; // ordinal-only export — no symbolic name
-            }
-            let rva = entry.function_rva() as u64;
-            api_map.insert(
-                event.module.address + rva,
-                ApiSymbol {
-                    module: basename.clone(),
-                    function: name,
-                },
-            );
-            count += 1;
         }
         debug!("indexed {count} exports from {basename}");
     }
