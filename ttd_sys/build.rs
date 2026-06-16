@@ -16,7 +16,7 @@ const ARCH: &str = "x64";
 const ARCH: &str = "arm64";
 
 const TTD_SDK_PACKAGE_NAME: &str = "microsoft.timetraveldebugging.apis";
-const TTD_SDK_PACKAGE_VERSION: &'static str = "0.9.5";
+const TTD_SDK_PACKAGE_VERSION: &str = "0.9.5";
 
 fn get_ttd_sdk_version() -> String {
     std::env::var("TTD_SDK_PACKAGE_VERSION").unwrap_or(TTD_SDK_PACKAGE_VERSION.to_string())
