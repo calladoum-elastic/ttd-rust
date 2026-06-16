@@ -29,14 +29,14 @@ fn get_nuget_ttd_download_link() -> String {
 
 const WINGET_TTD_PACKAGE_NAME: &str = "Microsoft.TimeTravelDebugging";
 const WINGET_TTD_PACKAGE_ID: &str = "8wekyb3d8bbwe";
-const WINGET_TTD_PACKAGE_VERSION: &str = "1.11.584.0";
+const WINGET_TTD_PACKAGE_VERSION: &str = "1.11.553.0";
 
 fn get_winget_ttd_package_version() -> String {
     std::env::var("WINGET_TTD_PACKAGE_VERSION").unwrap_or(WINGET_TTD_PACKAGE_VERSION.to_string())
 }
 
 fn get_winget_ttd_install_path() -> PathBuf {
-    let mut path = PathBuf::from(r"\Program Files\WindowsApps");
+    let mut path = PathBuf::from(r"C:\Program Files\WindowsApps");
     let fname = format!(
         "{}_{}_{}__{}",
         WINGET_TTD_PACKAGE_NAME,
