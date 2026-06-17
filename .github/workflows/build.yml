@@ -16,24 +16,22 @@ jobs:
         os:
           # - windows-2022 # missing `winget`
           - windows-2025
-          # - windows-11-arm # not available for private repos
+          # - windows-11-arm # ttd sdk v9.0.5 not working for arm64
         build: [debug, release]
 
     name: ${{ matrix.os }}/${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - run: |
-          rustup upgrade
-          rustup self update
           rustup update
           rustup component add rustfmt
           rustup show
           cargo install cargo-audit cargo-deny cargo-tarpaulin cargo-chef
 
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-deps
         env:
           cache-name: cache-deps
@@ -41,9 +39,8 @@ jobs:
           key: cargo-${{ matrix.os }}-${{ matrix.build }}-${{ hashFiles('**/Cargo.lock') }}
           path: |
             ~/.cargo/registry
-            ~/.cargo/git/db
-            ./target/debug/deps
-            ./target/release/deps
+            ~/.cargo/git
+            ./target
           restore-keys: cargo-${{ matrix.os }}-${{ matrix.build }}-
 
       - name: Build (debug)
@@ -81,7 +78,7 @@ jobs:
           cargo test --release
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: ttd_${{ matrix.build }}_${{ matrix.os }}_${{ github.sha }}
           if-no-files-found: warn
