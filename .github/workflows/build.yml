@@ -2,27 +2,27 @@ name: Build
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
   pull_request:
-    branches: ['main']
+    branches: ["main"]
 
 jobs:
   build:
     permissions:
       contents: read
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os:
           # - windows-2022 # missing `winget`
           - windows-2025
-          # - windows-11-arm # not available for private repos
+          # - windows-11-arm # ttd sdk v9.0.5 not working for arm64
         build: [debug, release]
 
     name: ${{ matrix.os }}/${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - run: |
           rustup update
@@ -31,7 +31,7 @@ jobs:
           cargo install cargo-audit cargo-deny cargo-tarpaulin cargo-chef
 
       - name: Cache dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-deps
         env:
           cache-name: cache-deps
@@ -39,11 +39,9 @@ jobs:
           key: cargo-${{ matrix.os }}-${{ matrix.build }}-${{ hashFiles('**/Cargo.lock') }}
           path: |
             ~/.cargo/registry
-            ~/.cargo/git/db
-            ./target/debug/deps
-            ./target/release/deps
-          restore-keys:
-            cargo-${{ matrix.os }}-${{ matrix.build }}-
+            ~/.cargo/git
+            ./target
+          restore-keys: cargo-${{ matrix.os }}-${{ matrix.build }}-
 
       - name: Build (debug)
         if: matrix.build == 'debug'
@@ -80,7 +78,7 @@ jobs:
           cargo test --release
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: ttd_${{ matrix.build }}_${{ matrix.os }}_${{ github.sha }}
           if-no-files-found: warn
