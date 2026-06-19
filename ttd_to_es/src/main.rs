@@ -102,16 +102,18 @@ async fn main() -> Result<()> {
     info!("resolved {} Win32 API entry points", api_map.len());
 
     let mut cursor = replay.cursor()?;
+    let mut armed = 0usize;
     for &addr in api_map.keys() {
-        cursor.add_memory_watchpoint(&MemoryWatchpointData {
+        if cursor.add_memory_watchpoint(&MemoryWatchpointData {
             Address: addr,
             Size: 1,
             AccessMask: DataAccessMask::Execute.bits(),
             ..Default::default()
-        })?;
+        })? {
+            armed += 1;
+        }
     }
-    info!("{} watchpoints armed, replaying...", api_map.len());
-
+    info!("{armed} watchpoints armed, replaying...");
     let mut buffer: Vec<JsonBody<Value>> = Vec::with_capacity(BULK_DOCS_PER_FLUSH * 2);
     let mut total = 0u64;
 
@@ -185,8 +187,13 @@ async fn flush(es: &Elasticsearch, buf: &mut Vec<JsonBody<Value>>) -> Result<()>
     let body = std::mem::take(buf);
     let n_docs = body.len() / 2;
     let resp = es.bulk(BulkParts::Index(ES_INDEX)).body(body).send().await?;
-    if !resp.status_code().is_success() {
-        warn!("bulk index returned HTTP {}", resp.status_code());
+    let status = resp.status_code();
+    let resp_body: Value = resp.json().await?;
+
+    if !status.is_success() {
+        warn!("bulk index returned HTTP {}", status);
+    } else if resp_body.get("errors").and_then(|v| v.as_bool()) == Some(true) {
+        warn!("bulk index completed with item-level errors");
     } else {
         debug!("flushed {n_docs} docs");
     }

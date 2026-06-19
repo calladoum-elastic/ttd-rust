@@ -116,7 +116,12 @@ fn get_ttd_sdk_path() -> std::path::PathBuf {
 }
 
 fn download_nuget_package(package_name: &str, version: &str) -> std::path::PathBuf {
-    let download_link = get_nuget_ttd_download_link();
+    let download_link = format!(
+        "https://globalcdn.nuget.org/packages/{}.{}.nupkg?packageVersion={}",
+        package_name,
+        version,
+        version
+    );
     let download_dir = get_nuget_pkg_path();
     std::fs::create_dir_all(&download_dir).unwrap();
 
@@ -175,7 +180,7 @@ fn cmake_build_ffi() {
             std::process::Command::new("cmake")
                 .args(["--install", ttd_rs_ffi_build_dir.to_str().unwrap()])
                 .args(["--config", BUILD_TYPE])
-                .args(["--prefix", ttd_rs_ffi_install_library_dir.to_str().unwrap()])
+                .args(["--prefix", get_ttd_ffi_install_dir().to_str().unwrap()])
                 .spawn()
                 .unwrap()
                 .wait()
@@ -226,14 +231,8 @@ fn generate_ttd_bindings() {
 
     // Create the binding files
     {
-        let base_dir = get_ttd_sys_base_dir();
         let inc = get_ttd_ffi_install_include_dir();
         let ttd_sys_dir = get_ttd_sys_base_dir();
-        println!(
-            "cargo:rustc-link-search={}/{}",
-            base_dir.to_str().unwrap(),
-            ttd_ffi_install_lib_dir.to_str().unwrap()
-        );
         let src = inc.join("ttd_ffi.hpp");
         let dst = ttd_sys_dir.join("src/bindings.rs");
         let bindings = bindgen::Builder::default()
