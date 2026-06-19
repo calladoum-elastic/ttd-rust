@@ -188,7 +188,7 @@ fn cmake_build_ffi() {
     let watched_files = [
         ttd_rs_ffi_base_dir.join("src/ttd_ffi.cpp"),
         ttd_rs_ffi_base_dir.join("src/constants.hpp.in"),
-        ttd_rs_ffi_install_library_dir.join("ttd_ffi/Include/ttd_ffi.hpp"),
+        get_ttd_ffi_install_include_dir().join("ttd_ffi.hpp"),
     ];
 
     for f in watched_files.as_ref() {
