@@ -7,7 +7,8 @@ use anyhow::{Context, Result, bail};
 use chrono::Utc;
 use elasticsearch::{BulkParts, Elasticsearch, http::request::JsonBody, http::transport::Transport};
 use log::{debug, info, warn};
-use pelite::pe64::{Pe, PeView};
+use pelite::pe::Pe;
+use pelite::PeView;
 use serde_json::{Value, json};
 
 use ttd::replay::events::{DataAccessMask, EventType};
